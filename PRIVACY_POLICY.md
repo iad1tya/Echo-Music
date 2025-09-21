@@ -1,7 +1,5 @@
 # Privacy Policy for Echo Music App
 
-**Last Updated: December 2024**
-
 ## Introduction
 
 Echo Music ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application (the "App").

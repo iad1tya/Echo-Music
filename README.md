@@ -183,7 +183,7 @@ Your privacy is important to us. Please read our [Privacy Policy](PRIVACY_POLICY
 
 ## 🔗 Links
 
-- **Website**: [Echo Music] (https://echomusic.fun)
+- **Website**: [Echo Music](https://echomusic.fun)
 - **Download**: [GitHub Releases](https://github.com/iad1tya/Echo-Music/releases)
 - **Documentation**: [Wiki](https://github.com/iad1tya/Echo-Music/wiki)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
