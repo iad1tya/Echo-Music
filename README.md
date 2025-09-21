@@ -136,15 +136,6 @@ Echo Music is built using modern Android development practices:
 ./gradlew assembleFossDebug
 ```
 
-## 📱 Screenshots
-
-<div align="center">
-  <img src="asset/screenshot/1.jpg" width="200" alt="Home Screen"/>
-  <img src="asset/screenshot/2.png" width="200" alt="Player Screen"/>
-  <img src="asset/screenshot/3.png" width="200" alt="Search Screen"/>
-  <img src="asset/screenshot/4.png" width="200" alt="Playlist Screen"/>
-</div>
-
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
@@ -192,7 +183,7 @@ Your privacy is important to us. Please read our [Privacy Policy](PRIVACY_POLICY
 
 ## 🔗 Links
 
-- **Website**: [Coming Soon]
+- **Website**: [Echo Music] (https://echomusic.fun)
 - **Download**: [GitHub Releases](https://github.com/iad1tya/Echo-Music/releases)
 - **Documentation**: [Wiki](https://github.com/iad1tya/Echo-Music/wiki)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
