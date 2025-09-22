@@ -2,7 +2,7 @@
 
 A modern, feature-rich music streaming app for Android that integrates with YouTube Music and Spotify, offering ad-free music streaming with advanced features like AI song suggestions, synced lyrics, and offline playback.
 
-> **Note**: Echo Music is a fork of [SimpMusic](https://github.com/SimpMusic/SimpMusic) with additional improvements and features.
+> **Note**: Echo Music is a fork of [SimpMusic](https://github.com/maxrave-dev/SimpMusic) with additional improvements and features.
 
 ![Echo Music Logo](/Echo_github.png)
 
