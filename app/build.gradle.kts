@@ -172,6 +172,10 @@ android {
                 "META-INF/*.kotlin_module",
             )
     }
+    
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 sentry {
@@ -192,7 +196,7 @@ sentry {
         }
     authToken.set(token ?: "")
     includeProguardMapping.set(true)
-    autoUploadProguardMapping.set(true)
+    autoUploadProguardMapping.set(false) // Disable auto upload to avoid build failures
     telemetry.set(false)
 }
 
@@ -236,7 +240,6 @@ dependencies {
     implementation(project(mapOf("path" to ":kotlinYtmusicScraper")))
     implementation(project(mapOf("path" to ":spotify")))
     implementation(project(mapOf("path" to ":aiService")))
-    implementation(project(mapOf("path" to ":lyricsService")))
 
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)

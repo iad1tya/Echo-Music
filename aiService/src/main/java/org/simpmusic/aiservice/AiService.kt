@@ -15,7 +15,6 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
-import aditya.echo.lyrics.domain.Lyrics
 
 class AiService(
     private val aiHost: AIHost = AIHost.GEMINI,
@@ -47,50 +46,6 @@ class AiService(
         }
     }
 
-    suspend fun translateLyrics(
-        inputLyrics: Lyrics,
-        targetLanguage: String,
-    ): Lyrics {
-        val request =
-            chatCompletionRequest {
-                this.model = this@AiService.model
-                responseFormat = ChatResponseFormat.jsonSchema(aiResponseJsonSchema)
-                messages {
-                    system {
-                        content =
-                            "You are a translation assistant. Translate the below JSON-serialized lyrics into the target language while preserving the exact same JSON structure. Only translate the actual text fields such as `words` and `syllables` (if present). Do not change keys, nesting, timestamps, or any other metadata.\\n\\nThe output must be valid JSON with the same structure as the input. Do not include explanations or extra commentary—only return the resulting JSON."
-                    }
-                    user {
-                        content {
-                            text("Target language: $targetLanguage")
-                        }
-                        content {
-                            text("Input lyrics: ${json.encodeToString(inputLyrics)}")
-                        }
-                    }
-                }
-            }
-        val completion: ChatCompletion = openAI.chatCompletion(request)
-        val jsonContent =
-            completion.choices
-                .firstOrNull()
-                ?.message
-                ?.content ?: throw IllegalStateException("No response from AI")
-        val jsonData =
-            Regex(
-                "```json\\s*([\\s\\S]*?)```",
-            ).find(jsonContent)
-                ?.groups
-                ?.firstOrNull()
-                ?.value ?: jsonContent
-        val aiResponse =
-            json.decodeFromString<Lyrics>(
-                jsonData
-                    .replace("```json", "")
-                    .replace("```", ""),
-            )
-        return aiResponse
-    }
 
     companion object {
         private val translationJsonSchema: JsonObject =

@@ -43,7 +43,6 @@ include(
     ":kotlinYtmusicScraper",
     ":spotify",
     ":aiService",
-    ":ffmpeg-kit",
-    ":lyricsService",
+    // ":ffmpeg-kit", // Temporarily disabled for development
 )
 // Removed missing module dependencies

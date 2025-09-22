@@ -1,6 +1,5 @@
 package aditya.echo.aiservice
 
-import aditya.echo.lyrics.domain.Lyrics
 
 class AiClient {
     private var aiService: AiService? = null
@@ -43,19 +42,4 @@ class AiClient {
                 }
         }
 
-    suspend fun translateLyrics(
-        inputLyrics: Lyrics,
-        targetLanguage: String,
-    ): Result<Lyrics> =
-        runCatching {
-            aiService?.translateLyrics(inputLyrics, targetLanguage).also {
-                if (it?.lyrics?.lines?.map { it.words }?.containsAll(
-                        inputLyrics.lyrics?.lines?.map { it.words } ?: emptyList(),
-                    ) == true
-                ) {
-                    throw IllegalStateException("Translation failed or returned empty lyrics.")
-                }
-            }
-                ?: throw IllegalStateException("AI service is not initialized. Please set host and apiKey.")
-        }
 }

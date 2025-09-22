@@ -49,7 +49,6 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.gemini.kotlin)
 
-    implementation(project(":lyricsService"))
 }
 tasks.withType<CompileArtProfileTask> {
     enabled = false

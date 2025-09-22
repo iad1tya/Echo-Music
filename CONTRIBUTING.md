@@ -205,7 +205,7 @@ When requesting features, please include:
 ### Code Organization
 
 ```
-app/src/main/java/com/maxrave/simpmusic/
+app/src/main/java/com/maxrave/echo/
 ├── ui/                    # UI components and screens
 │   ├── components/        # Reusable UI components
 │   ├── screens/          # Screen-specific UI
@@ -229,7 +229,7 @@ app/src/main/java/com/maxrave/simpmusic/
 - **Functions**: camelCase (`playMusic()`)
 - **Variables**: camelCase (`currentSong`)
 - **Constants**: UPPER_SNAKE_CASE (`MAX_VOLUME`)
-- **Packages**: lowercase (`com.maxrave.simpmusic.ui`)
+- **Packages**: lowercase (`com.maxrave.echo.ui`)
 
 ## 🧪 Testing
 
@@ -253,7 +253,7 @@ app/src/main/java/com/maxrave/simpmusic/
 ./gradlew test
 
 # Run specific test class
-./gradlew test --tests "com.maxrave.simpmusic.MusicPlayerTest"
+./gradlew test --tests "com.maxrave.echo.MusicPlayerTest"
 
 # Run tests with coverage
 ./gradlew testDebugUnitTestCoverage

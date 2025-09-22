@@ -89,7 +89,8 @@ dependencies {
 
     implementation(libs.newpipe.extractor)
 
-    api(project(":ffmpeg-kit"))
+    // api(project(":ffmpeg-kit")) // Temporarily disabled for development
+    // implementation("com.arthenica:ffmpeg-kit-full:6.0-2") // Using Maven Central version
 //    implementation(libs.ytdlp.android)
 }
 tasks.withType<CompileArtProfileTask> {

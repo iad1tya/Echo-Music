@@ -6,6 +6,7 @@ import aditya.echo.spotify.model.response.spotify.ClientTokenResponse
 import aditya.echo.spotify.model.response.spotify.PersonalTokenResponse
 import aditya.echo.spotify.model.response.spotify.SpotifyLyricsResponse
 import aditya.echo.spotify.model.response.spotify.search.SpotifySearchResponse
+import aditya.echo.spotify.model.response.spotify.playlist.SpotifyPlaylistResponse
 import io.ktor.client.call.body
 import io.ktor.client.engine.ProxyBuilder
 import io.ktor.client.engine.http
@@ -94,5 +95,26 @@ class Spotify {
         clientToken: String,
     ) = runCatching {
         spotifyClient.getSpotifyCanvas(trackId, token, clientToken).body<CanvasResponse>()
+    }
+
+    suspend fun getPlaylist(
+        playlistId: String,
+        authToken: String,
+        clientToken: String,
+    ) = runCatching {
+        spotifyClient.getSpotifyPlaylist(playlistId, authToken, clientToken).body<SpotifyPlaylistResponse>()
+    }
+
+    suspend fun getUserPlaylists(
+        authToken: String,
+        clientToken: String,
+        limit: Int = 50,
+        offset: Int = 0,
+    ) = runCatching {
+        spotifyClient.getSpotifyUserPlaylists(authToken, clientToken, limit, offset).body<List<SpotifyPlaylistResponse>>()
+    }
+
+    suspend fun getPublicPlaylist(playlistId: String, clientToken: String) = runCatching {
+        spotifyClient.getSpotifyPublicPlaylist(playlistId, clientToken).body<SpotifyPlaylistResponse>()
     }
 }

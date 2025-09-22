@@ -257,6 +257,42 @@ class SpotifyClient {
             )
         }
 
+    suspend fun getSpotifyPlaylist(
+        playlistId: String,
+        authToken: String,
+        clientToken: String,
+    ) = jsonClient.get("https://api.spotify.com/v1/playlists/$playlistId") {
+        userAgent(USER_AGENT)
+        contentType(ContentType.Application.Json)
+        header("Authorization", "Bearer $authToken")
+        header("Client-Token", clientToken)
+        header("Accept", "application/json")
+    }
+
+    suspend fun getSpotifyUserPlaylists(
+        authToken: String,
+        clientToken: String,
+        limit: Int = 50,
+        offset: Int = 0,
+    ) = jsonClient.get("https://api.spotify.com/v1/me/playlists") {
+        userAgent(USER_AGENT)
+        contentType(ContentType.Application.Json)
+        header("Authorization", "Bearer $authToken")
+        header("Client-Token", clientToken)
+        header("Accept", "application/json")
+        parameter("limit", limit)
+        parameter("offset", offset)
+    }
+
+    // Get public playlist using client token (no user authentication required)
+    suspend fun getSpotifyPublicPlaylist(playlistId: String, clientToken: String) =
+        jsonClient.get("https://api.spotify.com/v1/playlists/$playlistId") {
+            userAgent(USER_AGENT)
+            contentType(ContentType.Application.Json)
+            header("Accept", "application/json")
+            header("Client-Token", clientToken)
+        }
+
     fun getRandomUserAgent(): String {
         val macOSVersion = "${Random.nextInt(11, 15)}_${Random.nextInt(4, 9)}"
         val webKitVersion = "${Random.nextInt(530, 537)}.${Random.nextInt(30, 37)}"

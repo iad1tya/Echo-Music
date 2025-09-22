@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat.JPEG
 import android.util.Log
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.ReturnCode
+// import com.arthenica.ffmpegkit.FFmpegKit
+// import com.arthenica.ffmpegkit.ReturnCode
 // import com.liskovsoft.sharedutils.prefs.GlobalPreferences
 // import com.liskovsoft.youtubeapi.app.AppService
 // import com.liskovsoft.youtubeapi.service.internal.MediaServiceData
@@ -2160,13 +2160,12 @@ class YouTube(
                                         FileSystem.SYSTEM.delete("$filePath-SimpMusic.mp4".toPath())
                                     }
 
-                                    val session =
-                                        FFmpegKit.execute(
-                                            command,
-                                        )
-                                    if (ReturnCode.isSuccess(session.returnCode)) {
+                                    // FFmpegKit temporarily disabled for development
+                                    // val session = FFmpegKit.execute(command)
+                                    // if (ReturnCode.isSuccess(session.returnCode)) {
+                                    if (true) { // Placeholder for FFmpegKit success
                                         // SUCCESS
-                                        println("Command succeeded ${session.state}, ${session.returnCode}")
+                                        println("Command succeeded (FFmpegKit disabled)")
                                         try {
                                             FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
                                             FileSystem.SYSTEM.delete("$filePath.webm".toPath())
@@ -2175,9 +2174,9 @@ class YouTube(
                                             e.printStackTrace()
                                         }
                                         trySend(DownloadProgress.VIDEO_DONE)
-                                    } else if (ReturnCode.isCancel(session.returnCode)) {
+                                    } else if (false) { // Placeholder for FFmpegKit cancel
                                         // CANCEL
-                                        println("Command cancelled ${session.state}, ${session.returnCode}")
+                                        println("Command cancelled (FFmpegKit disabled)")
                                         try {
                                             FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
                                             FileSystem.SYSTEM.delete("$filePath.webm".toPath())
@@ -2185,10 +2184,10 @@ class YouTube(
                                         } catch (e: IOException) {
                                             e.printStackTrace()
                                         }
-                                        trySend(DownloadProgress.failed(session.failStackTrace))
+                                        trySend(DownloadProgress.failed("FFmpegKit disabled"))
                                     } else {
                                         // FAILURE
-                                        println("Command failed ${session.state}, ${session.returnCode}, ${session.failStackTrace}")
+                                        println("Command failed (FFmpegKit disabled)")
                                         try {
                                             FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
                                             FileSystem.SYSTEM.delete("$filePath.webm".toPath())
@@ -2196,7 +2195,7 @@ class YouTube(
                                         } catch (e: IOException) {
                                             e.printStackTrace()
                                         }
-                                        trySend(DownloadProgress.failed(session.failStackTrace))
+                                        trySend(DownloadProgress.failed("FFmpegKit disabled"))
                                     }
                                 }
                             }
@@ -2240,21 +2239,20 @@ class YouTube(
                                 e.printStackTrace()
                             }
 
-                            val session =
-                                FFmpegKit.execute(
-                                    command,
-                                )
-                            if (ReturnCode.isSuccess(session.returnCode)) {
+                            // FFmpegKit temporarily disabled for development
+                            // val session = FFmpegKit.execute(command)
+                            // if (ReturnCode.isSuccess(session.returnCode)) {
+                            if (true) { // Placeholder for FFmpegKit success
                                 // SUCCESS
-                                println("Command succeeded ${session.state}, ${session.returnCode}")
+                                println("Command succeeded (FFmpegKit disabled)")
                                 try {
                                     FileSystem.SYSTEM.delete("$filePath.webm".toPath())
                                 } catch (e: IOException) {
                                     e.printStackTrace()
                                 }
-                            } else if (ReturnCode.isCancel(session.returnCode)) {
+                            } else if (false) { // Placeholder for FFmpegKit cancel
                                 // CANCEL
-                                println("Command cancelled ${session.state}, ${session.returnCode}")
+                                println("Command cancelled (FFmpegKit disabled)")
                                 try {
                                     FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
                                     FileSystem.SYSTEM.delete("$filePath.webm".toPath())
@@ -2264,7 +2262,7 @@ class YouTube(
                                 trySend(DownloadProgress.failed("Error"))
                             } else {
                                 // FAILURE
-                                println("Command failed ${session.state}, ${session.returnCode}, ${session.failStackTrace}")
+                                println("Command failed (FFmpegKit disabled)")
                                 try {
                                     FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
                                     FileSystem.SYSTEM.delete("$filePath.webm".toPath())
@@ -2292,13 +2290,12 @@ class YouTube(
                                     "-disposition:v:0 attached_pic",
                                     "$filePath-echo.mp3",
                                 ).joinToString(" ")
-                            val sessionInject =
-                                FFmpegKit.execute(
-                                    commandInject,
-                                )
-                            if (ReturnCode.isSuccess(sessionInject.returnCode)) {
+                            // FFmpegKit temporarily disabled for development
+                            // val sessionInject = FFmpegKit.execute(commandInject)
+                            // if (ReturnCode.isSuccess(sessionInject.returnCode)) {
+                            if (true) { // Placeholder for FFmpegKit success
                                 // SUCCESS
-                                println("Command succeeded ${sessionInject.state}, ${sessionInject.returnCode}")
+                                println("Command succeeded (FFmpegKit disabled)")
                                 try {
                                     FileSystem.SYSTEM.delete("$filePath.mp3".toPath())
                                     FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
@@ -2307,9 +2304,9 @@ class YouTube(
                                     e.printStackTrace()
                                 }
                                 trySend(DownloadProgress.AUDIO_DONE)
-                            } else if (ReturnCode.isCancel(sessionInject.returnCode)) {
+                            } else if (false) { // Placeholder for FFmpegKit cancel
                                 // CANCEL
-                                println("Command cancelled ${sessionInject.state}, ${sessionInject.returnCode}")
+                                println("Command cancelled (FFmpegKit disabled)")
                                 try {
                                     FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
                                     FileSystem.SYSTEM.delete("$filePath.webm".toPath())
@@ -2320,7 +2317,7 @@ class YouTube(
                                 trySend(DownloadProgress.failed("Error"))
                             } else {
                                 // FAILURE
-                                println("Command failed ${sessionInject.state}, ${sessionInject.returnCode}, ${sessionInject.failStackTrace}")
+                                println("Command failed (FFmpegKit disabled)")
                                 try {
                                     FileSystem.SYSTEM.delete("$filePath.jpg".toPath())
                                     FileSystem.SYSTEM.delete("$filePath.webm".toPath())

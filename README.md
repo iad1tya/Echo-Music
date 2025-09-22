@@ -2,7 +2,10 @@
 
 A modern, feature-rich music streaming app for Android that integrates with YouTube Music and Spotify, offering ad-free music streaming with advanced features like AI song suggestions, synced lyrics, and offline playback.
 
+> **Note**: Echo Music is a fork of [SimpMusic](https://github.com/SimpMusic/SimpMusic) with additional improvements and features.
+
 ![Echo Music Logo](/Echo_github.png)
+
 
 ## ✨ Features
 
@@ -26,18 +29,19 @@ A modern, feature-rich music streaming app for Android that integrates with YouT
 
 ### 📱 Advanced Features
 - **Synced Lyrics**: Real-time lyrics from multiple sources (Echo Lyrics, LRCLIB, Spotify, YouTube Transcript)
-- **AI Lyrics Translation**: Translate lyrics to your preferred language (BETA)
 - **Offline Playback**: Download music for offline listening
 - **Playlist Management**: Create, edit, and sync custom playlists
 - **Sleep Timer**: Set automatic sleep timer for bedtime listening
 - **Android Auto Support**: Seamless integration with Android Auto
+- **Artist Notifications**: Get notifications from followed artists
+- **Data Analytics**: Track your listening habits and preferences
 
 ### 🛠️ Technical Features
 - **SponsorBlock Integration**: Skip sponsored content automatically
-- **Return YouTube Dislike**: See dislike counts on YouTube content
 - **1080p Video Support**: High-quality video playback with subtitles
 - **Multi-Account Support**: Support for multiple YouTube accounts
-- **Data Analytics**: Track your listening habits and preferences
+- **FFmpeg Integration**: Advanced audio/video processing capabilities
+- **Caching System**: Intelligent caching for faster loading and offline support
 
 ## 🏗️ Architecture
 
@@ -55,12 +59,9 @@ Echo Music is built using modern Android development practices:
 
 ### 📦 Modules
 
-- **app**: Main application module
-- **kotlinYtmusicScraper**: YouTube Music API integration
-- **spotify**: Spotify API integration
-- **aiService**: AI-powered features and recommendations
-- **lyricsService**: Lyrics fetching and synchronization
-- **ffmpeg-kit**: Audio/video processing
+- **app**: Main application module with UI and core functionality
+- **kotlinYtmusicScraper**: YouTube Music API integration and scraping
+- **ffmpeg-kit**: Audio/video processing and format conversion
 
 ## 🚀 Getting Started
 
@@ -166,6 +167,7 @@ Your privacy is important to us. Please read our [Privacy Policy](PRIVACY_POLICY
 
 ## 🙏 Acknowledgments
 
+- **SimpMusic** - The original project that Echo Music is forked from
 - **YouTube Music** for providing the music streaming platform
 - **Spotify** for their API and music library
 - **NewPipe** for YouTube extraction capabilities

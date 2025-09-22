@@ -17,6 +17,9 @@
     <string name="preparing">Preparing</string>
     <string name="hide">Hide</string>
     <string name="show">Show</string>
+    <string name="translate">Translate</string>
+    <string name="select_translation_language">Select Translation Language</string>
+    <string name="choose_language_for_translation">Choose the language you want to translate the lyrics to:</string>
     <string name="na_na">NA:NA</string>
     <string name="cache_size">%1$s MB</string>
     <string name="favorite">Favorite</string>
@@ -146,6 +149,7 @@
     <string name="login_failed">Login failed</string>
     <string name="log_out">Log out from YouTube</string>
     <string name="logged_in">Logged in</string>
+    <string name="not_logged_in">Not logged in</string>
     <string name="logged_out">Logged out</string>
     <string name="playlist">Playlist</string>
     <string name="restart_app">Restart app to apply the change</string>
@@ -274,7 +278,16 @@
     <string name="older_first">Older First</string>
     <string name="newer_first">Newer First</string>
     <string name="added_date">Added date</string>
-    <string name="credit_app">A simple music app using YouTube Music for backend \n\nEcho is an open source project to stream music from YouTube and YouTube Music without ads and tracking. Echo provides many features:\n\n - Streaming music \n - Synced lyrics\n - Personalize data\n - etc… \n\nEcho is always free and no ads\n\nBuild with ❤️ from Aditya</string>
+    <string name="credit_app">Echo is an open-source music app powered by YouTube and YouTube Music. It delivers seamless music streaming without ads or tracking. Echo is a fork of SimpMusic, with additional improvements and features.</string>
+    <string name="echo_overview">Overview</string>
+    <string name="echo_key_features">Key Features</string>
+    <string name="echo_about">About</string>
+    <string name="echo_resources">Resources</string>
+    <string name="echo_developed_by">Echo is developed and maintained by iad1tya.</string>
+    <string name="echo_feature_streaming">Stream music directly from YouTube and YouTube Music</string>
+    <string name="echo_feature_lyrics">Synced lyrics support</string>
+    <string name="echo_feature_personalized">Personalized data and preferences</string>
+    <string name="echo_feature_free">100% free, always ad-free</string>
     <string name="issue_tracker">Issue Tracker</string>
     <string name="copyright" translatable="false">©2025 Aditya</string>
     <string name="featured_playlists">Featured Playlists</string>
@@ -311,7 +324,6 @@
     <string name="published_at">Published at %1$s</string>
     <string name="less">Less</string>
     <string name="spotify">Spotify</string>
-    <string name="log_in_to_spotify">Log in to Spotify</string>
     <string name="intro_login_to_spotify">Log in for Spotify Lyrics, Canvas and more</string>
     <string name="enable_spotify_lyrics">Enable Spotify Lyrics</string>
     <string name="spotify_lyrícs_info">More lyrics without translation</string>
@@ -344,7 +356,6 @@
     <string name="repeat_all">Repeat All</string>
     <string name="repeat_off">Repeat Off</string>
     <string name="youtube_transcript">YouTube Transcript</string>
-    <string name="user_interface">Interface</string>
     <string name="translucent_bottom_navigation_bar">Translucent bottom navigation bar</string>
     <string name="you_can_see_the_content_below_the_bottom_bar">You can see the content below the bottom bar</string>
     <string name="donation">If you love my work, give me a coffee</string>
@@ -452,10 +463,6 @@
     <string name="contributor_name">Contributor name</string>
     <string name="contributor_email">Contributor email</string>
     <string name="anonymous">Anonymous</string>
-    <string name="simpmusic_lyrics">Echo Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Lyrics provided by Echo Lyrics</string>
-    <string name="echo_lyrics">Echo Lyrics</string>
-    <string name="lyrics_provider_echo">Lyrics provided by Echo Lyrics</string>
     <string name="enjoying_echo">Enjoying Echo</string>
     <string name="if_you_enjoy_using_echo_star_echo_on_github_or_leave_a_review_on">If you enjoy using Echo, star Echo on GitHub or leave a review on</string>
     <string name="backup_in_progress">Backup in progress</string>
@@ -477,4 +484,8 @@
     <string name="downloaded_songs">Downloaded Songs</string>
     <string name="no_songs_downloaded">No songs downloaded</string>
     <string name="chart_country">Chart Country</string>
+    <string name="log_in_to_spotify">Log in to Spotify</string>
+    <string name="user_interface">User Interface</string>
+    <string name="simpmusic_lyrics">Echo Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Lyrics provided by Echo Lyrics</string>
 </resources>

@@ -1,7 +1,7 @@
 [versions]
 # App version
-version-name="1.0"
-version-code="1"
+version-name="1.1"
+version-code="2"
 
 android = "8.13.0"
 kotlin = "2.2.10"
