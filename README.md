@@ -28,7 +28,7 @@ A modern, feature-rich music streaming app for Android that integrates with YouT
 - **Trending Content**: Stay updated with the latest music trends
 
 ### 📱 Advanced Features
-- **Synced Lyrics**: Real-time lyrics from multiple sources (Echo Lyrics, LRCLIB, Spotify, YouTube Transcript)
+- **Synced Lyrics**: Real-time lyrics from multiple sources (LRCLIB, Spotify, YouTube Transcript)
 - **Offline Playback**: Download music for offline listening
 - **Playlist Management**: Create, edit, and sync custom playlists
 - **Sleep Timer**: Set automatic sleep timer for bedtime listening
