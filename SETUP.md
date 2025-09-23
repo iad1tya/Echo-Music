@@ -24,9 +24,13 @@ cp local.properties.template local.properties
 Edit `local.properties` and set your Android SDK path:
 ```properties
 sdk.dir=/path/to/your/android/sdk
+
+# Optional: Firebase configuration (uncomment and fill if needed)
+# SENTRY_DSN=your_sentry_dsn_here
+# SENTRY_AUTH_TOKEN=your_sentry_auth_token_here
 ```
 
-### 3. Firebase Configuration
+### 3. Firebase Configuration (Optional)
 Copy the Firebase template and configure with your project details:
 ```bash
 cp app/google-services.json.template app/google-services.json
@@ -37,6 +41,8 @@ Edit `app/google-services.json` with your Firebase project configuration:
 - Replace `your-firebase-project-id` with your Firebase project ID
 - Replace `YOUR_MOBILE_SDK_APP_ID` with your Firebase app ID
 - Replace `YOUR_API_KEY` with your Firebase API key
+
+**Note**: Firebase configuration is optional for basic functionality. The app will work without it, but some features like analytics and crash reporting will be disabled.
 
 ### 4. Build the Project
 ```bash

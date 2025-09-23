@@ -21,7 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import iad1tya.echo.music.R
-import iad1tya.echo.music.ui.component.EndOfPage
+import iad1tya.echo.music.ui.component.EndOfPageWithMiniPlayerSpacing
 import iad1tya.echo.music.ui.component.MoodAndGenresContentItem
 import iad1tya.echo.music.ui.component.NormalAppBar
 import iad1tya.echo.music.viewModel.MoodViewModel
@@ -67,7 +67,7 @@ fun MoodScreen(
                     )
                 }
                 item {
-                    EndOfPage()
+                    EndOfPageWithMiniPlayerSpacing()
                 }
             }
         }

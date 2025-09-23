@@ -123,6 +123,7 @@ class SearchViewModel(
         }
     }
 
+
     fun deleteSearchHistory() {
         viewModelScope.launch {
             mainRepository.deleteSearchHistory()
@@ -132,6 +133,7 @@ class SearchViewModel(
             getSearchHistory()
         }
     }
+
 
     fun searchSongs(query: String) {
         _searchScreenUIState.value = SearchScreenUIState.Loading

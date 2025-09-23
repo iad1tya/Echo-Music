@@ -112,7 +112,7 @@ import iad1tya.echo.music.data.dataStore.DataStoreManager.Settings.TRUE
 import iad1tya.echo.music.extension.bytesToMB
 import iad1tya.echo.music.ui.component.ActionButton
 import iad1tya.echo.music.ui.component.CenterLoadingBox
-import iad1tya.echo.music.ui.component.EndOfPage
+import iad1tya.echo.music.ui.component.EndOfPageWithSettingsSpacing
 import iad1tya.echo.music.ui.component.PrivacyPolicyDialog
 import iad1tya.echo.music.ui.component.RippleIconButton
 import iad1tya.echo.music.ui.component.SettingItem
@@ -164,8 +164,8 @@ fun SettingScreen(
     val isMiniPlayerActive = nowPlayingData?.mediaItem != null && nowPlayingData?.mediaItem != MediaItem.EMPTY
     
     
-    // Calculate dynamic bottom padding: 56dp for bottom nav + 60dp for mini-player when active
-    val bottomPadding = if (isMiniPlayerActive) 116.dp else 56.dp
+    // Calculate dynamic bottom padding: minimal spacing to bring content closer to mini player
+    val bottomPadding = if (isMiniPlayerActive) 20.dp else 16.dp
     val context = LocalContext.current
     val localDensity = LocalDensity.current
     val uriHandler = LocalUriHandler.current
@@ -214,7 +214,7 @@ fun SettingScreen(
     val thumbnailCache by viewModel.thumbCacheSize.collectAsStateWithLifecycle(initialValue = 0L)
     val limitPlayerCache by viewModel.playerCacheLimit.collectAsStateWithLifecycle(initialValue = 0L)
     val fraction by viewModel.fraction.collectAsStateWithLifecycle(initialValue = null)
-    val lastCheckUpdate by viewModel.lastCheckForUpdate.collectAsStateWithLifecycle(initialValue = 0L)
+    val lastCheckUpdate by viewModel.lastCheckForUpdate.collectAsStateWithLifecycle(initialValue = null)
     val usingProxy by viewModel.usingProxy.collectAsStateWithLifecycle(initialValue = false)
     val proxyType by viewModel.proxyType.collectAsStateWithLifecycle(initialValue = null)
     val proxyHost by viewModel.proxyHost.collectAsStateWithLifecycle(initialValue = "")
@@ -251,14 +251,21 @@ fun SettingScreen(
                 isCheckingUpdate -> context.getString(R.string.checking)
                 isUpToDate -> context.getString(R.string.app_up_to_date)
                 else -> {
-                    val lastCheckLong: Long = (lastCheckUpdate as? Long) ?: 0L
-                    context.getString(
-                        R.string.last_checked_at,
-                        DateTimeFormatter
-                            .ofPattern("yyyy-MM-dd HH:mm:ss")
-                            .withZone(ZoneId.systemDefault())
-                            .format(Instant.ofEpochMilli(lastCheckLong)),
-                    )
+                    val lastCheckString = lastCheckUpdate ?: "0"
+                    val lastCheckLong = lastCheckString.toLongOrNull() ?: 0L
+                    
+                    // Only show date if it's a valid timestamp (not 0 or epoch)
+                    if (lastCheckLong > 0L) {
+                        context.getString(
+                            R.string.last_checked_at,
+                            DateTimeFormatter
+                                .ofPattern("yyyy-MM-dd HH:mm:ss")
+                                .withZone(ZoneId.systemDefault())
+                                .format(Instant.ofEpochMilli(lastCheckLong)),
+                        )
+                    } else {
+                        "Never checked"
+                    }
                 }
             }
         }
@@ -1247,7 +1254,7 @@ fun SettingScreen(
             }
         }
         item(key = "end") {
-            EndOfPage()
+            EndOfPageWithSettingsSpacing()
         }
         // Add dynamic bottom padding to prevent content from scrolling behind bottom navigation/mini player
         item {

@@ -158,7 +158,7 @@ fun MiniPlayer(
     
     // Swipe cooldown to prevent rapid successive swipes
     var lastSwipeTime by remember { mutableStateOf(0L) }
-    val swipeCooldownMs = 500L // 500ms cooldown between swipes
+    val swipeCooldownMs = 200L // 200ms cooldown between swipes for better responsiveness
 
     LaunchedEffect(bitmap) {
         val bm = bitmap
@@ -261,7 +261,7 @@ fun MiniPlayer(
                         onHorizontalDrag = { change: PointerInputChange, dragAmount: Float ->
                             coroutineScope.launch {
                                 change.consume()
-                                offsetX.animateTo(offsetX.value + dragAmount * 0.3f) // Reduce sensitivity
+                                offsetX.animateTo(offsetX.value + dragAmount * 0.8f) // Increase sensitivity
                                 Log.d("MiniPlayer", "Horizontal drag: ${offsetX.value}")
                             }
                         },
@@ -274,7 +274,7 @@ fun MiniPlayer(
                             Log.d("MiniPlayer", "Horizontal drag ended")
                             coroutineScope.launch {
                                 val currentTime = System.currentTimeMillis()
-                                val threshold = 50f // Minimum swipe distance
+                                val threshold = 25f // More sensitive swipe distance
                                 
                                 // Check cooldown
                                 if (currentTime - lastSwipeTime < swipeCooldownMs) {
@@ -361,44 +361,6 @@ fun MiniPlayer(
                         modifier =
                             Modifier
                                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                                .pointerInput(Unit) {
-                                    detectHorizontalDragGestures(
-                                        onDragStart = {
-                                        },
-                                        onHorizontalDrag = {
-                                            change: PointerInputChange,
-                                            dragAmount: Float,
-                                            ->
-                                            coroutineScope.launch {
-                                                change.consume()
-                                                offsetX.animateTo(offsetX.value + dragAmount * 2)
-                                                Log.w("MiniPlayer", "Dragged ${offsetX.value}")
-                                            }
-                                        },
-                                        onDragCancel = {
-                                            Log.w("MiniPlayer", "Drag Cancelled")
-                                            coroutineScope.launch {
-                                                if (offsetX.value > 200) {
-                                                    sharedViewModel.onUIEvent(UIEvent.Previous)
-                                                } else if (offsetX.value < -120) {
-                                                    sharedViewModel.onUIEvent(UIEvent.Next)
-                                                }
-                                                offsetX.animateTo(0f)
-                                            }
-                                        },
-                                        onDragEnd = {
-                                            Log.w("MiniPlayer", "Drag Ended")
-                                            coroutineScope.launch {
-                                                if (offsetX.value > 200) {
-                                                    sharedViewModel.onUIEvent(UIEvent.Previous)
-                                                } else if (offsetX.value < -120) {
-                                                    sharedViewModel.onUIEvent(UIEvent.Next)
-                                                }
-                                                offsetX.animateTo(0f)
-                                            }
-                                        },
-                                    )
-                                },
                     ) {
                         AsyncImage(
                             model =

@@ -282,7 +282,7 @@ fun SearchScreen(
                                 onItemClick = { ytItem ->
                                     // Hide keyboard and add to search history
                                     focusManager.clearFocus()
-                                    searchViewModel.insertSearchHistory(searchText)
+                                    searchViewModel.insertSearchHistory(ytItem.title)
                                     
                                     when (ytItem) {
                                         is SongItem, is VideoItem -> {
@@ -603,7 +603,7 @@ fun SearchScreen(
                                                                         },
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.title ?: "")
                                                                             val firstTrack = result.toTrack()
                                                                             searchViewModel.setQueueData(
                                                                                 QueueData(
@@ -635,7 +635,7 @@ fun SearchScreen(
                                                                         },
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.title ?: "")
                                                                             val firstTrack = result.toTrack()
                                                                             searchViewModel.setQueueData(
                                                                                 QueueData(
@@ -726,7 +726,7 @@ fun SearchScreen(
                                                                         data = result,
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.title)
                                                                             navController.navigate(
                                                                                 AlbumDestination(
                                                                                     result.browseId,
@@ -740,7 +740,7 @@ fun SearchScreen(
                                                                         data = result,
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.artist)
                                                                             navController.navigate(
                                                                                 ArtistDestination(
                                                                                     result.browseId,
@@ -754,7 +754,7 @@ fun SearchScreen(
                                                                         data = result,
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.title)
                                                                             if (result.resultType == "Podcast") {
                                                                                 navController.navigate(
                                                                                     PodcastDestination(
@@ -776,7 +776,7 @@ fun SearchScreen(
                                                                         data = result.toAlbumsResult(),
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.title)
                                                                             navController.navigate(
                                                                                 AlbumDestination(
                                                                                     result.browseId,
@@ -806,7 +806,7 @@ fun SearchScreen(
                                                                             ),
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.title)
                                                                             navController.navigate(
                                                                                 ArtistDestination(
                                                                                     result.id,
@@ -836,7 +836,7 @@ fun SearchScreen(
                                                                             ),
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(result.title)
                                                                             navController.navigate(
                                                                                 PlaylistDestination(
                                                                                     result.id,

@@ -164,9 +164,9 @@ fun HomeScreen(
     val isMiniPlayerActive = nowPlayingData?.mediaItem != null && nowPlayingData?.mediaItem != MediaItem.EMPTY
     
     // Calculate dynamic bottom padding: 56dp for bottom nav + extra space for better scrolling
-    // Without mini player: 56dp (nav) + 80dp (2-3cm extra) = 136dp
-    // With mini player: 56dp (nav) + 80dp (mini player) + 100dp (3-4cm extra) = 236dp
-    val bottomPadding = if (isMiniPlayerActive) 236.dp else 136.dp
+    // Without mini player: 56dp (nav) + 52dp (1-2cm extra) = 108dp
+    // With mini player: 56dp (nav) + 80dp (mini player) + 72dp (2-3cm extra) = 208dp
+    val bottomPadding = if (isMiniPlayerActive) 208.dp else 108.dp
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
     val chipRowState = rememberScrollState()

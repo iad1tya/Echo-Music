@@ -60,14 +60,25 @@ A modern, feature-rich music streaming app for Android that integrates with YouT
    ```
 
 2. **Configure Android SDK**
-   Create `local.properties` in the root directory:
+   Copy the template and set your SDK path:
+   ```bash
+   cp local.properties.template local.properties
+   ```
+   Edit `local.properties` and set your Android SDK path:
    ```properties
    sdk.dir=/path/to/your/android/sdk
    ```
 
 3. **Configure Firebase (Optional)**
-   - Copy `app/google-services.json.template` to `app/google-services.json`
-   - Replace placeholder values with your Firebase project configuration
+   Copy the template and configure with your project details:
+   ```bash
+   cp app/google-services.json.template app/google-services.json
+   ```
+   Edit `app/google-services.json` with your Firebase project configuration:
+   - Replace `YOUR_PROJECT_NUMBER` with your Firebase project number
+   - Replace `your-firebase-project-id` with your Firebase project ID
+   - Replace `YOUR_MOBILE_SDK_APP_ID` with your Firebase app ID
+   - Replace `YOUR_API_KEY` with your Firebase API key
    - See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed instructions
 
 4. **Build the app**
