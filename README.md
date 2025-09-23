@@ -173,7 +173,6 @@ Your privacy is important to us. Please read our [Privacy Policy](PRIVACY_POLICY
 
 - **Bug Reports**: [Create an issue](https://github.com/iad1tya/Echo-Music/issues/new?template=bug_report.md)
 - **Feature Requests**: [Create an issue](https://github.com/iad1tya/Echo-Music/issues/new?template=feature_request.md)
-- **General Discussion**: [GitHub Discussions](https://github.com/iad1tya/Echo-Music/discussions)
 
 ## Credits
 
@@ -194,5 +193,5 @@ Echo Music is developed and maintained by [iad1tya](https://github.com/iad1tya).
 ---
 
 <div align="center">
-  <p>Made with ❤️ by [iad1tya](https://github.com/iad1tya)</p>
+  <p>Made with ❤️ by <a href="https://github.com/iad1tya">iad1tya</a></p>
 </div>

@@ -1,8 +1,8 @@
-# Contributing to Echo Music 🎵
+# Contributing to Echo Music
 
-Thank you for your interest in contributing to Echo Music! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Echo Music! This document provides comprehensive guidelines and information for contributors.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
@@ -13,10 +13,16 @@ Thank you for your interest in contributing to Echo Music! This document provide
 - [Coding Standards](#coding-standards)
 - [Testing](#testing)
 - [Documentation](#documentation)
+- [Release Process](#release-process)
+- [Community Guidelines](#community-guidelines)
 
-## 🤝 Code of Conduct
+## Code of Conduct
 
 By participating in this project, you agree to abide by our Code of Conduct:
+
+### Our Pledge
+
+We are committed to providing a welcoming and inspiring community for all. We pledge to:
 
 - Be respectful and inclusive
 - Use welcoming and inclusive language
@@ -25,7 +31,23 @@ By participating in this project, you agree to abide by our Code of Conduct:
 - Focus on what's best for the community
 - Show empathy towards other community members
 
-## 🚀 Getting Started
+### Expected Behavior
+
+- Use welcoming and inclusive language
+- Be respectful of differing viewpoints and experiences
+- Gracefully accept constructive criticism
+- Focus on what is best for the community
+- Show empathy towards other community members
+
+### Unacceptable Behavior
+
+- The use of sexualized language or imagery
+- Trolling, insulting/derogatory comments, and personal or political attacks
+- Public or private harassment
+- Publishing others' private information without explicit permission
+- Other conduct which could reasonably be considered inappropriate in a professional setting
+
+## Getting Started
 
 ### Prerequisites
 
@@ -34,6 +56,8 @@ By participating in this project, you agree to abide by our Code of Conduct:
 - Android SDK 26 or later
 - Git
 - Basic knowledge of Kotlin and Android development
+- Understanding of Jetpack Compose (preferred)
+- Familiarity with MVVM architecture pattern
 
 ### Fork and Clone
 
@@ -48,7 +72,7 @@ By participating in this project, you agree to abide by our Code of Conduct:
    git remote add upstream https://github.com/iad1tya/Echo-Music.git
    ```
 
-## 🛠️ Development Setup
+## Development Setup
 
 ### 1. Environment Setup
 
@@ -78,19 +102,21 @@ If you want to test Firebase features:
 ./gradlew assembleDebug
 ```
 
-## 📝 Contributing Guidelines
+## Contributing Guidelines
 
 ### Types of Contributions
 
 We welcome various types of contributions:
 
-- 🐛 **Bug Fixes**: Fix existing issues
-- ✨ **New Features**: Add new functionality
-- 📚 **Documentation**: Improve documentation
-- 🎨 **UI/UX Improvements**: Enhance user interface
-- ⚡ **Performance**: Optimize app performance
-- 🧪 **Testing**: Add or improve tests
-- 🌐 **Translations**: Add new language support
+- **Bug Fixes**: Fix existing issues and improve stability
+- **New Features**: Add new functionality and capabilities
+- **Documentation**: Improve documentation and guides
+- **UI/UX Improvements**: Enhance user interface and experience
+- **Performance**: Optimize app performance and memory usage
+- **Testing**: Add or improve tests and test coverage
+- **Translations**: Add new language support and improve existing translations
+- **Code Quality**: Refactor code, improve architecture, and fix code smells
+- **Security**: Identify and fix security vulnerabilities
 
 ### Before You Start
 
@@ -99,7 +125,7 @@ We welcome various types of contributions:
 3. **Fork the repository** and create a feature branch
 4. **Follow the coding standards** outlined below
 
-## 🔄 Pull Request Process
+## Pull Request Process
 
 ### 1. Create a Branch
 
@@ -160,7 +186,7 @@ Then create a Pull Request on GitHub with:
 - Screenshots for UI changes
 - Testing instructions
 
-## 🐛 Issue Guidelines
+## Issue Guidelines
 
 ### Bug Reports
 
@@ -173,6 +199,7 @@ When reporting bugs, please include:
 5. **Device information** (Android version, device model)
 6. **App version** and build type
 7. **Logs** if available
+8. **Environment details** (build variant, configuration)
 
 ### Feature Requests
 
@@ -183,8 +210,18 @@ When requesting features, please include:
 3. **Use case** and why it would be useful
 4. **Mockups** or examples if applicable
 5. **Alternative solutions** you've considered
+6. **Impact assessment** (user experience, performance, etc.)
 
-## 📏 Coding Standards
+### Issue Templates
+
+We provide issue templates for:
+- Bug reports
+- Feature requests
+- Documentation improvements
+- Performance issues
+- Security vulnerabilities
+
+## Coding Standards
 
 ### Kotlin Style
 
@@ -231,7 +268,7 @@ app/src/main/java/com/maxrave/echo/
 - **Constants**: UPPER_SNAKE_CASE (`MAX_VOLUME`)
 - **Packages**: lowercase (`com.maxrave.echo.ui`)
 
-## 🧪 Testing
+## Testing
 
 ### Unit Tests
 
@@ -259,7 +296,7 @@ app/src/main/java/com/maxrave/echo/
 ./gradlew testDebugUnitTestCoverage
 ```
 
-## 📚 Documentation
+## Documentation
 
 ### Code Documentation
 
@@ -288,7 +325,7 @@ docs: update API documentation
 style: format code according to style guide
 ```
 
-## 🏷️ Release Process
+## Release Process
 
 ### Version Numbering
 
@@ -305,16 +342,23 @@ We follow [Semantic Versioning](https://semver.org/):
 - [ ] Version numbers are bumped
 - [ ] Release notes are prepared
 
-## 🤔 Questions?
+## Community Guidelines
+
+### Communication Channels
+
+- **GitHub Discussions**: For general questions and discussions
+- **GitHub Issues**: For bug reports and feature requests
+- **Pull Requests**: For code contributions and reviews
+
+### Getting Help
 
 If you have questions about contributing:
 
 1. Check the [GitHub Discussions](https://github.com/iad1tya/Echo-Music/discussions)
 2. Create a new discussion
-3. Join our community chat (if available)
-4. Contact maintainers directly
+3. Contact maintainers directly through GitHub
 
-## 🙏 Recognition
+### Recognition
 
 Contributors will be recognized in:
 - README.md contributors section
@@ -322,11 +366,19 @@ Contributors will be recognized in:
 - GitHub contributors page
 - App credits (if applicable)
 
-Thank you for contributing to Echo Music! 🎵
+## Questions?
+
+If you have questions about contributing:
+
+1. Check the [GitHub Discussions](https://github.com/iad1tya/Echo-Music/discussions)
+2. Create a new discussion
+3. Contact maintainers directly
+
+Thank you for contributing to Echo Music!
 
 ---
 
 <div align="center">
-  <p>Happy coding! 🚀</p>
-  <p>Together, we can make Echo Music even better! 🎵</p>
+  <p>Happy coding!</p>
+  <p>Together, we can make Echo Music even better!</p>
 </div>
