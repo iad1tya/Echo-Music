@@ -132,6 +132,7 @@ import iad1tya.echo.music.viewModel.SettingAlertState
 import iad1tya.echo.music.viewModel.SettingBasicAlertState
 import iad1tya.echo.music.viewModel.SettingsViewModel
 import iad1tya.echo.music.viewModel.SharedViewModel
+import iad1tya.echo.music.utils.USBDacDetector
 import iad1tya.echo.music.viewModel.WelcomeViewModel
 import com.mikepenz.aboutlibraries.ui.compose.ChipColors
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
@@ -286,6 +287,14 @@ fun SettingScreen(
     val sendData by viewModel.sendBackToGoogle.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = false)
     val normalizeVolume by viewModel.normalizeVolume.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = false)
     val skipSilent by viewModel.skipSilent.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = false)
+    val bitPerfectPlayback by viewModel.bitPerfectPlayback.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = false)
+    val isUSBDacConnected by remember { mutableStateOf(USBDacDetector.isUSBDacConnected(context)) }
+    val isDeviceCompatible by remember { mutableStateOf(USBDacDetector.isDeviceCompatible(context)) }
+    
+    // Function to show unsupported device toast
+    val showUnsupportedToast = {
+        Toast.makeText(context, context.getString(R.string.device_not_support_dac), Toast.LENGTH_SHORT).show()
+    }
     val savePlaybackState by viewModel.savedPlaybackState.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = false)
     val saveLastPlayed by viewModel.saveRecentSongAndQueue.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = false)
     val killServiceOnExit by viewModel.killServiceOnExit.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = true)
@@ -792,6 +801,23 @@ fun SettingScreen(
                     switch = (skipSilent to { viewModel.setSkipSilent(it) }),
                 )
                 SettingItem(
+                    title = stringResource(R.string.bit_perfect_playback),
+                    subtitle = if (isDeviceCompatible) {
+                        if (isUSBDacConnected) {
+                            "USB DAC detected - Bit-perfect audio available"
+                        } else {
+                            "Connect a USB DAC for bit-perfect audio output"
+                        }
+                    } else {
+                        "Device doesn't support USB DAC"
+                    },
+                    switch = if (isDeviceCompatible) {
+                        (bitPerfectPlayback to { viewModel.setBitPerfectPlayback(it) })
+                    } else {
+                        (false to { showUnsupportedToast() })
+                    },
+                )
+                SettingItem(
                     title = stringResource(R.string.open_system_equalizer),
                     subtitle = stringResource(R.string.use_your_system_equalizer),
                     onClick = {
@@ -834,7 +860,63 @@ fun SettingScreen(
         item(key = "lyrics") {
             Column {
                 Text(text = stringResource(R.string.lyrics), style = typo.labelMedium, modifier = Modifier.padding(vertical = 8.dp))
-                // Show Spotify Lyrics only when logged in
+                
+                // Main Lyrics Provider - only show when Smart Lyrics is OFF
+                if (!smartLyricsDefaults) {
+                    SettingItem(
+                        title = stringResource(R.string.main_lyrics_provider),
+                        subtitle =
+                            when (mainLyricsProvider) {
+                                DataStoreManager.YOUTUBE -> stringResource(R.string.youtube_transcript)
+                                DataStoreManager.LRCLIB -> stringResource(R.string.lrclib)
+                                DataStoreManager.SPOTIFY -> stringResource(R.string.spotify_lyrics_provider)
+                                else -> stringResource(R.string.youtube_transcript)
+                            },
+                        onClick = {
+                            val lyricsOptions = mutableListOf<Pair<Boolean, String>>()
+                            
+                            // Always include YouTube and LRCLIB
+                            lyricsOptions.add((mainLyricsProvider == DataStoreManager.YOUTUBE) to context.getString(R.string.youtube_transcript))
+                            lyricsOptions.add((mainLyricsProvider == DataStoreManager.LRCLIB) to context.getString(R.string.lrclib))
+                            
+                            // Only include Spotify if logged in
+                            if (spotifyLogIn) {
+                                lyricsOptions.add((mainLyricsProvider == DataStoreManager.SPOTIFY) to context.getString(R.string.spotify_lyrics_provider))
+                            }
+                            
+                            viewModel.setAlertData(
+                                SettingAlertState(
+                                    title = context.getString(R.string.main_lyrics_provider),
+                                    selectOne =
+                                        SettingAlertState.SelectData(
+                                            listSelect = lyricsOptions,
+                                        ),
+                                    confirm =
+                                        context.getString(R.string.change) to { state ->
+                                            viewModel.setLyricsProvider(
+                                                when (state.selectOne?.getSelected()) {
+                                                    context.getString(R.string.youtube_transcript) -> DataStoreManager.YOUTUBE
+                                                    context.getString(R.string.lrclib) -> DataStoreManager.LRCLIB
+                                                    context.getString(R.string.spotify_lyrics_provider) -> DataStoreManager.SPOTIFY
+                                                    else -> DataStoreManager.YOUTUBE
+                                                },
+                                            )
+                                        },
+                                    dismiss = context.getString(R.string.cancel),
+                                ),
+                            )
+                        },
+                    )
+                }
+                
+                // Smart Lyrics
+                SettingItem(
+                    title = "Smart Lyrics",
+                    subtitle = "Automatically choose the best lyrics provider",
+                    switch = (smartLyricsDefaults to { viewModel.setSmartLyricsDefaults(it) }),
+                )
+                
+                // Spotify Lyrics - only show when logged in
                 if (spotifyLogIn) {
                     SettingItem(
                         title = "Spotify Lyrics",
@@ -842,56 +924,8 @@ fun SettingScreen(
                         switch = (spotifyLyrics to { viewModel.setSpotifyLyrics(it) }),
                     )
                 }
-                SettingItem(
-                    title = stringResource(R.string.main_lyrics_provider),
-                    subtitle =
-                        when (mainLyricsProvider) {
-                            DataStoreManager.YOUTUBE -> stringResource(R.string.youtube_transcript)
-                            DataStoreManager.LRCLIB -> stringResource(R.string.lrclib)
-                            DataStoreManager.SPOTIFY -> stringResource(R.string.spotify_lyrics_provider)
-                            else -> stringResource(R.string.youtube_transcript)
-                        },
-                    onClick = {
-                        val lyricsOptions = mutableListOf<Pair<Boolean, String>>()
-                        
-                        // Always include YouTube and LRCLIB
-                        lyricsOptions.add((mainLyricsProvider == DataStoreManager.YOUTUBE) to context.getString(R.string.youtube_transcript))
-                        lyricsOptions.add((mainLyricsProvider == DataStoreManager.LRCLIB) to context.getString(R.string.lrclib))
-                        
-                        // Only include Spotify if logged in
-                        if (spotifyLogIn) {
-                            lyricsOptions.add((mainLyricsProvider == DataStoreManager.SPOTIFY) to context.getString(R.string.spotify_lyrics_provider))
-                        }
-                        
-                        viewModel.setAlertData(
-                            SettingAlertState(
-                                title = context.getString(R.string.main_lyrics_provider),
-                                selectOne =
-                                    SettingAlertState.SelectData(
-                                        listSelect = lyricsOptions,
-                                    ),
-                                confirm =
-                                    context.getString(R.string.change) to { state ->
-                                        viewModel.setLyricsProvider(
-                                            when (state.selectOne?.getSelected()) {
-                                                context.getString(R.string.youtube_transcript) -> DataStoreManager.YOUTUBE
-                                                context.getString(R.string.lrclib) -> DataStoreManager.LRCLIB
-                                                context.getString(R.string.spotify_lyrics_provider) -> DataStoreManager.SPOTIFY
-                                                else -> DataStoreManager.YOUTUBE
-                                            },
-                                        )
-                                    },
-                                dismiss = context.getString(R.string.cancel),
-                            ),
-                        )
-                    },
-                )
-                    SettingItem(
-                        title = "Smart Lyrics",
-                        subtitle = "Automatically choose the best lyrics provider",
-                        switch = (smartLyricsDefaults to { viewModel.setSmartLyricsDefaults(it) }),
-                    )
 
+                // YouTube Subtitle Language
                 SettingItem(
                     title = stringResource(R.string.youtube_subtitle_language),
                     subtitle = youtubeSubtitleLanguage,
@@ -1233,6 +1267,7 @@ fun SettingScreen(
                             ),
                     )
                     Spacer(Modifier.width(8.dp))
+                    Text(text = "Spotify Canvas Cache", style = typo.bodySmall)
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

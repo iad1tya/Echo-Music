@@ -711,7 +711,10 @@ fun QueueBottomSheet(
             skipPartiallyExpanded = true,
         )
     val nestedScrollInterop = rememberNestedScrollInteropConnection()
-    val lazyListState = rememberLazyListState()
+    val lazyListState = rememberLazyListState(
+        initialFirstVisibleItemIndex = 0,
+        initialFirstVisibleItemScrollOffset = 0
+    )
     val dragDropState =
         rememberDragDropState(lazyListState) { from, to ->
             coroutineScope.launch {

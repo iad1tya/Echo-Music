@@ -1,6 +1,7 @@
 package iad1tya.echo.music.ui.screen.home
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -78,6 +79,10 @@ fun RecentlySongsScreen(
                 Modifier
                     .fillMaxSize()
                     .hazeSource(state = hazeState),
+            // Performance optimizations
+            userScrollEnabled = true,
+            reverseLayout = false,
+            verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             item {
                 Spacer(

@@ -237,19 +237,21 @@ fun SearchScreen(
                         )
                     },
                     trailingIcon = {
-                        IconButton(
-                            modifier =
-                                Modifier
-                                    .clip(CircleShape),
-                            onClick = {
-                                searchText = ""
-                                isSearchSubmitted = false
-                            },
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.baseline_close_24),
-                                contentDescription = "Clear search",
-                            )
+                        if (searchText.isNotEmpty()) {
+                            IconButton(
+                                modifier =
+                                    Modifier
+                                        .clip(CircleShape),
+                                onClick = {
+                                    searchText = ""
+                                    isSearchSubmitted = false
+                                },
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.baseline_close_24),
+                                    contentDescription = "Clear search",
+                                )
+                            }
                         }
                     },
                 )

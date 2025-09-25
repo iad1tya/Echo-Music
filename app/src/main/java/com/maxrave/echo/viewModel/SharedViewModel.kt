@@ -299,6 +299,16 @@ class SharedViewModel(
                     Log.w(tag, "NowPlayingState is $state")
                     canvasJob?.cancel()
                     _nowPlayingState.value = state
+                    
+                    // Fix: Ensure timeline loading state is properly updated when song is loaded
+                    if (state.songEntity != null && state.mediaItem != androidx.media3.common.MediaItem.EMPTY) {
+                        _timeline.update { timeline ->
+                            timeline.copy(
+                                loading = false,
+                                total = if (timeline.total <= 0) simpleMediaServiceHandler.getPlayerDuration() else timeline.total
+                            )
+                        }
+                    }
                     state.track?.let { track ->
                         _nowPlayingScreenData.value =
                             NowPlayingScreenData(
@@ -366,7 +376,7 @@ class SharedViewModel(
                             }
 
                             is SimpleMediaState.Progress -> {
-                                if (mediaState.progress >= 0L && mediaState.progress != _timeline.value.current) {
+                                if (mediaState.progress >= 0L) {
                                     if (_timeline.value.total > 0L) {
                                         _timeline.update {
                                             it.copy(

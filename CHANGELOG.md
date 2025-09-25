@@ -5,6 +5,67 @@ All notable changes to Echo Music will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-01-XX
+
+### Added
+- **🎧 Bit Perfect Playback Support**
+  - USB DAC detection and configuration
+  - Automatic device compatibility checking
+  - Bit-perfect audio output for audiophiles
+  - Smart audio processing control
+  - High-resolution audio support
+
+- **📊 Enhanced Analytics & Crash Reporting**
+  - Firebase Analytics integration
+  - Comprehensive crash reporting with Sentry
+  - User-controlled privacy settings
+  - Performance monitoring
+  - Custom event tracking
+
+- **🎨 Performance Optimizations**
+  - Smooth animations and transitions
+  - Jitter-free scrolling experience
+  - Optimized LazyList performance
+  - Enhanced navigation animations
+  - Improved memory management
+
+- **🔧 Settings Improvements**
+  - Reorganized lyrics settings with smart defaults
+  - Conditional visibility for lyrics providers
+  - Enhanced storage visualization with proper labels
+  - Improved settings UI organization
+
+### Changed
+- **Login Experience**
+  - Removed "login failed" popup for cleaner UX
+  - Only shows "login success" confirmation
+  - Improved YouTube login flow
+
+- **Storage Management**
+  - Fixed Spotify Canvas Cache label in storage legend
+  - Improved storage visualization
+  - Better cache management
+
+### Technical Improvements
+- **Audio Processing**
+  - Enhanced ExoPlayer configuration
+  - Improved audio sink handling
+  - Better USB audio device support
+  - Optimized audio processing pipeline
+
+- **Build System**
+  - Updated to version 1.5 (version code 8)
+  - Enhanced build configurations
+  - Improved dependency management
+  - Better error handling
+
+### Security
+- **Privacy Enhancements**
+  - User-controlled analytics
+  - Optional crash reporting
+  - Enhanced data privacy controls
+  - Secure configuration management
+
 ## [Unreleased]
 
 ### Planned

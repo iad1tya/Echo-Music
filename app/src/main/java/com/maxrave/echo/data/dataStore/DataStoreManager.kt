@@ -948,7 +948,7 @@ class DataStoreManager(
 
     val killServiceOnExit: Flow<String> =
         settingsDataStore.data.map { preferences ->
-            preferences[KILL_SERVICE_ON_EXIT] ?: FALSE
+            preferences[KILL_SERVICE_ON_EXIT] ?: TRUE
         }
 
     suspend fun setKillServiceOnExit(kill: Boolean) {
@@ -1148,6 +1148,19 @@ class DataStoreManager(
         }
     }
 
+    val bitPerfectPlayback: Flow<Boolean> =
+        settingsDataStore.data.map { preferences ->
+            preferences[BIT_PERFECT_PLAYBACK] ?: FALSE == TRUE
+        }
+
+    suspend fun setBitPerfectPlayback(enabled: Boolean) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[BIT_PERFECT_PLAYBACK] = if (enabled) TRUE else FALSE
+            }
+        }
+    }
+
     companion object Settings {
         val APP_VERSION = stringPreferencesKey("app_version")
         val COOKIE = stringPreferencesKey("cookie")
@@ -1252,6 +1265,7 @@ class DataStoreManager(
         // Privacy settings
         val ANALYTICS_ENABLED = stringPreferencesKey("analytics_enabled")
         val CRASH_REPORT_ENABLED = stringPreferencesKey("crash_report_enabled")
+        val BIT_PERFECT_PLAYBACK = stringPreferencesKey("bit_perfect_playback")
         
 
         // Proxy type

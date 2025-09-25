@@ -86,6 +86,8 @@ class SettingsViewModel(
     val normalizeVolume: StateFlow<String?> = _normalizeVolume
     private var _skipSilent: MutableStateFlow<String?> = MutableStateFlow(null)
     val skipSilent: StateFlow<String?> = _skipSilent
+    private var _bitPerfectPlayback: MutableStateFlow<String?> = MutableStateFlow(null)
+    val bitPerfectPlayback: StateFlow<String?> = _bitPerfectPlayback
     private var _savedPlaybackState: MutableStateFlow<String?> = MutableStateFlow(null)
     val savedPlaybackState: StateFlow<String?> = _savedPlaybackState
     private var _saveRecentSongAndQueue: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -221,6 +223,7 @@ class SettingsViewModel(
                 safeExecute("getLoggedIn") { getLoggedIn() }
                 safeExecute("getNormalizeVolume") { getNormalizeVolume() }
                 safeExecute("getSkipSilent") { getSkipSilent() }
+                safeExecute("getBitPerfectPlayback") { getBitPerfectPlayback() }
                 safeExecute("getSavedPlaybackState") { getSavedPlaybackState() }
                 safeExecute("getSendBackToGoogle") { getSendBackToGoogle() }
                 safeExecute("getSaveRecentSongAndQueue") { getSaveRecentSongAndQueue() }
@@ -1200,6 +1203,22 @@ class SettingsViewModel(
         viewModelScope.launch {
             dataStoreManager.setSkipSilent(skip)
             getSkipSilent()
+        }
+    }
+
+    fun getBitPerfectPlayback() {
+        viewModelScope.launch {
+            dataStoreManager.bitPerfectPlayback.collect { bitPerfectPlayback ->
+                _bitPerfectPlayback.emit(if (bitPerfectPlayback) DataStoreManager.TRUE else DataStoreManager.FALSE)
+            }
+        }
+    }
+
+    @UnstableApi
+    fun setBitPerfectPlayback(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.setBitPerfectPlayback(enabled)
+            getBitPerfectPlayback()
         }
     }
 

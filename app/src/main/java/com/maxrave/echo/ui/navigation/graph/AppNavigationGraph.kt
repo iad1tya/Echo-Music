@@ -1,7 +1,11 @@
 package iad1tya.echo.music.ui.navigation.graph
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,16 +40,28 @@ fun AppNavigationGraph(
         navController,
         startDestination = startDestination,
         enterTransition = {
-            fadeIn()
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(300, easing = FastOutSlowInEasing)
+            ) + fadeIn(animationSpec = tween(200))
         },
         exitTransition = {
-            fadeOut()
+            slideOutHorizontally(
+                targetOffsetX = { -it },
+                animationSpec = tween(300, easing = FastOutSlowInEasing)
+            ) + fadeOut(animationSpec = tween(200))
         },
         popEnterTransition = {
-            fadeIn()
+            slideInHorizontally(
+                initialOffsetX = { -it },
+                animationSpec = tween(300, easing = FastOutSlowInEasing)
+            ) + fadeIn(animationSpec = tween(200))
         },
         popExitTransition = {
-            fadeOut()
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(300, easing = FastOutSlowInEasing)
+            ) + fadeOut(animationSpec = tween(200))
         },
     ) {
         // Bottom bar destinations

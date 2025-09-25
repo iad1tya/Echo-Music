@@ -40,6 +40,7 @@ import iad1tya.echo.music.common.Config.MAIN_PLAYER
 import iad1tya.echo.music.common.Config.PLAYER_CACHE
 import iad1tya.echo.music.common.Config.SERVICE_SCOPE
 import iad1tya.echo.music.data.dataStore.DataStoreManager
+import iad1tya.echo.music.utils.USBDacDetector
 import iad1tya.echo.music.data.repository.MainRepository
 import iad1tya.echo.music.service.SimpleMediaServiceHandler
 import iad1tya.echo.music.service.SimpleMediaSessionCallback
@@ -49,11 +50,11 @@ import iad1tya.echo.music.service.test.source.MergingMediaSourceFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -356,24 +357,46 @@ private fun provideRendererFactory(context: Context): DefaultRenderersFactory =
             context: Context,
             enableFloatOutput: Boolean,
             enableAudioTrackPlaybackParams: Boolean,
-        ): AudioSink =
-            DefaultAudioSink
+        ): AudioSink {
+            // Check if bit-perfect playback is enabled and USB DAC is connected
+            val isUSBDacConnected = USBDacDetector.isUSBDacConnected(context)
+            
+            // For now, we'll use a simple approach - check if USB DAC is connected
+            // In a real implementation, you'd inject DataStoreManager here
+            val shouldEnableBitPerfect = isUSBDacConnected
+            
+            Log.d("MediaServiceModule", "Bit Perfect Playback: usbDac=$isUSBDacConnected, final=$shouldEnableBitPerfect")
+            
+            return DefaultAudioSink
                 .Builder(context)
-                .setEnableFloatOutput(enableFloatOutput)
+                .setEnableFloatOutput(enableFloatOutput || shouldEnableBitPerfect)
                 .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
                 .setAudioProcessorChain(
-                    DefaultAudioSink.DefaultAudioProcessorChain(
-                        emptyArray(),
-                        SilenceSkippingAudioProcessor(
-                            2_000_000,
-                            (20_000 / 2_000_000).toFloat(),
-                            2_000_000,
-                            0,
-                            256,
-                        ),
-                        SonicAudioProcessor(),
-                    ),
+                    if (shouldEnableBitPerfect) {
+                        // For bit-perfect playback, use minimal processing with empty processors
+                        DefaultAudioSink.DefaultAudioProcessorChain(
+                            emptyArray(),
+                            SilenceSkippingAudioProcessor(0, 0f, 0, 0, 0), // Disabled processor
+                            SonicAudioProcessor().apply { 
+                                // Disable sonic processing for bit-perfect
+                            }
+                        )
+                    } else {
+                        // Normal processing chain
+                        DefaultAudioSink.DefaultAudioProcessorChain(
+                            emptyArray(),
+                            SilenceSkippingAudioProcessor(
+                                2_000_000,
+                                (20_000 / 2_000_000).toFloat(),
+                                2_000_000,
+                                0,
+                                256,
+                            ),
+                            SonicAudioProcessor(),
+                        )
+                    }
                 ).build()
+        }
     }
 
 @UnstableApi

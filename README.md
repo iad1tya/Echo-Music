@@ -6,7 +6,8 @@
 <div align="center">
   <h1>Echo Music</h1>
   <h3>A modern, feature-rich music streaming app for Android</h3>
-  <p>Stream music from YouTube Music and Spotify with advanced features like AI song suggestions, synced lyrics, and offline playback.</p>
+  <p>Stream music from YouTube Music and Spotify with advanced features like AI song suggestions, synced lyrics, bit-perfect USB DAC support, and offline playback.</p>
+  <p><strong>Current Version: v1.5</strong></p>
 </div>
 
 <div align="center">
@@ -69,6 +70,7 @@
 - **Spotify Integration**: Access Spotify's vast music library with Canvas support
 - **Background Playback**: Continue listening while using other apps
 - **High-Quality Audio**: Support for various audio formats and quality settings
+- **Bit Perfect Playback**: USB DAC support for audiophile-grade audio output
 - **Offline Playback**: Download music for offline listening
 
 ### 🎨 User Experience
@@ -95,6 +97,13 @@
 - **Widget Support**: Home screen widget for quick access
 - **Artist Notifications**: Get notifications from followed artists
 
+### 🎧 Audiophile Features
+- **Bit Perfect Playback**: USB DAC support for uncompressed audio output
+- **USB DAC Detection**: Automatic detection of connected USB audio devices
+- **Device Compatibility**: Smart detection of DAC-compatible devices
+- **Audio Processing Control**: Disable audio processing for pure bit-perfect output
+- **High-Resolution Audio**: Support for high-quality audio formats
+
 ### 🔧 Technical Features
 - **SponsorBlock Integration**: Skip sponsored content automatically
 - **1080p Video Support**: High-quality video playback with subtitles
@@ -102,6 +111,9 @@
 - **FFmpeg Integration**: Advanced audio/video processing capabilities
 - **Caching System**: Intelligent caching for faster loading and offline support
 - **Privacy Controls**: User-controlled analytics and crash reporting
+- **Performance Optimizations**: Smooth animations and jitter-free scrolling
+- **Firebase Analytics**: Comprehensive usage analytics and crash reporting
+- **USB DAC Detection**: Automatic detection and configuration for USB audio devices
 
 ## 🚀 Quick Start
 

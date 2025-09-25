@@ -198,6 +198,9 @@
     <string name="save_shuffle_and_repeat_mode">Save shuffle and repeat mode</string>
     <string name="skip_silent">Skip Silent</string>
     <string name="skip_no_music_part">Skip no music part</string>
+    <string name="bit_perfect_playback">Bit Perfect Playback</string>
+    <string name="bit_perfect_playback_description">Enable bit-perfect audio output for USB DACs</string>
+    <string name="device_not_support_dac">Device doesn\'t support USB DAC</string>
     <string name="time_out_check_internet_connection_or_change_piped_instance_in_settings">Time out, check internet connection (%1$s)</string>
     <string name="save_last_played">Save Last Played</string>
     <string name="save_last_played_track_and_queue">Save last played track and queue</string>

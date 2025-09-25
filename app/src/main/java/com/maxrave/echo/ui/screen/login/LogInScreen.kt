@@ -139,13 +139,6 @@ fun LoginScreen(
                                                     ).show()
                                                 // Automatically close the WebView and navigate back
                                                 navController.navigateUp()
-                                            } else {
-                                                Toast
-                                                    .makeText(
-                                                        context,
-                                                        R.string.login_failed,
-                                                        Toast.LENGTH_SHORT,
-                                                    ).show()
                                             }
                                         }
                                     }
@@ -238,13 +231,6 @@ fun LoginScreen(
                                 Toast.LENGTH_SHORT,
                             ).show()
                         navController.navigateUp()
-                    } else {
-                        Toast
-                            .makeText(
-                                context,
-                                R.string.login_failed,
-                                Toast.LENGTH_SHORT,
-                            ).show()
                     }
                 }
             },

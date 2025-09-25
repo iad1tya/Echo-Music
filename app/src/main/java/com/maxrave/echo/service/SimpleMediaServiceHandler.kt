@@ -237,6 +237,12 @@ class SimpleMediaServiceHandler(
             toggleRadio = ::toggleRadio
         }
         mayBeRestoreQueue()
+        
+        // Ensure initial state is properly set if player is already ready
+        // This helps fix the mini player loading issue on app restart
+        if (player.playbackState == Player.STATE_READY && player.currentMediaItem != null) {
+            _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
+        }
         coroutineScope.launch {
             val skipSegmentsJob =
                 launch {
@@ -1400,6 +1406,22 @@ class SimpleMediaServiceHandler(
                     addMediaItem(currentPlayingTrack.toMediaItem(), playWhenReady = false)
                     seekTo(dataStoreManager.recentPosition.first())
                     loadPlaylistOrAlbum(index = index)
+                    
+                    // Ensure the player state is properly updated after restoration
+                    // This fixes the issue where mini player shows loading after app restart
+                    delay(100) // Small delay to ensure player state is updated
+                    if (player.playbackState == Player.STATE_READY) {
+                        _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
+                    } else {
+                        // If player is not ready yet, wait a bit more and check again
+                        delay(200)
+                        if (player.playbackState == Player.STATE_READY) {
+                            _simpleMediaState.value = SimpleMediaState.Ready(player.duration)
+                        } else {
+                            // Even if not ready, emit progress to stop loading state
+                            _simpleMediaState.value = SimpleMediaState.Progress(player.currentPosition)
+                        }
+                    }
                 }
             }
         }

@@ -142,7 +142,10 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val scrollState = rememberLazyListState()
+    val scrollState = rememberLazyListState(
+        initialFirstVisibleItemIndex = 0,
+        initialFirstVisibleItemScrollOffset = 0
+    )
     val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
     val homeData by viewModel.homeItemList.collectAsStateWithLifecycle()
     val newRelease by viewModel.newRelease.collectAsStateWithLifecycle()
@@ -345,6 +348,10 @@ fun HomeScreen(
                         modifier = Modifier.padding(horizontal = 15.dp),
                         state = scrollState,
                         contentPadding = PaddingValues(bottom = bottomPadding),
+                        // Performance optimizations
+                        userScrollEnabled = true,
+                        reverseLayout = false,
+                        verticalArrangement = Arrangement.spacedBy(0.dp),
                     ) {
                         item {
                             Spacer(
@@ -659,6 +666,12 @@ fun QuickPicks(
             modifier = Modifier.height(280.dp),
             state = lazyListState,
             flingBehavior = snapperFlingBehavior,
+            // Performance optimizations
+            userScrollEnabled = true,
+            reverseLayout = false,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp),
         ) {
             items(homeItem.contents, key = { it.hashCode() }) {
                 if (it != null) {
@@ -815,7 +828,14 @@ fun ChartData(
             )
             val lazyListState = rememberLazyListState()
             val snapperFlingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyListState = lazyListState))
-            LazyRow(flingBehavior = snapperFlingBehavior) {
+            LazyRow(
+                flingBehavior = snapperFlingBehavior,
+                // Performance optimizations
+                userScrollEnabled = true,
+                reverseLayout = false,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp),
+            ) {
                 items(item.playlists.size, key = { index ->
                     val data = item.playlists[index]
                     data.id + data.title + index

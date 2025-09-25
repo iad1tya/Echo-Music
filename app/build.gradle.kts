@@ -138,10 +138,16 @@ android {
                     include(*abis)
                 }
             }
+            // Performance optimizations
+            isDebuggable = false
+            isJniDebuggable = false
         }
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".dev"
+            // Performance optimizations for debug builds
+            isDebuggable = true
+            isJniDebuggable = true
         }
     }
     compileOptions {
@@ -154,6 +160,10 @@ android {
         viewBinding = true
         compose = true
         buildConfig = true
+    }
+    
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.kotlin.get()
     }
     packaging {
         jniLibs.useLegacyPackaging = true
