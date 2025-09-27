@@ -16,8 +16,10 @@ import iad1tya.echo.music.data.db.entities.PlaylistEntity
 import iad1tya.echo.music.data.db.entities.SongEntity
 import iad1tya.echo.music.data.model.searchResult.playlists.PlaylistsResult
 import iad1tya.echo.music.data.type.PlaylistType
+import iad1tya.echo.music.service.test.download.DownloadUtils
 import iad1tya.echo.music.utils.LocalResource
 import iad1tya.echo.music.viewModel.base.BaseViewModel
+import org.koin.core.component.inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +35,8 @@ import java.time.LocalDateTime
 class LibraryViewModel(
     private val application: Application,
 ) : BaseViewModel(application) {
+    
+    private val downloadUtils: DownloadUtils by inject()
 
     private val _yourLocalPlaylist: MutableStateFlow<LocalResource<List<LocalPlaylistEntity>>> =
         MutableStateFlow(LocalResource.Loading())
@@ -254,8 +258,22 @@ class LibraryViewModel(
 
     fun deleteSong(videoId: String) {
         viewModelScope.launch {
+            // Check if the song is downloaded
+            val song = mainRepository.getSongById(videoId).first()
+            if (song?.downloadState == DownloadState.STATE_DOWNLOADED) {
+                // Remove the downloaded files
+                downloadUtils.removeDownload(videoId)
+                // Update download state
+                mainRepository.updateDownloadState(videoId, DownloadState.STATE_NOT_DOWNLOADED)
+                makeToast(getString(R.string.removed_download))
+            }
+            
+            // Remove from library and reset play time
             mainRepository.setInLibrary(videoId, Config.REMOVED_SONG_DATE_TIME)
             mainRepository.resetTotalPlayTime(videoId)
+            
+            // Refresh downloaded songs list
+            getDownloadedSongs()
         }
     }
 }

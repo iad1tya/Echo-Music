@@ -109,11 +109,26 @@ class SearchViewModel(
             val results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             if (!results.isNullOrEmpty()) {
                 val spokenText = results[0]
-                // Trigger search with the spoken text
+                // Update search text state and trigger search with the spoken text
+                updateSearchText(spokenText)
                 searchAll(spokenText)
                 insertSearchHistory(spokenText)
             }
         }
+    }
+    
+    // Add a method to update search text from ViewModel
+    private val _searchText = MutableStateFlow("")
+    val searchText: StateFlow<String> get() = _searchText.asStateFlow()
+    
+    fun updateSearchText(text: String) {
+        _searchText.value = text
+    }
+    
+    fun clearSearchState() {
+        _searchText.value = ""
+        _searchScreenState.value = SearchScreenState()
+        _searchScreenUIState.value = SearchScreenUIState.Empty
     }
     private val _searchScreenUIState = MutableStateFlow<SearchScreenUIState>(SearchScreenUIState.Empty)
     val searchScreenUIState: StateFlow<SearchScreenUIState> get() = _searchScreenUIState.asStateFlow()

@@ -8,6 +8,7 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import cat.ereza.customactivityoncrash.config.CaocConfig
 import coil3.ImageLoader
@@ -146,6 +147,16 @@ class EchoApplication :
         } catch (e: Exception) {
             Log.e("EchoApp", "Failed to initialize Firebase Analytics: ${e.message}")
             // Continue without Firebase Analytics
+        }
+        
+        // initialize Firebase Crashlytics with error handling
+        try {
+            val crashlytics = FirebaseCrashlytics.getInstance()
+            crashlytics.setCrashlyticsCollectionEnabled(true)
+            Log.d("EchoApp", "Firebase Crashlytics initialized")
+        } catch (e: Exception) {
+            Log.e("EchoApp", "Failed to initialize Firebase Crashlytics: ${e.message}")
+            // Continue without Firebase Crashlytics
         }
         
         // Initialize performance monitoring

@@ -56,8 +56,12 @@ object ErrorHandler {
                 }
             }
             
-            // You can add crash reporting here (Firebase Crashlytics, etc.)
-            // FirebaseCrashlytics.getInstance().recordException(throwable)
+            // Report to Firebase Crashlytics
+            try {
+                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(throwable)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to record exception in Crashlytics: ${e.message}")
+            }
             
         } catch (e: Exception) {
             Log.e(TAG, "Error in error handler: ${e.message}", e)

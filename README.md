@@ -7,7 +7,7 @@
   <h1>Echo Music</h1>
   <h3>A modern, feature-rich music streaming app for Android</h3>
   <p>Stream music from YouTube Music and Spotify with advanced features like AI song suggestions, synced lyrics, bit-perfect USB DAC support, and offline playback.</p>
-  <p><strong>Current Version: v1.6</strong></p>
+  <p><strong>Current Version: v1.6.1</strong></p>
 </div>
 
 <div align="center">
@@ -148,7 +148,14 @@
    sdk.dir=/path/to/your/android/sdk
    ```
 
-3. **Build the app**
+3. **Firebase Setup** (Required)
+   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   - Add Android app with package name: `iad1tya.echo.music`
+   - Download `google-services.json` and place it in `app/` directory
+   - For debug builds, also add `google-services.json` to `app/src/foss/debug/`
+   - Enable Analytics and Crashlytics in Firebase Console
+
+4. **Build the app**
    ```bash
    # Debug build
    ./gradlew assembleFossDebug

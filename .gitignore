@@ -74,7 +74,6 @@ app-signing.properties
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
-google-services.json.template
 GoogleService-Info.plist
 
 # Sentry
@@ -174,14 +173,11 @@ gradle-app.setting
 run_on_emulator.sh
 build_and_sign_apk.sh
 
-# Temporary development files
-*.tmp
-*.temp
-*.swp
-*.swo
-*.bak
-*.backup
-*.old
+# YouTube tokens and sensitive assets
+**/assets/po_token.html
+**/assets/*token*
+**/assets/*secret*
+**/assets/*key*
 
 # Additional sensitive files
 *.keystore
@@ -192,12 +188,6 @@ app-signing.properties
 secrets.properties
 api_keys.properties
 config.properties
-
-# YouTube tokens and sensitive assets
-**/assets/po_token.html
-**/assets/*token*
-**/assets/*secret*
-**/assets/*key*
 
 # Firebase and Google Services
 google-services.json

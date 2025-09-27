@@ -1,8 +1,8 @@
 {
   "project_info": {
     "project_number": "YOUR_PROJECT_NUMBER",
-    "project_id": "YOUR_PROJECT_ID",
-    "storage_bucket": "YOUR_PROJECT_ID.firebasestorage.app"
+    "project_id": "your-firebase-project-id",
+    "storage_bucket": "your-firebase-project-id.firebasestorage.app"
   },
   "client": [
     {
@@ -21,6 +21,15 @@
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": []
+        },
+        "analytics_service": {
+          "status": 1,
+          "analytics_property": {
+            "tracking_id": "G-XXXXXXXXXX"
+          }
+        },
+        "crashlytics_service": {
+          "status": 1
         }
       }
     }

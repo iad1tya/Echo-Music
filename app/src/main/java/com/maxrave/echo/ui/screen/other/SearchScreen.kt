@@ -42,6 +42,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -125,6 +126,7 @@ fun SearchScreen(
     val searchScreenState by searchViewModel.searchScreenState.collectAsStateWithLifecycle()
     val uiState by searchViewModel.searchScreenUIState.collectAsStateWithLifecycle()
     val searchHistory by searchViewModel.searchHistory.collectAsStateWithLifecycle()
+    val searchTextFromViewModel by searchViewModel.searchText.collectAsStateWithLifecycle()
 
     var searchUIType by rememberSaveable { mutableStateOf(SearchUIType.EMPTY) }
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -151,6 +153,22 @@ fun SearchScreen(
     // Set the launcher in the view model
     LaunchedEffect(Unit) {
         searchViewModel.setVoiceSearchLauncher(voiceSearchLauncher)
+    }
+    
+    // Sync search text from ViewModel (for voice search)
+    LaunchedEffect(searchTextFromViewModel) {
+        if (searchTextFromViewModel.isNotEmpty() && searchTextFromViewModel != searchText) {
+            searchText = searchTextFromViewModel
+            isSearchSubmitted = true
+            searchUIType = SearchUIType.SEARCH_RESULTS
+        }
+    }
+    
+    // Clear search state when leaving the screen
+    DisposableEffect(Unit) {
+        onDispose {
+            searchViewModel.clearSearchState()
+        }
     }
 
     val onMoreClick: (SongEntity) -> Unit = { song ->
