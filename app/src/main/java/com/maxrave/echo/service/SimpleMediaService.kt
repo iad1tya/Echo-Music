@@ -180,7 +180,8 @@ class SimpleMediaService :
                 service,
                 player,
                 callback,
-            ).setSessionActivity(
+            ).setId("EchoMusicSession_${System.currentTimeMillis()}")
+            .setSessionActivity(
                 PendingIntent.getActivity(
                     context,
                     0,

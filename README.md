@@ -7,7 +7,7 @@
   <h1>Echo Music</h1>
   <h3>A modern, feature-rich music streaming app for Android</h3>
   <p>Stream music from YouTube Music and Spotify with advanced features like AI song suggestions, synced lyrics, bit-perfect USB DAC support, and offline playback.</p>
-  <p><strong>Current Version: v1.6.1</strong></p>
+  <p><strong>Current Version: v1.6.2</strong></p>
 </div>
 
 <div align="center">
@@ -148,33 +148,46 @@
    sdk.dir=/path/to/your/android/sdk
    ```
 
-3. **Firebase Setup** (Required)
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-   - Add Android app with package name: `iad1tya.echo.music`
-   - Download `google-services.json` and place it in `app/` directory
-   - For debug builds, also add `google-services.json` to `app/src/foss/debug/`
-   - Enable Analytics and Crashlytics in Firebase Console
-
-4. **Build the app**
-   ```bash
-   # Debug build
-   ./gradlew assembleFossDebug
+3. **Configure Firebase (Required for Analytics & Crashlytics)**
    
-   # Release build
-   ./gradlew assembleFossRelease
+   **For Main App:**
+   ```bash
+   cp app/google-services.json.template app/google-services.json
+   ```
+   
+   **For Debug Build:**
+   ```bash
+   cp app/src/foss/debug/google-services.json.template app/src/foss/debug/google-services.json
+   ```
+   
+   **For Full Release Build:**
+   ```bash
+   cp app/src/full/release/google-services.json.template app/src/full/release/google-services.json
+   ```
+   
+   Replace placeholder values in these files with your Firebase project details:
+   - `YOUR_PROJECT_NUMBER`: Your Firebase project number
+   - `your-firebase-project-id`: Your Firebase project ID  
+   - `YOUR_MOBILE_SDK_APP_ID`: Your Firebase mobile SDK app ID
+   - `YOUR_API_KEY`: Your Firebase API key
+
+4. **Build the Project**
+   ```bash
+   ./gradlew assembleFossDebug
    ```
 
+5. **Run on Emulator**
+   ```bash
+   # Start emulator
+   emulator -avd YourAVDName
+   
+   # Install APK
+   adb install app/build/outputs/apk/foss/debug/app-foss-universal-debug.apk
+   ```
+
+> 📖 **Detailed Setup Guide**: See [SETUP_GUIDE.md](SETUP_GUIDE.md) for comprehensive setup instructions.
+
 ## ⚙️ Configuration
-
-### Firebase Setup (Optional)
-For analytics and crash reporting:
-1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Add Android app with package name: `iad1tya.echo.music`
-3. Download `google-services.json` from Firebase console
-4. Place the file in `app/google-services.json` (this file is gitignored for security)
-5. Enable Analytics and Crashlytics in Firebase console
-
-**Note**: The `google-services.json` file contains sensitive API keys and should never be committed to version control.
 
 ## 🏗️ Architecture
 
