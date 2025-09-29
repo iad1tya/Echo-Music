@@ -1,13 +1,23 @@
-## This file must *NOT* be checked into Version Control Systems,
-# as it contains information specific to your local configuration.
-#
-# Location of the SDK. This is only used by Gradle.
-# For customization when using a Version Control System, please read the
-# header note.
-sdk.dir=/path/to/your/android/sdk
+# Echo Music - Local Development Configuration Template
+# This file contains the template for local development configuration
+# IMPORTANT: Replace this template with your actual local configuration!
 
-# Optional: Firebase configuration (uncomment and fill if needed)
+# Android SDK Configuration
+sdk.dir=/path/to/your/Android/sdk
 
-# Optional: Additional configuration
-# API_KEY=your_api_key_here
-# DEBUG_MODE=true
+# Optional: Custom build configurations
+# org.gradle.jvmargs=-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+# org.gradle.parallel=true
+# org.gradle.daemon=true
+# org.gradle.configureondemand=true
+
+# Instructions:
+# 1. Copy this file to local.properties
+# 2. Update sdk.dir with your actual Android SDK path
+# 3. Add any additional local configuration as needed
+# 4. local.properties is automatically ignored by git
+
+# Security Note:
+# This file may contain local paths and configurations
+# Never commit the actual local.properties file to version control
+# This template is safe to commit as it contains no real paths

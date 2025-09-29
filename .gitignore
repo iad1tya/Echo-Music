@@ -193,6 +193,13 @@ secrets.properties
 api_keys.properties
 config.properties
 
+# Keystore directory
+keystore/
+
+# Keep template files for reference
+!keystore.properties.template
+!google-services.json.template
+
 # Firebase and Google Services
 google-services.json
 GoogleService-Info.plist

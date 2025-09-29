@@ -1725,7 +1725,7 @@ fun ActionButton(
     @StringRes text: Int?,
     textString: String? = null,
     textColor: Color? = null,
-    iconColor: Color = Color.White,
+    iconColor: Color = MaterialTheme.colorScheme.onSurface, // Use Material You onSurface color
     enable: Boolean = true,
     onClick: () -> Unit,
 ) {
@@ -1754,14 +1754,14 @@ fun ActionButton(
                     if (enable) {
                         ColorFilter.tint(iconColor)
                     } else {
-                        ColorFilter.tint(Color.Gray)
+                        ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
                     },
             )
 
             Text(
                 text = if (text != null) stringResource(text) else textString ?: "",
                 style = typo.labelSmall,
-                color = if (enable) textColor ?: Color.Unspecified else Color.Gray,
+                color = if (enable) textColor ?: MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier =
                     Modifier
                         .padding(start = 10.dp)

@@ -304,8 +304,8 @@ fun CreatePlaylistButton(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White, // White background
-            contentColor = Color.Black // Black text and icon
+            containerColor = Color.White,
+            contentColor = Color.Black
         ),
         shape = RoundedCornerShape(8.dp) // More boxy with less rounded corners
     ) {

@@ -20,7 +20,7 @@ kotlin {
     jvmToolchain(17) // or appropriate version
     compilerOptions {
         freeCompilerArgs.add("-Xwhen-guards")
-        freeCompilerArgs.add("-Xcontext-receivers")
+        freeCompilerArgs.add("-Xcontext-parameters")
         freeCompilerArgs.add("-Xmulti-dollar-interpolation")
     }
 }
@@ -30,6 +30,24 @@ android {
 
     namespace = "iad1tya.echo.music"
     compileSdk = 36
+
+    // Load keystore properties for release signing
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties()
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(keystorePropertiesFile.inputStream())
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = keystoreProperties["storeFile"]?.let { file(it) }
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
+        }
+    }
 
     room {
         schemaDirectory("$projectDir/schemas")
@@ -49,7 +67,6 @@ android {
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
 
-        @Suppress("UnstableApiUsage")
         androidResources {
             localeFilters +=
                 listOf(
@@ -127,6 +144,10 @@ android {
             // Performance optimizations
             isDebuggable = false
             isJniDebuggable = false
+            // Use release signing configuration if available
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isMinifyEnabled = false
@@ -323,6 +344,13 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
+
+    // Test dependencies
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
+
 
 
 //    debugImplementation(libs.leak.canary)

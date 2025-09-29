@@ -37,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -414,7 +415,7 @@ fun AlbumScreen(
                                                         imageVector = Icons.Filled.PlayCircle,
                                                         contentDescription = "Play",
                                                         modifier = Modifier.size(72.dp),
-                                                        tint = Color(0xFF81C784) // Light green color
+                                                        tint = MaterialTheme.colorScheme.primary // Use Material You primary color
                                                     )
                                                 }
                                             }

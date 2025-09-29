@@ -34,7 +34,7 @@ import kotlin.math.sin
 @Composable
 fun SonicBoomAnimation(
     modifier: Modifier = Modifier,
-    color: Color = Color.White,
+    color: Color = MaterialTheme.colorScheme.primary, // Use Material You primary color
     size: androidx.compose.ui.unit.Dp = 200.dp,
     isAnimating: Boolean = true
 ) {
@@ -175,7 +175,7 @@ fun SonicBoomEntranceAnimation(
         SonicBoomAnimation(
             modifier = modifier
                 .alpha(alpha.value),
-            color = Color.White
+            color = MaterialTheme.colorScheme.primary // Use Material You primary color
         )
     }
 }

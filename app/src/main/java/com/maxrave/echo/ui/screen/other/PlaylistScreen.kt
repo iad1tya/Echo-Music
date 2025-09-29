@@ -48,6 +48,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -588,7 +589,7 @@ fun PlaylistScreen(
                                                         },
                                                         contentDescription = if (isCurrentlyPlaying) "Pause" else "Play",
                                                         modifier = Modifier.size(72.dp),
-                                                        tint = Color(0xFF81C784) // Light green color
+                                                        tint = MaterialTheme.colorScheme.primary // Use Material You primary color
                                                     )
                                                 }
                                             }
@@ -983,14 +984,14 @@ fun PlaylistSortBottomSheet(
                     Text(
                         text = getSortOrderText(sortOrder),
                         style = typo.bodyMedium,
-                        color = if (sortOrder == selectedSortOrder) Color(0xFF81C784) else Color.White,
+                        color = if (sortOrder == selectedSortOrder) MaterialTheme.colorScheme.primary else Color.White, // Use Material You primary color
                         modifier = Modifier.weight(1f)
                     )
                     if (sortOrder == selectedSortOrder) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Selected",
-                            tint = Color(0xFF81C784),
+                            tint = MaterialTheme.colorScheme.primary, // Use Material You primary color
                             modifier = Modifier.size(20.dp)
                         )
                     }

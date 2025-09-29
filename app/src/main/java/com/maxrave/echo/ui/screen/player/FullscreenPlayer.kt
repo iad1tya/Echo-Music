@@ -50,6 +50,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -588,8 +589,8 @@ fun FullscreenPlayer(
                                                             ).clip(
                                                                 RoundedCornerShape(8.dp),
                                                             ),
-                                                    color = Color.Gray,
-                                                    trackColor = Color.DarkGray,
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), // Use Material You primary color
+                                                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), // Use Material You surface variant
                                                     strokeCap = StrokeCap.Round,
                                                 )
                                             }
@@ -606,8 +607,8 @@ fun FullscreenPlayer(
                                                             ).clip(
                                                                 RoundedCornerShape(8.dp),
                                                             ),
-                                                    color = Color.Gray,
-                                                    trackColor = Color.DarkGray,
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), // Use Material You primary color
+                                                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), // Use Material You surface variant
                                                     strokeCap = StrokeCap.Round,
                                                     drawStopIndicator = {},
                                                 )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,14 +22,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,12 +74,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.util.UnstableApi
-import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import coil3.request.crossfade
 import iad1tya.echo.kotlinytmusicscraper.models.AlbumItem
 import iad1tya.echo.kotlinytmusicscraper.models.ArtistItem
@@ -113,6 +127,19 @@ import iad1tya.echo.music.viewModel.SharedViewModel
 import iad1tya.echo.music.viewModel.toStringRes
 import org.koin.compose.koinInject
 
+data class AlbumData(
+    val title: String,
+    val artist: String,
+    val genre: String,
+    val imageUrl: String
+)
+
+data class GenreData(
+    val name: String,
+    val color: Color,
+    val imageUrl: String
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @UnstableApi
@@ -128,9 +155,13 @@ fun SearchScreen(
     val searchHistory by searchViewModel.searchHistory.collectAsStateWithLifecycle()
     val searchTextFromViewModel by searchViewModel.searchText.collectAsStateWithLifecycle()
 
-    var searchUIType by rememberSaveable { mutableStateOf(SearchUIType.EMPTY) }
-    var searchText by rememberSaveable { mutableStateOf("") }
-    var isSearchSubmitted by rememberSaveable { mutableStateOf(false) }
+    var searchUIType by rememberSaveable { 
+        mutableStateOf(
+            if (searchTextFromViewModel.isNotEmpty()) SearchUIType.SEARCH_RESULTS else SearchUIType.EMPTY
+        ) 
+    }
+    var searchText by rememberSaveable { mutableStateOf(searchTextFromViewModel) }
+    var isSearchSubmitted by rememberSaveable { mutableStateOf(searchTextFromViewModel.isNotEmpty()) }
     var isExpanded by rememberSaveable { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
@@ -142,6 +173,10 @@ fun SearchScreen(
     val currentVideoId by searchViewModel.nowPlayingVideoId.collectAsStateWithLifecycle()
     val chipRowState = rememberScrollState()
     val pullToRefreshState = rememberPullToRefreshState()
+    
+    // Get mini-player state to calculate proper bottom padding
+    val nowPlayingData by sharedViewModel.nowPlayingState.collectAsStateWithLifecycle()
+    val isMiniPlayerActive = nowPlayingData?.mediaItem != null && nowPlayingData?.mediaItem != MediaItem.EMPTY
 
     // Voice search launcher
     val voiceSearchLauncher = rememberLauncherForActivityResult(
@@ -150,9 +185,16 @@ fun SearchScreen(
         searchViewModel.handleVoiceSearchResult(result.resultCode, result.data)
     }
 
-    // Set the launcher in the view model
+    // Set the launcher in the view model and restore search state
     LaunchedEffect(Unit) {
         searchViewModel.setVoiceSearchLauncher(voiceSearchLauncher)
+        
+        // Restore search state if we have a previous search
+        if (searchTextFromViewModel.isNotEmpty()) {
+            searchText = searchTextFromViewModel
+            isSearchSubmitted = true
+            searchUIType = SearchUIType.SEARCH_RESULTS
+        }
     }
     
     // Sync search text from ViewModel (for voice search)
@@ -164,12 +206,12 @@ fun SearchScreen(
         }
     }
     
-    // Clear search state when leaving the screen
-    DisposableEffect(Unit) {
-        onDispose {
-            searchViewModel.clearSearchState()
-        }
-    }
+    // Don't clear search state when leaving the screen to preserve search results when navigating back
+    // DisposableEffect(Unit) {
+    //     onDispose {
+    //         searchViewModel.clearSearchState()
+    //     }
+    // }
 
     val onMoreClick: (SongEntity) -> Unit = { song ->
         sheetSong = song
@@ -358,12 +400,18 @@ fun SearchScreen(
                                         is ArtistItem -> {
                                             navController.navigate(
                                                 ArtistDestination(ytItem.id),
+                                                navOptions = NavOptions.Builder()
+                                                    .setLaunchSingleTop(true)
+                                                    .build()
                                             )
                                         }
 
                                         is AlbumItem -> {
                                             navController.navigate(
                                                 AlbumDestination(ytItem.browseId),
+                                                navOptions = NavOptions.Builder()
+                                                    .setLaunchSingleTop(true)
+                                                    .build()
                                             )
                                         }
 
@@ -372,6 +420,9 @@ fun SearchScreen(
                                                 PlaylistDestination(
                                                     ytItem.id,
                                                 ),
+                                                navOptions = NavOptions.Builder()
+                                                    .setLaunchSingleTop(true)
+                                                    .build()
                                             )
                                         }
                                     }
@@ -526,30 +577,246 @@ fun SearchScreen(
                 }
 
                 SearchUIType.EMPTY -> {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
+                    // Modern music discovery interface without pull-to-refresh on empty state
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        state = rememberLazyListState(),
+                        modifier = Modifier.fillMaxSize(),
                     ) {
-                        // Default empty state
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
+                        
+                        // Add 0.5cm spacing between search bar and Featured section
+                        item {
+                            Spacer(modifier = Modifier.height(19.dp))
+                        }
+                        
+                        // Featured Section
+                        item {
                             Text(
-                                text = stringResource(id = R.string.everything_you_need),
-                                style = typo.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
+                                text = "Featured",
+                                style = typo.titleLarge,
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
-                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+                        
+                        item {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(listOf(
+                                    AlbumData("Trending 2025", "Latest Hits", "Global", "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5"),
+                                    AlbumData("Trending Bollywood", "Bollywood Hits", "Hindi", "https://i.scdn.co/image/ab67616d0000b27349d694203245f241a1bcaa72"),
+                                    AlbumData("Instagram Trending", "Viral Songs", "Social Media", "https://i.scdn.co/image/ab67616d0000b27370dbc63f8b5aa80c3c73b2c0")
+                                )) { album ->
+                                    Card(
+                                        modifier = Modifier
+                                            .width(200.dp)
+                                            .height(280.dp)
+                                            .clickable {
+                                                searchText = album.title
+                                                isSearchSubmitted = true
+                                                focusManager.clearFocus()
+                                                searchViewModel.insertSearchHistory(album.title)
+                                                searchViewModel.searchAll(album.title)
+                                            },
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = Color.Transparent
+                                        ),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize()
+                                        ) {
+                                            // Background gradient
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(
+                                                        when (album.title) {
+                                                            "Trending 2025" -> Color(0xFF2D1B69)
+                                                            "Trending Bollywood" -> Color(0xFFFF6B35)
+                                                            "Instagram Trending" -> Color(0xFF8B5CF6)
+                                                            "Trending 90s" -> Color(0xFF4A90E2)
+                                                            "Trending 00s" -> Color(0xFFE91E63)
+                                                            else -> Color(0xFF96CEB4)
+                                                        },
+                                                        RoundedCornerShape(12.dp)
+                                                    )
+                                            )
+                                            
+                                            // Album art image - use local drawable based on album title
+                                            val imageRes = when (album.title) {
+                                                "Trending 2025" -> R.drawable.trending
+                                                "Trending Bollywood" -> R.drawable.trending_bollywood
+                                                "Instagram Trending" -> R.drawable.trending_social_media
+                                                "Trending 90s" -> R.drawable.trending
+                                                "Trending 00s" -> R.drawable.trending
+                                                else -> R.drawable.echo_nobg
+                                            }
+                                            
+                                            // Large square tilted image positioned on the right side
+                                            AsyncImage(
+                                                model = ImageRequest.Builder(LocalContext.current)
+                                                    .data(imageRes)
+                                                    .diskCachePolicy(CachePolicy.ENABLED)
+                                                    .crossfade(true)
+                                                    .build(),
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                placeholder = painterResource(R.drawable.echo_nobg),
+                                                error = painterResource(R.drawable.echo_nobg),
+                                                modifier = Modifier
+                                                    .size(140.dp)
+                                                    .clip(RoundedCornerShape(16.dp))
+                                                    .align(Alignment.TopEnd)
+                                                    .offset(15.dp, -20.dp)
+                                                    .graphicsLayer {
+                                                        rotationZ = 15f
+                                                    }
+                                            )
+                                            
+                                            // Text properly aligned to bottom-left corner
+                                            Column(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomStart)
+                                                    .padding(16.dp, 0.dp, 0.dp, 16.dp)
+                                            ) {
+                                                Text(
+                                                    text = "#${album.genre}",
+                                                    style = typo.labelSmall,
+                                                    color = Color.White.copy(alpha = 0.8f),
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = album.title,
+                                                    style = typo.titleMedium,
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 2
+                                                )
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text(
+                                                    text = album.artist,
+                                                    style = typo.bodyMedium,
+                                                    color = Color.White.copy(alpha = 0.9f),
+                                                    fontWeight = FontWeight.Medium,
+                                                    maxLines = 1
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Mood & Genres Grid Section
+                        item {
+                            Spacer(modifier = Modifier.height(32.dp))
                             Text(
-                                text = stringResource(id = R.string.search_for_songs_artists_albums_playlists_and_more),
-                                style = typo.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
+                                text = "Mood & Genres",
+                                style = typo.titleLarge,
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
+                        }
+                        
+                        item {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.height(520.dp)
+                            ) {
+                                items(listOf(
+                                    GenreData("Hip Hop", Color(0xFF74B9FF), "https://i.scdn.co/image/ab67616d0000b273c8a11e48c91f982b9a4152e0"),
+                                    GenreData("LoFi", Color(0xFFA29BFE), "https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a"),
+                                    GenreData("Pop", Color(0xFF00B894), "https://i.scdn.co/image/ab67616d0000b273b0ca6153f052f56275a10f26"),
+                                    GenreData("Party", Color(0xFFE84393), "https://i.scdn.co/image/ab67616d0000b2736e7f8a9b0c1d2e3f4a5b6c7d"),
+                                    GenreData("Blues", Color(0xFF6C5CE7), "https://i.scdn.co/image/ab67616d0000b2737f8a9b0c1d2e3f4a5b6c7d8e"),
+                                    GenreData("Techno", Color(0xFF74B9FF), "https://i.scdn.co/image/ab67616d0000b2738a9b0c1d2e3f4a5b6c7d8e9f"),
+                                    GenreData("Gym", Color(0xFFFF6B6B), "https://i.scdn.co/image/ab67616d0000b2739b0c1d2e3f4a5b6c7d8e9f0a"),
+                                    GenreData("Romance", Color(0xFFFF69B4), "https://i.scdn.co/image/ab67616d0000b2730c1d2e3f4a5b6c7d8e9f0a1b")
+                                )) { genre ->
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(140.dp)
+                                            .clickable {
+                                                searchText = genre.name
+                                                isSearchSubmitted = true
+                                                focusManager.clearFocus()
+                                                searchViewModel.insertSearchHistory(genre.name)
+                                                searchViewModel.searchAll(genre.name)
+                                            }
+                                    ) {
+                                        // Main card with rounded corners
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(120.dp)
+                                                .align(Alignment.CenterStart),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = genre.color
+                                            ),
+                                            shape = RoundedCornerShape(20.dp),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize()
+                                            ) {
+                                                // Genre text on the left
+                                                Text(
+                                                    text = genre.name,
+                                                    style = typo.headlineSmall,
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier
+                                                        .align(Alignment.CenterStart)
+                                                        .padding(start = 24.dp)
+                                                )
+                                            }
+                                        }
+                                        
+                                        // Angled overlapping album art on the right
+                                        val imageRes = when (genre.name) {
+                                            "Hip Hop" -> R.drawable.hiphop
+                                            "LoFi" -> R.drawable.lofi
+                                            "Pop" -> R.drawable.pop
+                                            "Party" -> R.drawable.party
+                                            "Blues" -> R.drawable.blues
+                                            "Techno" -> R.drawable.techno
+                                            "Gym" -> R.drawable.gym
+                                            "Romance" -> R.drawable.romance
+                                            else -> R.drawable.echo_nobg
+                                        }
+                                        
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(LocalContext.current)
+                                                .data(imageRes)
+                                                .diskCachePolicy(CachePolicy.ENABLED)
+                                                .crossfade(true)
+                                                .build(),
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            placeholder = painterResource(R.drawable.echo_nobg),
+                                            error = painterResource(R.drawable.echo_nobg),
+                                            modifier = Modifier
+                                                .size(80.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .align(Alignment.CenterEnd)
+                                                .offset(20.dp, 0.dp)
+                                                .graphicsLayer {
+                                                    rotationZ = 15f
+                                                }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        
+                        item {
+                            // Dynamic bottom padding based on mini player state
+                            val bottomPadding = if (isMiniPlayerActive) 200.dp else 140.dp
+                            Spacer(modifier = Modifier.height(bottomPadding))
                         }
                     }
                 }
@@ -786,6 +1053,9 @@ fun SearchScreen(
                                                                                 AlbumDestination(
                                                                                     result.browseId,
                                                                                 ),
+                                                                                navOptions = NavOptions.Builder()
+                                                                                    .setLaunchSingleTop(true)
+                                                                                    .build()
                                                                             )
                                                                         },
                                                                     )
@@ -800,6 +1070,9 @@ fun SearchScreen(
                                                                                 ArtistDestination(
                                                                                     result.browseId,
                                                                                 ),
+                                                                                navOptions = NavOptions.Builder()
+                                                                                    .setLaunchSingleTop(true)
+                                                                                    .build()
                                                                             )
                                                                         },
                                                                     )
@@ -815,12 +1088,18 @@ fun SearchScreen(
                                                                                     PodcastDestination(
                                                                                         result.browseId,
                                                                                     ),
+                                                                                    navOptions = NavOptions.Builder()
+                                                                                        .setLaunchSingleTop(true)
+                                                                                        .build()
                                                                                 )
                                                                             } else {
                                                                                 navController.navigate(
                                                                                     PlaylistDestination(
                                                                                         result.browseId,
                                                                                     ),
+                                                                                    navOptions = NavOptions.Builder()
+                                                                                        .setLaunchSingleTop(true)
+                                                                                        .build()
                                                                                 )
                                                                             }
                                                                         },
@@ -836,6 +1115,9 @@ fun SearchScreen(
                                                                                 AlbumDestination(
                                                                                     result.browseId,
                                                                                 ),
+                                                                                navOptions = NavOptions.Builder()
+                                                                                    .setLaunchSingleTop(true)
+                                                                                    .build()
                                                                             )
                                                                         },
                                                                     )
@@ -948,7 +1230,7 @@ fun SearchScreen(
                                     }
 
                                     SearchScreenUIState.Empty -> {
-                                        // Empty state
+                                        // Empty state - show simple message
                                         Box(
                                             modifier = Modifier.fillMaxSize(),
                                             contentAlignment = Alignment.Center,

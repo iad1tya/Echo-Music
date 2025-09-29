@@ -16,6 +16,7 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -59,6 +60,20 @@ fun AppBottomNavigationBar(
                 else -> BottomNavScreen.Home.ordinal // Default to Home if not recognized
             },
         )
+    }
+    
+    // Sync selectedIndex with current navigation destination
+    LaunchedEffect(currentBackStackEntry) {
+        val currentDestination = currentBackStackEntry?.destination
+        selectedIndex = when {
+            currentDestination?.route?.contains("home") == true || 
+            currentDestination?.hasRoute(BottomNavScreen.Home.destination::class) == true -> BottomNavScreen.Home.ordinal
+            currentDestination?.route?.contains("search") == true || 
+            currentDestination?.hasRoute(BottomNavScreen.Search.destination::class) == true -> BottomNavScreen.Search.ordinal
+            currentDestination?.route?.contains("library") == true || 
+            currentDestination?.hasRoute(BottomNavScreen.Library.destination::class) == true -> BottomNavScreen.Library.ordinal
+            else -> BottomNavScreen.Home.ordinal // Default to Home
+        }
     }
     Box(
         modifier =

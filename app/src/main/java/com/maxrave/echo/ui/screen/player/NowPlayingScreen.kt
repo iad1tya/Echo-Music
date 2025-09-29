@@ -96,6 +96,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -2087,8 +2088,8 @@ fun NowPlayingScreen(
                                             color = Color.Transparent,
                                             shape = RoundedCornerShape(4.dp),
                                         ),
-                                color = Color.White,
-                                trackColor = Color.Gray.copy(alpha = 0.4f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f), // Use Material You primary with transparency
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f), // Use Material You surface variant
                                 strokeCap = StrokeCap.Round,
                                 drawStopIndicator = {},
                             )

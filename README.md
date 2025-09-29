@@ -7,7 +7,7 @@
   <h1>Echo Music</h1>
   <h3>A modern, feature-rich music streaming app for Android</h3>
   <p>Stream music from YouTube Music and Spotify with advanced features like AI song suggestions, synced lyrics, bit-perfect USB DAC support, and offline playback.</p>
-  <p><strong>Current Version: v1.6.2</strong></p>
+  <p><strong>Current Version: v1.6.3</strong></p>
 </div>
 
 <div align="center">

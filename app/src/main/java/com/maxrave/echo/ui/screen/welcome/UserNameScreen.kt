@@ -210,8 +210,8 @@ fun UserNameScreen(
                             .fillMaxWidth()
                             .alpha(contentAlpha.value),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -270,7 +270,7 @@ fun UserNameScreen(
                     ) {
                         Text(
                             text = "Privacy Policy",
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = typo.bodySmall
                         )
                     }
@@ -282,7 +282,7 @@ fun UserNameScreen(
                     ) {
                         Text(
                             text = "Terms of Service",
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = typo.bodySmall
                         )
                     }

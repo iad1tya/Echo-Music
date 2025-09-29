@@ -58,7 +58,7 @@ object ErrorHandler {
             
             // Report to Firebase Crashlytics
             try {
-                com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(throwable)
+                CrashlyticsHelper.recordException(throwable)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to record exception in Crashlytics: ${e.message}")
             }

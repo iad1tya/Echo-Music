@@ -65,6 +65,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.activity.compose.BackHandler
 import iad1tya.echo.music.R
 import iad1tya.echo.music.common.FIRST_TIME_MIGRATION
 import iad1tya.echo.music.common.SELECTED_LANGUAGE
@@ -347,6 +348,14 @@ class MainActivity : AppCompatActivity() {
             // Track current navigation destination
             val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = currentNavBackStackEntry?.destination?.route
+            
+            // Handle back button behavior for search page
+            BackHandler( 
+                enabled = currentDestination?.contains("SearchDestination") == true
+            ) {
+                // Back button does nothing - stay on search page
+                // This handler only activates when on SearchDestination
+            }
             
             // Hide navbar on welcome screen and name input screen
             LaunchedEffect(currentDestination) {
@@ -826,6 +835,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getString(key: String): String? = viewModel.getString(key)
+
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)

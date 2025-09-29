@@ -26,6 +26,8 @@ import iad1tya.echo.music.utils.AnalyticsHelper
 import iad1tya.echo.music.utils.PerformanceMonitor
 import iad1tya.echo.music.utils.MemoryOptimizer
 import iad1tya.echo.music.utils.CrashLoggingHandler
+import iad1tya.echo.music.utils.CrashlyticsHelper
+import iad1tya.echo.music.utils.FirebaseConfig
 import iad1tya.echo.music.ui.MainActivity
 import iad1tya.echo.music.ui.theme.newDiskCache
 import okhttp3.OkHttpClient
@@ -139,24 +141,28 @@ class EchoApplication :
         // initialize WorkManager
         WorkManager.initialize(this, workConfig)
 
-        // initialize Firebase Analytics with error handling
+        // Initialize Firebase services
         try {
-            val firebaseAnalytics = Firebase.analytics
-            AnalyticsHelper.initialize(this)
-            Log.d("EchoApp", "Firebase Analytics initialized")
+            FirebaseConfig.initialize(this)
+            Log.d("EchoApp", "Firebase services initialized")
         } catch (e: Exception) {
-            Log.e("EchoApp", "Failed to initialize Firebase Analytics: ${e.message}")
-            // Continue without Firebase Analytics
+            Log.e("EchoApp", "Failed to initialize Firebase services: ${e.message}")
         }
         
-        // initialize Firebase Crashlytics with error handling
+        // Initialize Analytics Helper
         try {
-            val crashlytics = FirebaseCrashlytics.getInstance()
-            crashlytics.setCrashlyticsCollectionEnabled(true)
-            Log.d("EchoApp", "Firebase Crashlytics initialized")
+            AnalyticsHelper.initialize(this)
+            Log.d("EchoApp", "Analytics Helper initialized")
         } catch (e: Exception) {
-            Log.e("EchoApp", "Failed to initialize Firebase Crashlytics: ${e.message}")
-            // Continue without Firebase Crashlytics
+            Log.e("EchoApp", "Failed to initialize Analytics Helper: ${e.message}")
+        }
+        
+        // Initialize Crashlytics Helper
+        try {
+            CrashlyticsHelper.initialize(this)
+            Log.d("EchoApp", "Crashlytics Helper initialized")
+        } catch (e: Exception) {
+            Log.e("EchoApp", "Failed to initialize Crashlytics Helper: ${e.message}")
         }
         
         // Initialize performance monitoring

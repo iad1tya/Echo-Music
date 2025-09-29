@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -547,8 +548,8 @@ fun MiniPlayer(
                                 color = Color.Transparent,
                                 shape = RoundedCornerShape(4.dp),
                             ),
-                    color = Color.White,
-                    trackColor = Color.Transparent,
+                    color = MaterialTheme.colorScheme.primary, // Use Material You primary color
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), // Use Material You surface variant
                     strokeCap = StrokeCap.Round,
                     drawStopIndicator = {},
                 )

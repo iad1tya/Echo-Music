@@ -732,7 +732,7 @@ fun MoodMomentAndGenre(
         )
         LazyHorizontalGrid(
             rows = GridCells.Fixed(3),
-            modifier = Modifier.height(210.dp),
+            modifier = Modifier.height(300.dp),
             state = lazyListState1,
             flingBehavior = snapperFlingBehavior1,
         ) {
@@ -757,7 +757,7 @@ fun MoodMomentAndGenre(
         )
         LazyHorizontalGrid(
             rows = GridCells.Fixed(3),
-            modifier = Modifier.height(210.dp),
+            modifier = Modifier.height(300.dp),
             state = lazyListState2,
             flingBehavior = snapperFlingBehavior2,
         ) {

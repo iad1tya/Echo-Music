@@ -166,87 +166,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ModernAlertDialog(
-    title: String,
-    message: String? = null,
-    confirmText: String = "OK",
-    dismissText: String = "Cancel",
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-    showDismiss: Boolean = true,
-    confirmButtonColor: Color = Color(0xFF4CAF50) // Light green
-) {
-    BasicAlertDialog(
-        onDismissRequest = onDismiss,
-        modifier = Modifier.wrapContentSize(),
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
-            color = Color(0xFF242424),
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-            shadowElevation = 1.dp,
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp)
-            ) {
-                // Header with title
-                Text(
-                    text = title,
-                    style = typo.titleMedium,
-                    color = Color.White
-                )
-                
-                if (message != null) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = message,
-                        style = typo.bodyMedium,
-                        color = Color.White
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Action buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    if (showDismiss) {
-                        TextButton(
-                            onClick = onDismiss,
-                            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-                                contentColor = Color.Gray
-                            )
-                        ) {
-                            Text(
-                                text = dismissText,
-                                style = typo.labelMedium
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    androidx.compose.material3.Button(
-                        onClick = onConfirm,
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = confirmButtonColor,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = confirmText,
-                            style = typo.labelMedium
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class, ExperimentalHazeMaterialsApi::class)
 @UnstableApi
@@ -655,7 +574,7 @@ fun SettingScreen(
                             withLink(
                                 LinkAnnotation.Url(
                                     "https://sponsor.ajay.app/",
-                                    TextLinkStyles(style = SpanStyle(color = md_theme_dark_primary)),
+                                    TextLinkStyles(style = SpanStyle(color = MaterialTheme.colorScheme.primary)), // Use Material You primary color
                                 ),
                             ) {
                                 append("https://sponsor.ajay.app/")
@@ -1702,17 +1621,26 @@ fun SettingScreen(
     val basisAlertData by viewModel.basicAlertData.collectAsStateWithLifecycle()
     if (basisAlertData != null) {
         val alertBasicState = basisAlertData ?: return
-        ModernAlertDialog(
-            title = alertBasicState.title,
-            message = alertBasicState.message,
-            confirmText = alertBasicState.confirm.first,
-            dismissText = alertBasicState.dismiss,
-            onConfirm = {
-                alertBasicState.confirm.second.invoke()
-                viewModel.setBasicAlertData(null)
+        AlertDialog(
+            title = { Text(alertBasicState.title) },
+            text = { Text(alertBasicState.message ?: "") },
+            onDismissRequest = { viewModel.setBasicAlertData(null) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        alertBasicState.confirm.second.invoke()
+                        viewModel.setBasicAlertData(null)
+                    }
+                ) {
+                    Text(alertBasicState.confirm.first)
+                }
             },
-            onDismiss = {
-                viewModel.setBasicAlertData(null)
+            dismissButton = {
+                TextButton(
+                    onClick = { viewModel.setBasicAlertData(null) }
+                ) {
+                    Text(alertBasicState.dismiss)
+                }
             }
         )
     }
@@ -1905,19 +1833,28 @@ fun SettingScreen(
         }
     }
 
-    // Modern Spotify Logout Dialog
+    // Spotify Logout Dialog
     if (showSpotifyLogoutDialog) {
-        ModernAlertDialog(
-            title = "Spotify Logout",
-            message = "Are you sure you want to logout from Spotify? You'll lose access to Spotify lyrics and enhanced features.",
-            confirmText = "Logout",
-            dismissText = "Cancel",
-            onConfirm = {
-                viewModel.setSpotifyLogIn(false)
-                showSpotifyLogoutDialog = false
+        AlertDialog(
+            title = { Text("Spotify Logout") },
+            text = { Text("Are you sure you want to logout from Spotify? You'll lose access to Spotify lyrics and enhanced features.") },
+            onDismissRequest = { showSpotifyLogoutDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.setSpotifyLogIn(false)
+                        showSpotifyLogoutDialog = false
+                    }
+                ) {
+                    Text("Logout")
+                }
             },
-            onDismiss = {
-                showSpotifyLogoutDialog = false
+            dismissButton = {
+                TextButton(
+                    onClick = { showSpotifyLogoutDialog = false }
+                ) {
+                    Text("Cancel")
+                }
             }
         )
     }
