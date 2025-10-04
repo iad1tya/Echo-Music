@@ -129,7 +129,8 @@ Your privacy is important to us. Echo Music includes user-controlled privacy fea
 ## 🙏 Credits
 
 Echo Music is developed and maintained by [**iad1tya**](https://github.com/iad1tya).
-Thank you to all contributors who help make Echo Music better! See our [Contributors](https://github.com/iad1tya/Echo-Music/graphs/contributors) page.
+Thank you to all contributors who help make Echo Music better! 
+See our [Contributors](https://github.com/iad1tya/Echo-Music/graphs/contributors) page.
 
 ## ☕ Support the Project
 <div align="center">
@@ -144,6 +145,5 @@ Thank you to all contributors who help make Echo Music better! See our [Contribu
 ---
 
 <div align="center">
-  <p><strong>Made with ❤️ by <a href="https://github.com/iad1tya">iad1tya</a></strong></p>
   <p>📧 Contact: <a href="mailto:hello@echomusic.fun">hello@echomusic.fun</a></p>
 </div>
