@@ -54,7 +54,6 @@
 - **Synced Lyrics**: Real-time lyrics with translation support
 - **Playlist Management**: Create, edit, and sync custom playlists
 - **Sleep Timer**: Set automatic sleep timer for bedtime listening
-- **Android Auto Support**: Seamless integration with Android Auto
 - **Widget Support**: Home screen widget for quick access
 
 ## 🚀 Installation
