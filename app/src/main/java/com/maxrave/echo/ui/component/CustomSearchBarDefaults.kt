@@ -26,7 +26,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -47,7 +46,7 @@ object CustomSearchBarDefaults {
     fun InputField(
         query: TextFieldValue,
         onQueryChange: (TextFieldValue) -> Unit,
-        onSearch: (TextFieldValue) -> Unit,
+        onSearch: (String) -> Unit, // Changed to String to match KeyboardActions
         expanded: Boolean,
         onExpandedChange: (Boolean) -> Unit,
         modifier: Modifier = Modifier,
@@ -55,66 +54,58 @@ object CustomSearchBarDefaults {
         placeholder: @Composable (() -> Unit)? = null,
         leadingIcon: @Composable (() -> Unit)? = null,
         trailingIcon: @Composable (() -> Unit)? = null,
-        colors: TextFieldColors = inputFieldColors(),
+        colors: TextFieldColors = inputFieldColors(), // Use M3 default
         interactionSource: MutableInteractionSource? = null,
     ) {
-        @Suppress("NAME_SHADOWING")
         val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-
         val focused = interactionSource.collectIsFocusedAsState().value
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
 
-        val textColor =
-            LocalTextStyle.current.color.takeOrElse {
-                textColor(enabled, isError = false, focused = focused)
-            }
+        // Let TextFieldColors handle the color logic
+        val textStyle = LocalTextStyle.current.merge(
+            TextStyle(color = textColor(enabled))
+        )
+        val cursorBrush = SolidColor(cursorColor(false))
 
         BasicTextField(
             value = query,
             onValueChange = onQueryChange,
-            modifier =
-                modifier
-                    .sizeIn(
-                        minWidth = SearchBarMinWidth,
-                        maxWidth = SearchBarMaxWidth,
-                        minHeight = InputFieldHeight,
-                    )
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { if (it.isFocused) onExpandedChange(true) },
+            modifier = modifier
+                .sizeIn(
+                    minWidth = SearchBarMinWidth,
+                    maxWidth = SearchBarMaxWidth,
+                    minHeight = InputFieldHeight,
+                )
+                .focusRequester(focusRequester)
+                .onFocusChanged { if (it.isFocused) onExpandedChange(true) },
             enabled = enabled,
             singleLine = true,
-            textStyle = LocalTextStyle.current.merge(TextStyle(color = textColor)),
-            cursorBrush = SolidColor(cursorColor(isError = false)),
+            textStyle = textStyle, // Apply the style
+            cursorBrush = cursorBrush, // Apply the brush
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { onSearch(query) }),
+            keyboardActions = KeyboardActions(onSearch = { onSearch(query.text) }), // Pass query.text
             interactionSource = interactionSource,
-            decorationBox =
-                @Composable { innerTextField ->
-                    TextFieldDefaults.DecorationBox(
-                        value = query.text,
-                        innerTextField = innerTextField,
-                        enabled = enabled,
-                        singleLine = true,
-                        visualTransformation = VisualTransformation.None,
-                        interactionSource = interactionSource,
-                        placeholder = placeholder,
-                        leadingIcon =
-                            leadingIcon?.let { leading ->
-                                { Box(Modifier.offset(x = SearchBarIconOffsetX)) { leading() } }
-                            },
-                        trailingIcon =
-                            trailingIcon?.let { trailing ->
-                                { Box(Modifier.offset(x = -SearchBarIconOffsetX)) { trailing() } }
-                            },
-                        shape = SearchBarDefaults.inputFieldShape,
-                        colors = colors,
-                        contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(),
-                        container = {},
-                    )
-                }
+            decorationBox = @Composable { innerTextField ->
+                TextFieldDefaults.DecorationBox(
+                    value = query.text,
+                    innerTextField = innerTextField,
+                    enabled = enabled,
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource = interactionSource,
+                    placeholder = placeholder,
+                    leadingIcon = leadingIcon?.let { { Box(Modifier.offset(x = SearchBarIconOffsetX)) { it() } } },
+                    trailingIcon = trailingIcon?.let { { Box(Modifier.offset(x = -SearchBarIconOffsetX)) { it() } } },
+                    shape = SearchBarDefaults.inputFieldShape,
+                    colors = colors, // Pass colors to the decoration box
+                    contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(),
+                    container = {},
+                )
+            }
         )
 
+        // LaunchedEffect for focus management remains the same
         val shouldClearFocus = !expanded && focused
         LaunchedEffect(expanded) {
             if (shouldClearFocus) {
@@ -127,13 +118,10 @@ object CustomSearchBarDefaults {
     @Composable
     fun textColor(
         enabled: Boolean,
-        isError: Boolean,
-        focused: Boolean,
     ): Color =
         when {
             !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            isError -> MaterialTheme.colorScheme.onSurface
-            focused -> MaterialTheme.colorScheme.onSurface
+            // This can be simplified since the other conditions are the same
             else -> MaterialTheme.colorScheme.onSurface
         }
 

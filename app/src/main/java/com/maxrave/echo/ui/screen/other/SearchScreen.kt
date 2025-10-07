@@ -183,10 +183,7 @@ fun SearchScreen(
         
         // Restore search state if we have a previous search
         if (searchTextFromViewModel.isNotEmpty()) {
-            searchText = TextFieldValue(
-                searchTextFromViewModel,
-                selection = TextRange(searchTextFromViewModel.length)
-            )
+            searchText = searchTextFromViewModel.toTextFieldValue()
             isSearchSubmitted = true
             searchUIType = SearchUIType.SEARCH_RESULTS
         }
@@ -195,10 +192,7 @@ fun SearchScreen(
     // Sync search text from ViewModel (for voice search)
     LaunchedEffect(searchTextFromViewModel) {
         if (searchTextFromViewModel.isNotEmpty() && searchTextFromViewModel != searchText.text) {
-            searchText = TextFieldValue(
-                searchTextFromViewModel,
-                selection = TextRange(searchTextFromViewModel.length)
-            )
+            searchText = searchTextFromViewModel.toTextFieldValue()
             isSearchSubmitted = true
             searchUIType = SearchUIType.SEARCH_RESULTS
         }
@@ -281,19 +275,19 @@ fun SearchScreen(
                         searchText = newText
                     },
                     onSearch = { query ->
-                        if (query.text.isNotEmpty()) {
+                        if (query.isNotEmpty()) {
                             isSearchSubmitted = true
                             focusManager.clearFocus()
-                            searchViewModel.insertSearchHistory(query.text)
+                            searchViewModel.insertSearchHistory(query)
                             when (searchScreenState.searchType) {
-                                SearchType.ALL -> searchViewModel.searchAll(query.text)
-                                SearchType.SONGS -> searchViewModel.searchSongs(query.text)
-                                SearchType.VIDEOS -> searchViewModel.searchVideos(query.text)
-                                SearchType.ALBUMS -> searchViewModel.searchAlbums(query.text)
-                                SearchType.ARTISTS -> searchViewModel.searchArtists(query.text)
-                                SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(query.text)
-                                SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(query.text)
-                                SearchType.PODCASTS -> searchViewModel.searchPodcast(query.text)
+                                SearchType.ALL -> searchViewModel.searchAll(query)
+                                SearchType.SONGS -> searchViewModel.searchSongs(query)
+                                SearchType.VIDEOS -> searchViewModel.searchVideos(query)
+                                SearchType.ALBUMS -> searchViewModel.searchAlbums(query)
+                                SearchType.ARTISTS -> searchViewModel.searchArtists(query)
+                                SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(query)
+                                SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(query)
+                                SearchType.PODCASTS -> searchViewModel.searchPodcast(query)
                             }
                         }
                     },
@@ -335,7 +329,7 @@ fun SearchScreen(
                                     modifier = Modifier
                                         .clip(CircleShape),
                                     onClick = {
-                                        searchText = TextFieldValue("")
+                                        searchText = "".toTextFieldValue()
                                         isSearchSubmitted = false
                                     },
                                 ) {
@@ -436,10 +430,7 @@ fun SearchScreen(
                                             interactionSource = remember { MutableInteractionSource() },
                                             indication = ripple(),
                                             onClick = {
-                                                searchText = TextFieldValue(
-                                                    suggestion,
-                                                    selection = TextRange(suggestion.length)
-                                                )
+                                                searchText = suggestion.toTextFieldValue()
                                                 focusManager.clearFocus()
                                                 isSearchSubmitted = true
                                                 searchViewModel.insertSearchHistory(suggestion)
@@ -465,10 +456,7 @@ fun SearchScreen(
                                 Spacer(modifier = Modifier.weight(1f))
                                 IconButton(
                                     onClick = {
-                                        searchText = TextFieldValue(
-                                            suggestion,
-                                            selection = TextRange(suggestion.length)
-                                        )
+                                        searchText = suggestion.toTextFieldValue()
                                         focusRequester.requestFocus()
                                     },
                                 ) {
@@ -529,10 +517,7 @@ fun SearchScreen(
                                         Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                searchText = TextFieldValue(
-                                                    historyItem,
-                                                    selection = TextRange(historyItem.length)
-                                                )
+                                                searchText = historyItem.toTextFieldValue()
                                                 focusManager.clearFocus()
                                                 isSearchSubmitted = true
                                                 searchViewModel.insertSearchHistory(historyItem)
@@ -562,10 +547,7 @@ fun SearchScreen(
                                     Spacer(modifier = Modifier.weight(1f))
                                     IconButton(
                                         onClick = {
-                                            searchText = TextFieldValue(
-                                                historyItem,
-                                                selection = TextRange(historyItem.length)
-                                            )
+                                            searchText = historyItem.toTextFieldValue()
                                             focusRequester.requestFocus()
                                         },
                                     ) {
@@ -624,10 +606,7 @@ fun SearchScreen(
                                      "Relax", "Sleep", "Energize", "Sad", "Happy", "Workout"
                                  )) { mood ->
                                      MoodMomentAndGenreHomeItem(title = mood) {
-                                         searchText = TextFieldValue(
-                                             mood,
-                                             selection = TextRange(mood.length)
-                                         )
+                                         searchText = mood.toTextFieldValue()
                                          isSearchSubmitted = true
                                          focusManager.clearFocus()
                                          searchViewModel.insertSearchHistory(mood)
@@ -662,10 +641,7 @@ fun SearchScreen(
                                      "Hip Hop", "LoFi", "Pop", "Blues", "Techno", "Gym"
                                  )) { genre ->
                                      MoodMomentAndGenreHomeItem(title = genre) {
-                                         searchText = TextFieldValue(
-                                             genre,
-                                             selection = TextRange(genre.length)
-                                         )
+                                         searchText = genre.toTextFieldValue()
                                          isSearchSubmitted = true
                                          focusManager.clearFocus()
                                          searchViewModel.insertSearchHistory(genre)
@@ -1224,4 +1200,11 @@ enum class SearchUIType {
     SEARCH_HISTORY,
     SEARCH_SUGGESTIONS,
     SEARCH_RESULTS,
+}
+
+fun String.toTextFieldValue(): TextFieldValue {
+    return TextFieldValue(
+        text = this,
+        selection = TextRange(this.length)
+    )
 }
