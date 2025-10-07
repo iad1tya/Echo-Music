@@ -100,7 +100,6 @@ import iad1tya.echo.music.ui.theme.typo
 import iad1tya.echo.music.viewModel.NowPlayingScreenData
 import iad1tya.echo.music.viewModel.SharedViewModel
 import iad1tya.echo.music.viewModel.TimeLine
-import iad1tya.echo.music.viewModel.TranslationProgress
 import iad1tya.echo.music.viewModel.UIEvent
 import com.moriatsushi.insetsx.systemBars
 import dev.chrisbanes.haze.hazeEffect
@@ -117,7 +116,6 @@ fun LyricsView(
     lyricsData: NowPlayingScreenData.LyricsData,
     timeLine: StateFlow<TimeLine>,
     onLineClick: (Float) -> Unit,
-    translationProgress: TranslationProgress? = null,
 ) {
     @Suppress("ktlint:standard:property-naming")
     val TAG = "LyricsView"
@@ -188,26 +186,6 @@ fun LyricsView(
         }
     }
 
-    // Hàm tìm translated lyrics dựa vào thời gian gần nhất
-    fun findClosestTranslatedLine(originalTimeMs: String): String? {
-        val translatedLines = lyricsData.translatedLyrics?.lines ?: return null
-        if (translatedLines.isEmpty()) return null
-
-        val originalTime = originalTimeMs.toLongOrNull() ?: return null
-
-        // Tìm dòng translated có thời gian gần nhất với dòng original
-        return translatedLines
-            .minByOrNull {
-                abs((it.startTimeMs.toLongOrNull() ?: 0L) - originalTime)
-            }?.let {
-                val abs = abs((it.startTimeMs.toLongOrNull() ?: 0L) - originalTime)
-                if (abs < 1000L) {
-                    it
-                } else {
-                    null
-                }
-            }?.words
-    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -223,14 +201,10 @@ fun LyricsView(
         ) {
         items(lyricsData.lyrics.lines?.size ?: 0) { index ->
             val line = lyricsData.lyrics.lines?.getOrNull(index)
-            // Tìm translated lyrics phù hợp dựa vào thời gian
-            val translatedWords = line?.startTimeMs?.let { findClosestTranslatedLine(it) }
-            Log.d(TAG, "Line $index: ${line?.words}, Translated: $translatedWords")
 
             line?.words?.let {
                 LyricsLineItem(
                     originalWords = it,
-                    translatedWords = translatedWords,
                     isBold = index <= currentLineIndex,
                     modifier =
                         Modifier
@@ -256,7 +230,6 @@ fun LyricsView(
 @Composable
 fun LyricsLineItem(
     originalWords: String,
-    translatedWords: String?,
     isBold: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -267,9 +240,6 @@ fun LyricsLineItem(
             ) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = originalWords, style = typo.headlineMedium, color = Color.White)
-                if (translatedWords != null) {
-                    Text(text = translatedWords, style = typo.bodyMedium, color = Color.Yellow)
-                }
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
@@ -287,16 +257,6 @@ fun LyricsLineItem(
                         alpha = 0.8f,
                     ),
             )
-            if (translatedWords != null) {
-                Text(
-                    text = translatedWords,
-                    style = typo.bodyMedium,
-                    color =
-                        Color(0xFF97971A).copy(
-                            alpha = 0.8f,
-                        ),
-                )
-            }
             Spacer(modifier = Modifier.height(4.dp))
         }
     }
@@ -499,11 +459,9 @@ fun FullscreenLyricsSheet(
                     ) {
                         if (it) {
                             screenDataState.lyricsData?.let { lyrics ->
-                                val translationProgress by sharedViewModel.translationProgress.collectAsStateWithLifecycle()
                                 LyricsView(
                                     lyricsData = lyrics, 
                                     timeLine = sharedViewModel.timeline,
-                                    translationProgress = translationProgress,
                                     onLineClick = { f ->
                                         sharedViewModel.onUIEvent(UIEvent.UpdateProgress(f))
                                     }

@@ -110,10 +110,6 @@ class SettingsViewModel(
     private var _mainLyricsProvider: MutableStateFlow<String?> = MutableStateFlow(null)
     val mainLyricsProvider: StateFlow<String?> = _mainLyricsProvider
 
-    private var _translationLanguage: MutableStateFlow<String?> = MutableStateFlow(null)
-    val translationLanguage: StateFlow<String?> = _translationLanguage
-    private var _useTranslation: MutableStateFlow<String?> = MutableStateFlow(null)
-    val useTranslation: StateFlow<String?> = _useTranslation
     private var _playerCacheLimit: MutableStateFlow<Int?> = MutableStateFlow(null)
     val playerCacheLimit: StateFlow<Int?> = _playerCacheLimit
     private var _playVideoInsteadOfAudio: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -246,10 +242,8 @@ class SettingsViewModel(
                 safeExecute("getLastCheckForUpdate") { getLastCheckForUpdate() }
                 safeExecute("getSponsorBlockEnabled") { getSponsorBlockEnabled() }
                 safeExecute("getSponsorBlockCategories") { getSponsorBlockCategories() }
-                safeExecute("getTranslationLanguage") { getTranslationLanguage() }
                 safeExecute("getYoutubeSubtitleLanguage") { getYoutubeSubtitleLanguage() }
                 safeExecute("getLyricsProvider") { getLyricsProvider() }
-                safeExecute("getUseTranslation") { getUseTranslation() }
                 safeExecute("getHomeLimit") { getHomeLimit() }
                 safeExecute("getChartKey") { getChartKey() }
                 safeExecute("getPlayVideoInsteadOfAudio") { getPlayVideoInsteadOfAudio() }
@@ -659,35 +653,7 @@ class SettingsViewModel(
         }
     }
 
-    fun getTranslationLanguage() {
-        viewModelScope.launch {
-            dataStoreManager.translationLanguage.collect { translationLanguage ->
-                _translationLanguage.emit(translationLanguage)
-            }
-        }
-    }
 
-    fun setTranslationLanguage(language: String) {
-        viewModelScope.launch {
-            dataStoreManager.setTranslationLanguage(language)
-            getTranslationLanguage()
-        }
-    }
-
-    fun getUseTranslation() {
-        viewModelScope.launch {
-            dataStoreManager.enableTranslateLyric.collect { useTranslation ->
-                _useTranslation.emit(useTranslation)
-            }
-        }
-    }
-
-    fun setUseTranslation(useTranslation: Boolean) {
-        viewModelScope.launch {
-            dataStoreManager.setEnableTranslateLyric(useTranslation)
-            getUseTranslation()
-        }
-    }
 
     fun getLyricsProvider() {
         viewModelScope.launch {

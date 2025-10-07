@@ -29,6 +29,7 @@ import iad1tya.echo.music.utils.CrashlyticsHelper
 import iad1tya.echo.music.utils.FirebaseConfig
 import iad1tya.echo.music.utils.FirebaseManager
 import iad1tya.echo.music.utils.FirebaseTestUtils
+import iad1tya.echo.music.utils.FirebaseVerification
 import iad1tya.echo.music.ui.MainActivity
 import iad1tya.echo.music.ui.theme.newDiskCache
 import iad1tya.echo.music.BuildConfig
@@ -155,6 +156,10 @@ class EchoApplication :
                 FirebaseTestUtils.testFirebaseIntegration(this)
                 val report = FirebaseTestUtils.generateFirebaseTestReport(this)
                 Log.d("EchoApp", "Firebase test report:\n$report")
+                
+                // Run Firebase verification
+                val verificationResults = FirebaseVerification.runCompleteVerification(this)
+                Log.d("EchoApp", "Firebase verification results: $verificationResults")
             }
         } catch (e: Exception) {
             Log.e("EchoApp", "Failed to initialize Firebase services: ${e.message}")

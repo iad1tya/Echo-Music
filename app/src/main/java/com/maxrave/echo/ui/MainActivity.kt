@@ -464,12 +464,12 @@ class MainActivity : AppCompatActivity() {
                                             }
                                         },
                                         onDragEnd = { finalProgress ->
-                                            if (finalProgress >= 0.3f) {
-                                                // Complete the transition to full screen
+                                            if (finalProgress >= 0.2f) { // More sensitive threshold
+                                                // Complete the transition to full screen - instant
                                                 dragProgress = 1f
                                                 isShowNowPlaylistScreen = true
                                             } else {
-                                                // Return to mini player
+                                                // Return to mini player - instant
                                                 dragProgress = 0f
                                                 isShowNowPlaylistScreen = false
                                             }

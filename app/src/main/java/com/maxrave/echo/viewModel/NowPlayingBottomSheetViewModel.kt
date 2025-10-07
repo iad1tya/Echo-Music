@@ -381,12 +381,6 @@ class NowPlayingBottomSheetViewModel(
                             }
                         }
                 }
-                is NowPlayingBottomSheetUIEvent.TranslateLyrics -> {
-                    // Get SharedViewModel and trigger translation
-                    // We need to access SharedViewModel through Koin
-                    val sharedViewModel: SharedViewModel by inject()
-                    sharedViewModel.translateLyrics(ev.targetLanguage)
-                }
             }
         }
     }
@@ -452,7 +446,4 @@ sealed class NowPlayingBottomSheetUIEvent {
 
     data object Share : NowPlayingBottomSheetUIEvent()
 
-    data class TranslateLyrics(
-        val targetLanguage: String,
-    ) : NowPlayingBottomSheetUIEvent()
 }

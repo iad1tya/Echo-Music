@@ -225,9 +225,6 @@ fun NowPlayingScreen(
     val timelineState by sharedViewModel.timeline.collectAsStateWithLifecycle()
     val likeStatus by sharedViewModel.likeStatus.collectAsStateWithLifecycle()
     
-    // Translation states
-    val useTranslation by sharedViewModel.useTranslation.collectAsStateWithLifecycle(initialValue = FALSE)
-    val translationProgress by sharedViewModel.translationProgress.collectAsStateWithLifecycle()
 
     val shouldShowVideo by sharedViewModel.getVideo.collectAsStateWithLifecycle()
     // State
@@ -958,7 +955,6 @@ fun NowPlayingScreen(
                                                     shouldScaleDownSubtitle = true,
                                                     timelineState = timelineState,
                                                     lyricsData = screenDataState.lyricsData?.lyrics,
-                                                    translatedLyricsData = screenDataState.lyricsData?.translatedLyrics,
                                                 )
                                             }
                                             Box(
@@ -1785,53 +1781,7 @@ fun NowPlayingScreen(
                                                 color = Color.White,
                                             )
                                             
-                                            // Translation status beside lyrics title (only when translation is enabled)
-                                            if (useTranslation == TRUE) {
-                                                translationProgress?.let { progress ->
-                                                    if (progress.isTranslating) {
-                                                        Spacer(modifier = Modifier.width(8.dp))
-                                                        Row(
-                                                            verticalAlignment = Alignment.CenterVertically,
-                                                            modifier = Modifier.weight(1f)
-                                                        ) {
-                                                            CircularProgressIndicator(
-                                                                progress = { progress.percentage },
-                                                                modifier = Modifier.size(12.dp),
-                                                                strokeWidth = 1.5.dp,
-                                                                color = Color.White.copy(alpha = 0.8f),
-                                                                trackColor = Color.White.copy(alpha = 0.3f)
-                                                            )
-                                                            Spacer(modifier = Modifier.width(6.dp))
-                                                            Text(
-                                                                text = if (progress.detectedLanguageName != null) {
-                                                                    "Translating from ${progress.detectedLanguageName}..."
-                                                                } else {
-                                                                    "Translating..."
-                                                                },
-                                                                style = typo.bodySmall,
-                                                                color = Color.White.copy(alpha = 0.8f),
-                                                                maxLines = 1,
-                                                                overflow = TextOverflow.Ellipsis
-                                                            )
-                                                        }
-                                                    } else if (progress.confidence != null && progress.confidence > 0f) {
-                                                        // Show confidence after translation completes
-                                                        Spacer(modifier = Modifier.width(8.dp))
-                                                        Text(
-                                                            text = "Confidence: ${(progress.confidence * 100).toInt()}%",
-                                                            style = typo.bodySmall,
-                                                            color = Color.White.copy(alpha = 0.7f),
-                                                            modifier = Modifier.weight(1f)
-                                                        )
-                                                    } else {
-                                                        Spacer(modifier = Modifier.weight(1f))
-                                                    }
-                                                } ?: run {
-                                                    Spacer(modifier = Modifier.weight(1f))
-                                                }
-                                            } else {
-                                                Spacer(modifier = Modifier.weight(1f))
-                                            }
+                                            Spacer(modifier = Modifier.weight(1f))
                                             
                                             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
                                                 TextButton(
@@ -1857,11 +1807,9 @@ fun NowPlayingScreen(
                                                     .height(350.dp),
                                         ) {
                                             screenDataState.lyricsData?.let {
-                                                val translationProgress by sharedViewModel.translationProgress.collectAsStateWithLifecycle()
                                                 LyricsView(
                                                     lyricsData = it,
                                                     timeLine = sharedViewModel.timeline,
-                                                    translationProgress = translationProgress,
                                                     onLineClick = { f ->
                                                         sharedViewModel.onUIEvent(UIEvent.UpdateProgress(f))
                                                     },

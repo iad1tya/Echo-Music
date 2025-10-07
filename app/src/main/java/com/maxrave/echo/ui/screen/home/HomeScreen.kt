@@ -51,6 +51,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -93,7 +94,7 @@ import iad1tya.echo.music.extension.toMediaItem
 import iad1tya.echo.music.extension.toTrack
 import iad1tya.echo.music.service.PlaylistType
 import iad1tya.echo.music.service.QueueData
-import iad1tya.echo.music.ui.component.CenterLoadingBox
+import iad1tya.echo.music.ui.component.ChartSkeleton
 import iad1tya.echo.music.ui.component.Chip
 import iad1tya.echo.music.ui.component.DropdownButton
 import iad1tya.echo.music.ui.component.EndOfPage
@@ -149,6 +150,22 @@ fun HomeScreen(
         initialFirstVisibleItemIndex = 0,
         initialFirstVisibleItemScrollOffset = 0
     )
+    
+    // Reset scroll state when screen becomes visible to prevent stuck scrolling
+    DisposableEffect(Unit) {
+        onDispose {
+            // Reset scroll state when leaving the screen to prevent issues when returning
+            try {
+                if (scrollState.firstVisibleItemIndex > 0) {
+                    coroutineScope.launch {
+                        scrollState.scrollToItem(0)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("HomeScreen", "Error resetting scroll state on dispose: ${e.message}", e)
+            }
+        }
+    }
     val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
     val homeData by viewModel.homeItemList.collectAsStateWithLifecycle()
     val newRelease by viewModel.newRelease.collectAsStateWithLifecycle()
@@ -172,10 +189,10 @@ fun HomeScreen(
     val nowPlayingData by sharedViewModel.nowPlayingState.collectAsStateWithLifecycle()
     val isMiniPlayerActive = nowPlayingData?.mediaItem != null && nowPlayingData?.mediaItem != MediaItem.EMPTY
     
-    // Calculate dynamic bottom padding: 56dp for bottom nav + extra space for better scrolling
-    // Without mini player: 56dp (nav) + 52dp (1-2cm extra) = 108dp
-    // With mini player: 56dp (nav) + 80dp (mini player) + 72dp (2-3cm extra) = 208dp
-    val bottomPadding = if (isMiniPlayerActive) 208.dp else 108.dp
+    // Memoize expensive calculations
+    val memoizedBottomPadding = remember(isMiniPlayerActive) {
+        if (isMiniPlayerActive) 208.dp else 108.dp
+    }
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
     val chipRowState = rememberScrollState()
@@ -233,6 +250,12 @@ fun HomeScreen(
             }
         } catch (e: Exception) {
             Log.e("HomeScreen", "Error in reloadDestination LaunchedEffect: ${e.message}", e)
+            // Reset scroll state on error to prevent stuck scrolling
+            try {
+                scrollState.scrollToItem(0)
+            } catch (scrollError: Exception) {
+                Log.e("HomeScreen", "Error resetting scroll state: ${scrollError.message}", scrollError)
+            }
         }
     }
     LaunchedEffect(key1 = loading) {
@@ -248,41 +271,14 @@ fun HomeScreen(
             Log.e("HomeScreen", "Error in loading LaunchedEffect: ${e.message}", e)
         }
     }
-    // Initial data load when screen is first composed
+    // Optimized initial data load - single LaunchedEffect for better performance
     LaunchedEffect(Unit) {
         try {
-            // Load data with retry mechanism
+            // Load data efficiently
             viewModel.getHomeItemList()
             sharedViewModel.getRecentlyPlayed()
-            
-            // Add a small delay to ensure data is processed
-            kotlinx.coroutines.delay(100)
-            
-            // Retry if no data loaded after initial attempt
-            if (homeData.isEmpty()) {
-                kotlinx.coroutines.delay(500)
-                viewModel.getHomeItemList()
-            }
         } catch (e: Exception) {
             Log.e("HomeScreen", "Error in initial data load: ${e.message}", e)
-            // Retry on error
-            kotlinx.coroutines.delay(1000)
-            try {
-                viewModel.getHomeItemList()
-                sharedViewModel.getRecentlyPlayed()
-            } catch (retryException: Exception) {
-                Log.e("HomeScreen", "Error in retry data load: ${retryException.message}", retryException)
-            }
-        }
-    }
-    
-    // Force show content after timeout to prevent blank screen
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(3000) // 3 second timeout
-        if (homeData.isEmpty()) {
-            Log.w("HomeScreen", "Timeout reached - forcing content display")
-            // Force load data one more time
-            viewModel.getHomeItemList()
         }
     }
     
@@ -345,16 +341,17 @@ fun HomeScreen(
             },
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Crossfade(targetState = loading, label = "Home Shimmer") { loading ->
-                if (!loading || homeData.isNotEmpty()) {
+            Crossfade(targetState = loading, label = "Home Skeleton Loading") { isLoading ->
+                if (!isLoading && homeData.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier.padding(horizontal = 15.dp),
                         state = scrollState,
-                        contentPadding = PaddingValues(bottom = bottomPadding),
-                        // Performance optimizations
+                        contentPadding = PaddingValues(bottom = memoizedBottomPadding),
+                        // Performance optimizations for smooth scrolling
                         userScrollEnabled = true,
                         reverseLayout = false,
                         verticalArrangement = Arrangement.spacedBy(0.dp),
+                        // Performance optimizations for smooth scrolling
                     ) {
                         item {
                             Spacer(
@@ -460,12 +457,7 @@ fun HomeScreen(
                                             )
                                         }
                                     } else {
-                                        CenterLoadingBox(
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxWidth()
-                                                    .height(400.dp),
-                                        )
+                                        ChartSkeleton()
                                     }
                                 }
                             }

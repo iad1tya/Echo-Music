@@ -146,12 +146,11 @@ fun MiniPlayer(
             Animatable(Color.DarkGray)
         }
 
-    val offsetX = remember { Animatable(initialValue = 0f) }
     val offsetY = remember { Animatable(0f) }
     
-    // Visual feedback for swipe gestures
+    // Visual feedback for vertical swipe gestures only
     val swipeAlpha by animateFloatAsState(
-        targetValue = if (kotlin.math.abs(offsetX.value) > 10f) 0.3f else 0f,
+        targetValue = if (kotlin.math.abs(offsetY.value) > 10f) 0.3f else 0f,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
         label = "swipe_alpha",
     )
@@ -228,7 +227,7 @@ fun MiniPlayer(
         modifier =
             modifier
                 .clipToBounds()
-                .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
+                .offset { IntOffset(0, offsetY.value.roundToInt()) }
                 .clickable(
                     onClick = onClick,
                 )
@@ -244,7 +243,7 @@ fun MiniPlayer(
                             coroutineScope.launch {
                                 change.consume()
                                 val newOffsetY = offsetY.value + 2 * dragAmount
-                                offsetY.animateTo(newOffsetY)
+                                offsetY.snapTo(newOffsetY) // Use snapTo for instant response
                                 
                                 // Calculate drag progress for upward swipes (0f to 1f)
                                 val progress = if (newOffsetY < 0) {
@@ -261,7 +260,7 @@ fun MiniPlayer(
                         },
                         onDragCancel = {
                             coroutineScope.launch {
-                                offsetY.animateTo(0f)
+                                offsetY.snapTo(0f) // Instant reset
                                 onDragProgress(0f)
                             }
                         },
@@ -275,15 +274,15 @@ fun MiniPlayer(
                                 }
                                 
                                 when {
-                                    // Swipe up to open full screen (negative offset)
-                                    offsetY.value < -70 -> {
+                                    // Swipe up to open full screen (negative offset) - more sensitive
+                                    offsetY.value < -50 -> {
                                         Log.d("MiniPlayer", "Swipe up detected - progress: $finalProgress")
                                         try {
                                             view.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
                                         } catch (e: Exception) {
                                             Log.e("MiniPlayer", "Error triggering haptic feedback: ${e.message}")
                                         }
-                                        offsetY.animateTo(0f)
+                                        offsetY.snapTo(0f) // Instant reset
                                         onDragEnd(finalProgress)
                                     }
                                     // Swipe down to close (positive offset)
@@ -298,7 +297,7 @@ fun MiniPlayer(
                                     }
                                     // Return to original position if swipe wasn't far enough
                                     else -> {
-                                        offsetY.animateTo(0f)
+                                        offsetY.snapTo(0f) // Instant reset
                                         onDragEnd(finalProgress)
                                     }
                                 }
@@ -307,101 +306,72 @@ fun MiniPlayer(
                     )
                 }.pointerInput(Unit) {
                     // Horizontal drag for track navigation
+                    var totalDragAmount = 0f
+                    
                     detectHorizontalDragGestures(
                         onDragStart = {
+                            totalDragAmount = 0f
                             Log.d("MiniPlayer", "Horizontal drag started")
                         },
                         onHorizontalDrag = { change: PointerInputChange, dragAmount: Float ->
-                            coroutineScope.launch {
-                                change.consume()
-                                offsetX.animateTo(offsetX.value + dragAmount * 0.8f) // Increase sensitivity
-                                Log.d("MiniPlayer", "Horizontal drag: ${offsetX.value}")
-                            }
+                            change.consume()
+                            totalDragAmount += dragAmount
+                            // Don't move the mini player visually - just track the gesture
+                            // The song change will happen on drag end
+                            Log.d("MiniPlayer", "Horizontal drag detected: $dragAmount, total: $totalDragAmount")
                         },
                         onDragCancel = {
-                            coroutineScope.launch {
-                                offsetX.animateTo(0f)
-                            }
+                            // No visual reset needed since mini player doesn't move
+                            Log.d("MiniPlayer", "Horizontal drag cancelled")
                         },
                         onDragEnd = {
-                            Log.d("MiniPlayer", "Horizontal drag ended")
-                            coroutineScope.launch {
-                                val currentTime = System.currentTimeMillis()
-                                val threshold = 25f // More sensitive swipe distance
-                                
-                                // Check cooldown
-                                if (currentTime - lastSwipeTime < swipeCooldownMs) {
-                                    Log.d("MiniPlayer", "Swipe ignored due to cooldown")
-                                    offsetX.animateTo(0f)
-                                    return@launch
-                                }
-                                
-                                when {
-                                    offsetX.value > threshold -> {
-                                        // Swipe right - Previous track
-                                        Log.d("MiniPlayer", "Swipe right - Previous track")
-                                        lastSwipeTime = currentTime
-                                        
-                                        // Add haptic feedback
-                                        try {
-                                            (context as? android.app.Activity)?.window?.decorView?.performHapticFeedback(
-                                                HapticFeedbackConstants.VIRTUAL_KEY
-                                            )
-                                        } catch (e: Exception) {
-                                            Log.e("MiniPlayer", "Error providing haptic feedback: ${e.message}")
-                                        }
-                                        sharedViewModel.onUIEvent(UIEvent.Previous)
+                            Log.d("MiniPlayer", "Horizontal drag ended with total amount: $totalDragAmount")
+                            val currentTime = System.currentTimeMillis()
+                            val threshold = 50f // Swipe distance threshold
+                            
+                            // Check cooldown
+                            if (currentTime - lastSwipeTime < swipeCooldownMs) {
+                                Log.d("MiniPlayer", "Swipe ignored due to cooldown")
+                                return@detectHorizontalDragGestures
+                            }
+                            
+                            when {
+                                totalDragAmount > threshold -> {
+                                    // Swipe right - Previous track
+                                    Log.d("MiniPlayer", "Swipe right - Previous track")
+                                    lastSwipeTime = currentTime
+                                    
+                                    // Add haptic feedback
+                                    try {
+                                        (context as? android.app.Activity)?.window?.decorView?.performHapticFeedback(
+                                            HapticFeedbackConstants.VIRTUAL_KEY
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.e("MiniPlayer", "Error providing haptic feedback: ${e.message}")
                                     }
-                                    offsetX.value < -threshold -> {
-                                        // Swipe left - Next track
-                                        Log.d("MiniPlayer", "Swipe left - Next track")
-                                        lastSwipeTime = currentTime
-                                        
-                                        // Add haptic feedback
-                                        try {
-                                            (context as? android.app.Activity)?.window?.decorView?.performHapticFeedback(
-                                                HapticFeedbackConstants.VIRTUAL_KEY
-                                            )
-                                        } catch (e: Exception) {
-                                            Log.e("MiniPlayer", "Error providing haptic feedback: ${e.message}")
-                                        }
-                                        sharedViewModel.onUIEvent(UIEvent.Next)
-                                    }
+                                    sharedViewModel.onUIEvent(UIEvent.Previous)
                                 }
-                                offsetX.animateTo(0f)
+                                totalDragAmount < -threshold -> {
+                                    // Swipe left - Next track
+                                    Log.d("MiniPlayer", "Swipe left - Next track")
+                                    lastSwipeTime = currentTime
+                                    
+                                    // Add haptic feedback
+                                    try {
+                                        (context as? android.app.Activity)?.window?.decorView?.performHapticFeedback(
+                                            HapticFeedbackConstants.VIRTUAL_KEY
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.e("MiniPlayer", "Error providing haptic feedback: ${e.message}")
+                                    }
+                                    sharedViewModel.onUIEvent(UIEvent.Next)
+                                }
                             }
                         },
                     )
                 },
     ) {
         Box(modifier = Modifier.fillMaxHeight()) {
-            // Swipe direction indicators
-            if (swipeAlpha > 0f) {
-                // Previous track indicator (right side)
-                if (offsetX.value > 10f) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_skip_previous_24),
-                        contentDescription = "Previous",
-                        tint = Color.White.copy(alpha = swipeAlpha),
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 16.dp)
-                            .size(24.dp)
-                    )
-                }
-                // Next track indicator (left side)
-                if (offsetX.value < -10f) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_skip_next_24),
-                        contentDescription = "Next",
-                        tint = Color.White.copy(alpha = swipeAlpha),
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .padding(start = 16.dp)
-                            .size(24.dp)
-                    )
-                }
-            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier =
@@ -413,7 +383,7 @@ fun MiniPlayer(
                     Row(
                         modifier =
                             Modifier
-                                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                                .fillMaxWidth()
                     ) {
                         AsyncImage(
                             model =

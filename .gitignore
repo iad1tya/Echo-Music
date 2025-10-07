@@ -307,6 +307,13 @@ node_modules/
 # dotenv environment variables file
 .env
 
+# Kotlin build cache
+.kotlin/
+
+# Firebase implementation summaries (may contain sensitive info)
+*IMPLEMENTATION_SUMMARY.md
+*IMPLEMENTATION_GUIDE.md
+
 # next.js build output
 .next
 

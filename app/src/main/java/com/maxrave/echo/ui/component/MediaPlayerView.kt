@@ -201,7 +201,6 @@ fun MediaPlayerViewWithSubtitle(
     shouldScaleDownSubtitle: Boolean = false,
     timelineState: TimeLine,
     lyricsData: Lyrics? = null,
-    translatedLyricsData: Lyrics? = null,
 ) {
     val context = LocalContext.current
 
@@ -232,7 +231,6 @@ fun MediaPlayerViewWithSubtitle(
 
     LaunchedEffect(key1 = timelineState) {
         val lines = lyricsData?.lines ?: return@LaunchedEffect
-        val translatedLines = translatedLyricsData?.lines
         if (timelineState.current > 0L) {
             lines.indices.forEach { i ->
                 val sentence = lines[i]
@@ -248,22 +246,6 @@ fun MediaPlayerViewWithSubtitle(
                     }
                 if (timelineState.current in startTimeMs..endTimeMs) {
                     currentLineIndex = i
-                }
-            }
-            translatedLines?.indices?.forEach { i ->
-                val sentence = translatedLines[i]
-                val startTimeMs = sentence.startTimeMs.toLong()
-
-                // estimate the end time of the current sentence based on the start time of the next sentence
-                val endTimeMs =
-                    if (i < translatedLines.size - 1) {
-                        translatedLines[i + 1].startTimeMs.toLong()
-                    } else {
-                        // if this is the last sentence, set the end time to be some default value (e.g., 1 minute after the start time)
-                        startTimeMs + 60000
-                    }
-                if (timelineState.current in startTimeMs..endTimeMs) {
-                    currentTranslatedLineIndex = i
                 }
             }
             if (lines.isNotEmpty() &&
@@ -480,28 +462,6 @@ fun MediaPlayerViewWithSubtitle(
                                             .background(Color.Black.copy(alpha = 0.5f))
                                             .wrapContentWidth(),
                                 )
-                                Crossfade(translatedLyricsData?.lines != null, label = "") { translate ->
-                                    val translateLines = translatedLyricsData?.lines ?: return@Crossfade
-                                    if (translate) {
-                                        Text(
-                                            text = translateLines.getOrNull(currentTranslatedLineIndex)?.words ?: return@Crossfade,
-                                            style =
-                                                typo.bodyMedium.let {
-                                                    if (isInPipMode || shouldScaleDownSubtitle) {
-                                                        it.copy(fontSize = it.fontSize * 0.8f)
-                                                    } else {
-                                                        it
-                                                    }
-                                                },
-                                            color = Color.Yellow,
-                                            textAlign = TextAlign.Center,
-                                            modifier =
-                                                Modifier
-                                                    .background(Color.Black.copy(alpha = 0.5f))
-                                                    .wrapContentWidth(),
-                                        )
-                                    }
-                                }
                             }
                         }
                     }

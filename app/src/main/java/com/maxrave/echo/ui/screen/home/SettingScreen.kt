@@ -122,7 +122,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import coil3.annotation.ExperimentalCoilApi
-import com.maxrave.echo.service.LanguageDownloadManager
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -190,8 +189,6 @@ fun SettingScreen(
     viewModel: SettingsViewModel = koinViewModel(),
     sharedViewModel: SharedViewModel = koinInject(),
 ) {
-    val languageDownloadManager: LanguageDownloadManager = koinInject()
-    
     fun getLanguageDisplayName(languageCode: String): String {
         return when (languageCode) {
             "en" -> "English"
@@ -297,8 +294,6 @@ fun SettingScreen(
     val spotifyCanvas by viewModel.spotifyCanvas.collectAsStateWithLifecycle(initialValue = false)
     val smartLyricsDefaults by viewModel.smartLyricsDefaults.collectAsStateWithLifecycle(initialValue = false)
     val showRecentlyPlayed by viewModel.showRecentlyPlayed.collectAsStateWithLifecycle(initialValue = true)
-    val useTranslation by viewModel.useTranslation.map { it == TRUE }.collectAsStateWithLifecycle(initialValue = false)
-    val translationLanguage by viewModel.translationLanguage.collectAsStateWithLifecycle(initialValue = "en")
     val showPreviousTrackButton by viewModel.showPreviousTrackButton.collectAsStateWithLifecycle(initialValue = true)
     val materialYouTheme by viewModel.materialYouTheme.collectAsStateWithLifecycle(initialValue = false)
     val pitchBlackTheme by viewModel.pitchBlackTheme.collectAsStateWithLifecycle(initialValue = false)
@@ -1151,23 +1146,6 @@ fun SettingScreen(
                 }
 
 
-                // Translate Lyrics Toggle
-                SettingItem(
-                    title = "Translate Lyrics",
-                    subtitle = "Translate lyrics using Google Translate",
-                    switch = (useTranslation to { viewModel.setUseTranslation(it) }),
-                )
-
-                // Translation Language - only show when translate is enabled
-                if (useTranslation) {
-                    SettingItem(
-                        title = "Translation Language",
-                        subtitle = getLanguageDisplayName(translationLanguage ?: "en"),
-                        onClick = {
-                            navController.navigate(iad1tya.echo.music.ui.navigation.destination.home.LanguageSelectionDestination)
-                        }
-                    )
-                }
                 // Removed lyrics database description text as requested
             }
         }

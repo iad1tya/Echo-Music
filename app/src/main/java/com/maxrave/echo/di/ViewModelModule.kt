@@ -1,8 +1,6 @@
 package iad1tya.echo.music.di
 
 import androidx.media3.common.util.UnstableApi
-import com.maxrave.echo.service.LanguageDownloadManager
-import com.maxrave.echo.service.TranslationService
 import iad1tya.echo.music.viewModel.AlbumViewModel
 import iad1tya.echo.music.viewModel.ArtistViewModel
 import iad1tya.echo.music.viewModel.HomeViewModel
@@ -28,14 +26,6 @@ import org.koin.dsl.module
 @UnstableApi
 val viewModelModule =
     module {
-        // Services
-        single<LanguageDownloadManager> {
-            LanguageDownloadManager(get())
-        }
-        
-        single<TranslationService> {
-            TranslationService(get())
-        }
         
         single {
             SharedViewModel(

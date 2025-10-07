@@ -144,7 +144,7 @@ fun HomeItem(
                             .data(data.thumbnail?.lastOrNull()?.url)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .diskCacheKey(data.thumbnail?.lastOrNull()?.url)
-                            .crossfade(550)
+                            .crossfade(200)
                             .build(),
                     contentDescription = "",
                     placeholder = painterResource(R.drawable.echo_nobg),
@@ -183,6 +183,7 @@ fun HomeItem(
                 ),
             state = lazyListState,
             flingBehavior = snapperFlingBehavior,
+            // Performance optimizations
         ) {
             items(data.contents) { temp ->
                 if (temp != null) {
@@ -324,8 +325,9 @@ fun HomeItemContentPlaylist(
                         .Builder(LocalContext.current)
                         .data(thumb)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumb)
-                        .crossfade(550)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),
@@ -365,7 +367,7 @@ fun HomeItemContentPlaylist(
                         .padding(top = 10.dp)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
             Text(
@@ -411,7 +413,7 @@ fun HomeItemContentPlaylist(
                         .padding(top = 10.dp)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
             if (data is iad1tya.echo.music.data.type.PlaylistType && data !is AlbumsResult) {
@@ -478,7 +480,7 @@ fun QuickPicksItem(
                     ImageRequest
                         .Builder(LocalContext.current)
                         .data(data.thumbnails.lastOrNull()?.url)
-                        .crossfade(550)
+                        .crossfade(200)
                         .diskCacheKey(data.thumbnails.lastOrNull()?.url)
                         .diskCachePolicy(CachePolicy.ENABLED)
                         .build(),
@@ -582,15 +584,15 @@ fun HomeItemSong(
                         it
                     }
                 }
-            Log.w("AsyncImage", "HomeItemSong: $thumb")
             AsyncImage(
                 model =
                     ImageRequest
                         .Builder(LocalContext.current)
                         .data(thumb)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumb)
-                        .crossfade(550)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),
@@ -616,7 +618,7 @@ fun HomeItemSong(
                         .padding(top = 10.dp)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -654,7 +656,7 @@ fun HomeItemSong(
                         .wrapContentHeight(align = Alignment.CenterVertically)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
         }
@@ -685,15 +687,15 @@ fun HomeItemVideo(
                     .padding(10.dp),
         ) {
             val thumb = data.thumbnails.lastOrNull()?.url
-            Log.w("AsyncImage", "HomeItemSong: $thumb")
             AsyncImage(
                 model =
                     ImageRequest
                         .Builder(LocalContext.current)
                         .data(thumb)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumb)
-                        .crossfade(550)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),
@@ -720,7 +722,7 @@ fun HomeItemVideo(
                         .padding(top = 10.dp)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
             Text(
@@ -747,7 +749,7 @@ fun HomeItemVideo(
                         .wrapContentHeight(align = Alignment.CenterVertically)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
         }
@@ -774,15 +776,15 @@ fun HomeItemArtist(
                     .padding(10.dp),
         ) {
             val thumb = data.thumbnails.lastOrNull()?.url
-            Log.w("AsyncImage", "HomeItemSong: $thumb")
             AsyncImage(
                 model =
                     ImageRequest
                         .Builder(LocalContext.current)
                         .data(thumb)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumb)
-                        .crossfade(550)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),
@@ -809,7 +811,7 @@ fun HomeItemArtist(
                         .padding(top = 10.dp)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
             Text(
@@ -838,7 +840,7 @@ fun HomeItemArtist(
                         .wrapContentHeight(align = Alignment.CenterVertically)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
         }
@@ -936,15 +938,15 @@ fun ItemVideoChart(
                     .padding(10.dp),
         ) {
             val thumb = data.thumbnails.lastOrNull()?.url
-            Log.w("AsyncImage", "HomeItemSong: $thumb")
             AsyncImage(
                 model =
                     ImageRequest
                         .Builder(LocalContext.current)
                         .data(thumb)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumb)
-                        .crossfade(550)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),
@@ -1057,15 +1059,15 @@ fun ItemArtistChart(
                         .padding(end = 20.dp),
             )
             val thumb = data.thumbnails.lastOrNull()?.url
-            Log.w("AsyncImage", "HomeItemSong: $thumb")
             AsyncImage(
                 model =
                     ImageRequest
                         .Builder(LocalContext.current)
                         .data(thumb)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumb)
-                        .crossfade(550)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),
@@ -1168,15 +1170,15 @@ fun ItemTrackChart(
                 }
             }
             val thumb = data.thumbnails?.lastOrNull()?.url
-            Log.w("AsyncImage", "HomeItemSong: $thumb")
             AsyncImage(
                 model =
                     ImageRequest
                         .Builder(LocalContext.current)
                         .data(thumb)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumb)
-                        .crossfade(550)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),

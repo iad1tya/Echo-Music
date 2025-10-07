@@ -145,7 +145,7 @@ fun NotificationItem(
                             .data(thumb)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .diskCacheKey(thumb)
-                            .crossfade(true)
+                            .crossfade(200)
                             .build(),
                     placeholder = painterResource(R.drawable.echo_nobg),
                     error = painterResource(R.drawable.echo_nobg),
@@ -229,8 +229,9 @@ fun ItemAlbumNotification(
                         .Builder(LocalContext.current)
                         .data(thumbnail)
                         .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
                         .diskCacheKey(thumbnail)
-                        .crossfade(true)
+                        .crossfade(200)
                         .build(),
                 placeholder = painterResource(R.drawable.echo_nobg),
                 error = painterResource(R.drawable.echo_nobg),
@@ -256,7 +257,7 @@ fun ItemAlbumNotification(
                         .padding(top = 10.dp)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
             Text(
@@ -270,7 +271,7 @@ fun ItemAlbumNotification(
                         .padding(top = 10.dp)
                         .basicMarquee(
                             iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
+                            animationMode = MarqueeAnimationMode.WhileFocused,
                         ).focusable(),
             )
         }

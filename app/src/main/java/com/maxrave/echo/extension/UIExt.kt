@@ -94,7 +94,7 @@ fun Modifier.shimmer(): Modifier =
             targetValue = 2 * size.width.toFloat(),
             animationSpec =
                 infiniteRepeatable(
-                    animation = tween(1000),
+                    animation = tween(1200), // Slightly slower for smoother effect
                 ),
             label = "Shimmer",
         )
@@ -421,28 +421,31 @@ fun LazyListState.isScrollingUp(): Boolean {
     var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
     var previousScrollOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { layoutInfo.totalItemsCount }.collect {
-            Log.w("isScrollingUp", "firstVisibleItemIndex: $firstVisibleItemIndex")
-            previousIndex = firstVisibleItemIndex
-            previousScrollOffset = firstVisibleItemScrollOffset
-        }
-    }
-
     return remember(this) {
         derivedStateOf {
-            if (firstVisibleItemIndex > 0) {
-                if (previousIndex != firstVisibleItemIndex) {
-                    previousIndex > firstVisibleItemIndex
-                } else {
-                    previousScrollOffset >= firstVisibleItemScrollOffset
-                }.also {
-                    previousIndex = firstVisibleItemIndex
-                    previousScrollOffset = firstVisibleItemScrollOffset
+            val currentIndex = firstVisibleItemIndex
+            val currentOffset = firstVisibleItemScrollOffset
+            
+            val isScrollingUp = when {
+                // If we're at the top, always show the top bar
+                currentIndex == 0 && currentOffset == 0 -> true
+                // If index changed, compare indices
+                currentIndex != previousIndex -> {
+                    val result = currentIndex < previousIndex
+                    previousIndex = currentIndex
+                    previousScrollOffset = currentOffset
+                    result
                 }
-            } else {
-                true
+                // If same index, compare scroll offsets
+                else -> {
+                    val result = currentOffset < previousScrollOffset
+                    previousIndex = currentIndex
+                    previousScrollOffset = currentOffset
+                    result
+                }
             }
+            
+            isScrollingUp
         }
     }.value
 }

@@ -227,7 +227,6 @@ fun FullscreenPlayer(
             shouldShowSubtitle = shouldShowSubtitle,
             timelineState = timelineState,
             lyricsData = nowPlayingState.lyricsData?.lyrics,
-            translatedLyricsData = nowPlayingState.lyricsData?.translatedLyrics,
         )
         if (!isInPipMode) {
             Row(Modifier.fillMaxSize()) {

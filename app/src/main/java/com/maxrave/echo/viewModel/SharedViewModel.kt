@@ -40,9 +40,7 @@ import iad1tya.echo.music.data.db.entities.PairSongLocalPlaylist
 import iad1tya.echo.music.data.db.entities.PlaylistEntity
 import iad1tya.echo.music.data.db.entities.SongEntity
 import iad1tya.echo.music.data.db.entities.SongInfoEntity
-import iad1tya.echo.music.data.db.entities.TranslatedLyricsEntity
 import iad1tya.echo.music.data.manager.LocalPlaylistManager
-import com.maxrave.echo.service.TranslationService
 import iad1tya.echo.music.data.model.browse.album.Track
 import iad1tya.echo.music.data.model.metadata.Lyrics
 import iad1tya.echo.music.data.model.update.UpdateData
@@ -96,23 +94,12 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.reflect.KClass
 
-data class TranslationProgress(
-    val current: Int,
-    val total: Int,
-    val isTranslating: Boolean = true,
-    val detectedLanguage: String? = null,
-    val detectedLanguageName: String? = null,
-    val confidence: Float? = null
-) {
-    val percentage: Float get() = if (total > 0) current.toFloat() / total else 0f
-}
 
 @UnstableApi
 class SharedViewModel(
     private val application: Application,
 ) : BaseViewModel(application) {
     private val localPlaylistManager: LocalPlaylistManager by inject()
-    private val translationService: TranslationService by inject()
     var isFirstLiked: Boolean = false
     var isFirstMiniplayer: Boolean = false
     var isFirstSuggestions: Boolean = false
@@ -237,37 +224,10 @@ class SharedViewModel(
     private val _shareSavedLyrics: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val shareSavedLyrics: StateFlow<Boolean> get() = _shareSavedLyrics
 
-    // Translation state
-    private val _translationProgress = MutableStateFlow<TranslationProgress?>(null)
-    val translationProgress: StateFlow<TranslationProgress?> = _translationProgress
-    
-    // Public access to translation settings
-    val useTranslation: StateFlow<String> = dataStoreManager.enableTranslateLyric.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = FALSE
-    )
 
     init {
         mainRepository.initYouTube(viewModelScope)
         
-        // Observe translation settings and trigger translation when enabled
-        viewModelScope.launch {
-            combine(
-                dataStoreManager.enableTranslateLyric,
-                dataStoreManager.translationLanguage
-            ) { useTranslation, language ->
-                Pair(useTranslation == TRUE, language)
-            }.collect { (useTranslation, language) ->
-                if (useTranslation && language.isNotEmpty()) {
-                    // Check if we have current lyrics and they're not already translated
-                    val currentLyricsData = _nowPlayingScreenData.value.lyricsData
-                    if (currentLyricsData?.lyrics != null && currentLyricsData.translatedLyrics == null) {
-                        translateLyrics(language)
-                    }
-                }
-            }
-        }
         
         viewModelScope.launch {
             log("SharedViewModel init")
@@ -725,7 +685,6 @@ class SharedViewModel(
                         track.videoId,
                         track.durationSeconds ?: 0,
                         lyricsData,
-                        false,
                         LyricsProvider.OFFLINE,
                     )
                 }
@@ -1217,9 +1176,8 @@ class SharedViewModel(
 
     private fun updateLyrics(
         videoId: String,
-        duration: Int, // 0 if translated lyrics
+        duration: Int,
         lyrics: Lyrics?,
-        isTranslatedLyrics: Boolean,
         lyricsProvider: LyricsProvider = LyricsProvider.LRCLIB,
     ) {
         if (lyrics == null) {
@@ -1231,99 +1189,28 @@ class SharedViewModel(
             return
         }
 
-        if (isTranslatedLyrics) {
-            val originalLyrics = _nowPlayingScreenData.value.lyricsData?.lyrics
-            if (originalLyrics != null && originalLyrics.lines != null && lyrics.lines != null) {
-                var outOfSyncCount = 0
-
-                originalLyrics.lines.forEach { originalLine ->
-                    val originalTime = originalLine.startTimeMs.toLongOrNull() ?: 0L
-                    val closestTranslatedLine =
-                        lyrics.lines.minByOrNull {
-                            abs((it.startTimeMs.toLongOrNull() ?: 0L) - originalTime)
-                        }
-
-                    if (closestTranslatedLine != null) {
-                        val translatedTime = closestTranslatedLine.startTimeMs.toLongOrNull() ?: 0L
-                        val timeDiff = abs(originalTime - translatedTime)
-
-                        if (timeDiff > 1000L) { // Lệch quá 1 giây
-                            outOfSyncCount++
-                        }
-                    }
-                }
-
-                if (outOfSyncCount > 5) {
-                    Log.w(tag, "Translated lyrics out of sync: $outOfSyncCount lines with time diff > 1s")
-
-                    _nowPlayingScreenData.update {
-                        it.copy(
-                            lyricsData =
-                                it.lyricsData?.copy(
-                                    translatedLyrics = null,
-                                ),
-                        )
-                    }
-
-                    viewModelScope.launch {
-                        mainRepository.removeTranslatedLyrics(
-                            videoId,
-                            dataStoreManager.translationLanguage.first(),
-                        )
-                        Log.d(tag, "Removed out-of-sync translated lyrics for $videoId")
-                    }
-                    return
-                }
-            }
-        }
-
         val shouldSendLyricsToEcho = false // Removed Echo lyrics sending
         if (_nowPlayingState.value?.songEntity?.videoId == videoId) {
             val track = _nowPlayingState.value?.track
-            when (isTranslatedLyrics) {
-                true -> {
-                    _nowPlayingScreenData.update {
-                        it.copy(
-                            lyricsData =
-                                it.lyricsData?.copy(
-                                    translatedLyrics = lyrics,
-                                ),
-                        )
-                    }
-                }
-                false -> {
-                    _nowPlayingScreenData.update {
-                        it.copy(
-                            lyricsData =
-                                NowPlayingScreenData.LyricsData(
-                                    lyrics = lyrics,
-                                    lyricsProvider = lyricsProvider,
-                                ),
-                        )
-                    }
-                    // Save lyrics to database
-                    viewModelScope.launch {
-                        mainRepository.insertLyrics(
-                            LyricsEntity(
-                                videoId = videoId,
-                                error = false,
-                                lines = lyrics.lines,
-                                syncType = lyrics.syncType,
-                            ),
-                        )
-                    }
-                    
-                    // Trigger automatic translation if enabled
-                    viewModelScope.launch {
-                        val useTranslation = dataStoreManager.enableTranslateLyric.first() == TRUE
-                        val translationLanguage = dataStoreManager.translationLanguage.first()
-                        
-                        if (useTranslation && !translationLanguage.isNullOrEmpty()) {
-                            Log.d("AutoTranslation", "Triggering automatic translation for new lyrics")
-                            translateLyrics(translationLanguage)
-                        }
-                    }
-                }
+            _nowPlayingScreenData.update {
+                it.copy(
+                    lyricsData =
+                        NowPlayingScreenData.LyricsData(
+                            lyrics = lyrics,
+                            lyricsProvider = lyricsProvider,
+                        ),
+                )
+            }
+            // Save lyrics to database
+            viewModelScope.launch {
+                mainRepository.insertLyrics(
+                    LyricsEntity(
+                        videoId = videoId,
+                        error = false,
+                        lines = lyrics.lines,
+                        syncType = lyrics.syncType,
+                    ),
+                )
             }
         }
     }
@@ -1411,21 +1298,8 @@ class SharedViewModel(
                                             videoId,
                                             duration,
                                             lyrics,
-                                            false,
                                             LyricsProvider.YOUTUBE,
                                         )
-                                        if (translatedLyrics != null) {
-                                            Log.d(tag, "YouTube transcript translated lyrics found: ${translatedLyrics.lines?.size ?: 0} lines")
-                                            updateLyrics(
-                                                videoId,
-                                                duration,
-                                                translatedLyrics,
-                                                true,
-                                                LyricsProvider.YOUTUBE,
-                                            )
-                                        } else {
-                                            Log.d(tag, "No translated lyrics available")
-                                        }
                                     } else {
                                         Log.w(tag, "YouTube transcript lyrics is null")
                                     }
@@ -1470,7 +1344,6 @@ class SharedViewModel(
                                 song.videoId,
                                 duration,
                                 response.data,
-                                false,
                                 LyricsProvider.LRCLIB,
                             )
                         }
@@ -1504,7 +1377,6 @@ class SharedViewModel(
                                     song.videoId,
                                     duration,
                                     lyrics,
-                                    false,
                                     LyricsProvider.YOUTUBE,
                                 )
                             } else {
@@ -1544,7 +1416,6 @@ class SharedViewModel(
                                 track.videoId,
                                 duration ?: 0,
                                 response.data,
-                                false,
                                 LyricsProvider.SPOTIFY,
                             )
                         }
@@ -1570,108 +1441,6 @@ class SharedViewModel(
         }
     }
 
-    /**
-     * Translates the current lyrics to the specified language
-     */
-    fun translateLyrics(targetLanguage: String) {
-        viewModelScope.launch {
-            val currentLyricsData = _nowPlayingScreenData.value.lyricsData
-            val originalLyrics = currentLyricsData?.lyrics
-            val videoId = _nowPlayingState.value?.songEntity?.videoId
-
-            if (originalLyrics == null || videoId == null) {
-                Log.w("TranslateLyrics", "No lyrics or video ID available for translation")
-                return@launch
-            }
-
-            // Check if translation is already in progress
-            if (_translationProgress.value?.isTranslating == true) {
-                Log.w("TranslateLyrics", "Translation already in progress")
-                return@launch
-            }
-
-            // Check if we already have translated lyrics for this language
-            try {
-                val existingTranslation = mainRepository.getSavedTranslatedLyrics(videoId, targetLanguage).first()
-                if (existingTranslation != null) {
-                    Log.d("TranslateLyrics", "Using existing translation for $targetLanguage")
-                    val translatedLyrics = existingTranslation.toLyrics()
-                    updateLyrics(videoId, 0, translatedLyrics, true)
-                    return@launch
-                }
-            } catch (e: Exception) {
-                Log.e("TranslateLyrics", "Error checking existing translation", e)
-            }
-
-            // Start translation with language detection
-            _translationProgress.value = TranslationProgress(0, originalLyrics.lines?.size ?: 0)
-
-            try {
-                val translatedLyrics = translationService.translateLyricsWithDetection(
-                    originalLyrics,
-                    targetLanguage,
-                    onProgress = { current, total ->
-                        _translationProgress.value = TranslationProgress(current, total)
-                    },
-                    onLanguageDetected = { detectedLanguage ->
-                        Log.d("TranslateLyrics", "Detected language: ${detectedLanguage.name} (confidence: ${detectedLanguage.confidence})")
-                        _translationProgress.value = TranslationProgress(
-                            current = 0,
-                            total = originalLyrics.lines?.size ?: 0,
-                            detectedLanguage = detectedLanguage.code,
-                            detectedLanguageName = detectedLanguage.name,
-                            confidence = detectedLanguage.confidence
-                        )
-                    }
-                )
-
-                if (translatedLyrics != null) {
-                    // Save translated lyrics to database
-                    val translatedEntity = TranslatedLyricsEntity(
-                        videoId = videoId,
-                        language = targetLanguage,
-                        error = false,
-                        lines = translatedLyrics.lines,
-                        syncType = translatedLyrics.syncType
-                    )
-                    mainRepository.insertTranslatedLyrics(translatedEntity)
-
-                    // Update UI with translated lyrics
-                    updateLyrics(videoId, 0, translatedLyrics, true)
-                    
-                    // Keep confidence score for a few seconds after completion
-                    val currentProgress = _translationProgress.value
-                    if (currentProgress != null) {
-                        _translationProgress.value = currentProgress.copy(
-                            isTranslating = false,
-                            current = currentProgress.total,
-                        )
-                        
-                        // Clear translation progress after showing confidence for 3 seconds
-                        viewModelScope.launch {
-                            kotlinx.coroutines.delay(3000)
-                            _translationProgress.value = null
-                        }
-                    }
-                    
-                    Log.d("TranslateLyrics", "Translation completed for $targetLanguage")
-                } else {
-                    Log.e("TranslateLyrics", "Translation failed")
-                    _translationProgress.value = null
-                }
-            } catch (e: Exception) {
-                Log.e("TranslateLyrics", "Error during translation", e)
-                _translationProgress.value = null
-            }
-        }
-    }
-
-    /**
-     * Clears the translation progress state
-     */
-    fun clearTranslationProgress() {
-        _translationProgress.value = null
-    }
 
     fun insertPairSongLocalPlaylist(pairSongLocalPlaylist: PairSongLocalPlaylist) {
         viewModelScope.launch {
@@ -1914,7 +1683,6 @@ data class NowPlayingScreenData(
 
     data class LyricsData(
         val lyrics: Lyrics,
-        val translatedLyrics: Lyrics? = null,
         val lyricsProvider: LyricsProvider,
     )
 

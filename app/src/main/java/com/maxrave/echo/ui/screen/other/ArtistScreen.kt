@@ -237,7 +237,7 @@ fun ArtistScreen(
                                                 )
                                             },
                                             colors = ButtonDefaults.outlinedButtonColors(
-                                                contentColor = Color.White,
+                                                contentColor = Color.Black, // Changed to black
                                             ),
                                         ) {
                                             Text(text = stringResource(R.string.followed))
@@ -256,7 +256,7 @@ fun ArtistScreen(
                                             },
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = MaterialTheme.colorScheme.primary, // Use Material You primary color
-                                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                                contentColor = Color.Black, // Changed to black
                                             ),
                                         ) {
                                             Text(text = stringResource(R.string.follow))
