@@ -1,7 +1,5 @@
 package iad1tya.echo.music.ui.screen.other
 
-import android.content.Intent
-import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
@@ -22,29 +20,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -52,7 +43,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,22 +61,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.offset
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
+import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.maxrave.echo.ui.component.CustomSearchBarDefaults
 import iad1tya.echo.kotlinytmusicscraper.models.AlbumItem
 import iad1tya.echo.kotlinytmusicscraper.models.ArtistItem
 import iad1tya.echo.kotlinytmusicscraper.models.PlaylistItem
@@ -162,7 +152,7 @@ fun SearchScreen(
             if (searchTextFromViewModel.isNotEmpty()) SearchUIType.SEARCH_RESULTS else SearchUIType.EMPTY
         ) 
     }
-    var searchText by rememberSaveable { mutableStateOf(searchTextFromViewModel) }
+    var searchText by remember { mutableStateOf(TextFieldValue(searchTextFromViewModel)) }
     var isSearchSubmitted by rememberSaveable { mutableStateOf(searchTextFromViewModel.isNotEmpty()) }
     var isExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -193,7 +183,10 @@ fun SearchScreen(
         
         // Restore search state if we have a previous search
         if (searchTextFromViewModel.isNotEmpty()) {
-            searchText = searchTextFromViewModel
+            searchText = TextFieldValue(
+                searchTextFromViewModel,
+                selection = TextRange(searchTextFromViewModel.length)
+            )
             isSearchSubmitted = true
             searchUIType = SearchUIType.SEARCH_RESULTS
         }
@@ -201,8 +194,11 @@ fun SearchScreen(
     
     // Sync search text from ViewModel (for voice search)
     LaunchedEffect(searchTextFromViewModel) {
-        if (searchTextFromViewModel.isNotEmpty() && searchTextFromViewModel != searchText) {
-            searchText = searchTextFromViewModel
+        if (searchTextFromViewModel.isNotEmpty() && searchTextFromViewModel != searchText.text) {
+            searchText = TextFieldValue(
+                searchTextFromViewModel,
+                selection = TextRange(searchTextFromViewModel.length)
+            )
             isSearchSubmitted = true
             searchUIType = SearchUIType.SEARCH_RESULTS
         }
@@ -225,8 +221,8 @@ fun SearchScreen(
             isSearchSubmitted = false
             isExpanded = true
         }
-        if (searchText.isNotEmpty() && isFocused) {
-            searchViewModel.suggestQuery(searchText)
+        if (searchText.text.isNotEmpty() && isFocused) {
+            searchViewModel.suggestQuery(searchText.text)
         }
     }
 
@@ -242,13 +238,13 @@ fun SearchScreen(
         }
     }
 
-    LaunchedEffect(isExpanded, searchText, isFocused) {
+    LaunchedEffect(isExpanded, searchText.text, isFocused) {
         searchUIType =
-            if (searchText.isNotEmpty() && isExpanded) {
+            if (searchText.text.isNotEmpty() && isExpanded) {
                 SearchUIType.SEARCH_SUGGESTIONS
             } else if (isFocused && isExpanded) {
                 SearchUIType.SEARCH_HISTORY
-            } else if (searchText.isEmpty()) {
+            } else if (searchText.text.isEmpty()) {
                 SearchUIType.EMPTY
             } else {
                 SearchUIType.SEARCH_RESULTS
@@ -279,25 +275,25 @@ fun SearchScreen(
         // YTItem suggestions
         SearchBar(
             inputField = {
-                SearchBarDefaults.InputField(
+                CustomSearchBarDefaults.InputField(
                     query = searchText,
                     onQueryChange = { newText ->
                         searchText = newText
                     },
                     onSearch = { query ->
-                        if (query.isNotEmpty()) {
+                        if (query.text.isNotEmpty()) {
                             isSearchSubmitted = true
                             focusManager.clearFocus()
-                            searchViewModel.insertSearchHistory(query)
+                            searchViewModel.insertSearchHistory(query.text)
                             when (searchScreenState.searchType) {
-                                SearchType.ALL -> searchViewModel.searchAll(query)
-                                SearchType.SONGS -> searchViewModel.searchSongs(query)
-                                SearchType.VIDEOS -> searchViewModel.searchVideos(query)
-                                SearchType.ALBUMS -> searchViewModel.searchAlbums(query)
-                                SearchType.ARTISTS -> searchViewModel.searchArtists(query)
-                                SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(query)
-                                SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(query)
-                                SearchType.PODCASTS -> searchViewModel.searchPodcast(query)
+                                SearchType.ALL -> searchViewModel.searchAll(query.text)
+                                SearchType.SONGS -> searchViewModel.searchSongs(query.text)
+                                SearchType.VIDEOS -> searchViewModel.searchVideos(query.text)
+                                SearchType.ALBUMS -> searchViewModel.searchAlbums(query.text)
+                                SearchType.ARTISTS -> searchViewModel.searchArtists(query.text)
+                                SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(query.text)
+                                SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(query.text)
+                                SearchType.PODCASTS -> searchViewModel.searchPodcast(query.text)
                             }
                         }
                     },
@@ -334,12 +330,12 @@ fun SearchScreen(
                             }
                             
                             // Clear button (only show when there's text)
-                            if (searchText.isNotEmpty()) {
+                            if (searchText.text.isNotEmpty()) {
                                 IconButton(
                                     modifier = Modifier
                                         .clip(CircleShape),
                                     onClick = {
-                                        searchText = ""
+                                        searchText = TextFieldValue("")
                                         isSearchSubmitted = false
                                     },
                                 ) {
@@ -391,7 +387,7 @@ fun SearchScreen(
                                                     listTracks = arrayListOf(firstTrack),
                                                     firstPlayedTrack = firstTrack,
                                                     playlistId = "RDAMVM${ytItem.id}",
-                                                    playlistName = "\"${searchText}\" ${context.getString(R.string.in_search)}",
+                                                    playlistName = "\"${searchText.text}\" ${context.getString(R.string.in_search)}",
                                                     playlistType = PlaylistType.RADIO,
                                                     continuation = null,
                                                 ),
@@ -440,7 +436,10 @@ fun SearchScreen(
                                             interactionSource = remember { MutableInteractionSource() },
                                             indication = ripple(),
                                             onClick = {
-                                                searchText = suggestion
+                                                searchText = TextFieldValue(
+                                                    suggestion,
+                                                    selection = TextRange(suggestion.length)
+                                                )
                                                 focusManager.clearFocus()
                                                 isSearchSubmitted = true
                                                 searchViewModel.insertSearchHistory(suggestion)
@@ -466,7 +465,10 @@ fun SearchScreen(
                                 Spacer(modifier = Modifier.weight(1f))
                                 IconButton(
                                     onClick = {
-                                        searchText = suggestion
+                                        searchText = TextFieldValue(
+                                            suggestion,
+                                            selection = TextRange(suggestion.length)
+                                        )
                                         focusRequester.requestFocus()
                                     },
                                 ) {
@@ -527,7 +529,10 @@ fun SearchScreen(
                                         Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                searchText = historyItem
+                                                searchText = TextFieldValue(
+                                                    historyItem,
+                                                    selection = TextRange(historyItem.length)
+                                                )
                                                 focusManager.clearFocus()
                                                 isSearchSubmitted = true
                                                 searchViewModel.insertSearchHistory(historyItem)
@@ -557,7 +562,10 @@ fun SearchScreen(
                                     Spacer(modifier = Modifier.weight(1f))
                                     IconButton(
                                         onClick = {
-                                            searchText = historyItem
+                                            searchText = TextFieldValue(
+                                                historyItem,
+                                                selection = TextRange(historyItem.length)
+                                            )
                                             focusRequester.requestFocus()
                                         },
                                     ) {
@@ -616,7 +624,10 @@ fun SearchScreen(
                                      "Relax", "Sleep", "Energize", "Sad", "Happy", "Workout"
                                  )) { mood ->
                                      MoodMomentAndGenreHomeItem(title = mood) {
-                                         searchText = mood
+                                         searchText = TextFieldValue(
+                                             mood,
+                                             selection = TextRange(mood.length)
+                                         )
                                          isSearchSubmitted = true
                                          focusManager.clearFocus()
                                          searchViewModel.insertSearchHistory(mood)
@@ -651,7 +662,10 @@ fun SearchScreen(
                                      "Hip Hop", "LoFi", "Pop", "Blues", "Techno", "Gym"
                                  )) { genre ->
                                      MoodMomentAndGenreHomeItem(title = genre) {
-                                         searchText = genre
+                                         searchText = TextFieldValue(
+                                             genre,
+                                             selection = TextRange(genre.length)
+                                         )
                                          isSearchSubmitted = true
                                          focusManager.clearFocus()
                                          searchViewModel.insertSearchHistory(genre)
@@ -700,7 +714,7 @@ fun SearchScreen(
                                     .padding(vertical = 10.dp),
                             state = pullToRefreshState,
                             onRefresh = {
-                                val query = searchText.trim()
+                                val query = searchText.text.trim()
                                 if (query.isNotEmpty()) {
                                     isSearchSubmitted = true
                                     searchViewModel.insertSearchHistory(query)
@@ -781,7 +795,7 @@ fun SearchScreen(
                                                                                     firstPlayedTrack = firstTrack,
                                                                                     playlistId = "RDAMVM${result.videoId}",
                                                                                     playlistName =
-                                                                                        "\"${searchText}\" ${context.getString(R.string.in_search)}",
+                                                                                        "\"${searchText.text}\" ${context.getString(R.string.in_search)}",
                                                                                     playlistType = PlaylistType.RADIO,
                                                                                     continuation = null,
                                                                                 ),
@@ -813,7 +827,7 @@ fun SearchScreen(
                                                                                     firstPlayedTrack = firstTrack,
                                                                                     playlistId = "RDAMVM${result.videoId}",
                                                                                     playlistName =
-                                                                                        "\"${searchText}\" ${context.getString(R.string.in_search)}",
+                                                                                        "\"${searchText.text}\" ${context.getString(R.string.in_search)}",
                                                                                     playlistType = PlaylistType.RADIO,
                                                                                     continuation = null,
                                                                                 ),
@@ -837,7 +851,7 @@ fun SearchScreen(
                                                                         },
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(searchText.text)
                                                                             val firstTrack: Track = result.toTrack()
                                                                             searchViewModel.setQueueData(
                                                                                 QueueData(
@@ -845,7 +859,7 @@ fun SearchScreen(
                                                                                     firstPlayedTrack = firstTrack,
                                                                                     playlistId = "RDAMVM${result.id}",
                                                                                     playlistName =
-                                                                                        "\"${searchText}\" ${context.getString(R.string.in_search)}",
+                                                                                        "\"${searchText.text}\" ${context.getString(R.string.in_search)}",
                                                                                     playlistType = PlaylistType.RADIO,
                                                                                     continuation = null,
                                                                                 ),
@@ -869,7 +883,7 @@ fun SearchScreen(
                                                                         },
                                                                         onClickListener = {
                                                                             focusManager.clearFocus()
-                                                                            searchViewModel.insertSearchHistory(searchText)
+                                                                            searchViewModel.insertSearchHistory(searchText.text)
                                                                             val firstTrack: Track = result.toTrack()
                                                                             searchViewModel.setQueueData(
                                                                                 QueueData(
@@ -877,7 +891,7 @@ fun SearchScreen(
                                                                                     firstPlayedTrack = firstTrack,
                                                                                     playlistId = "RDAMVM${result.id}",
                                                                                     playlistName =
-                                                                                        "\"${searchText}\" ${context.getString(R.string.in_search)}",
+                                                                                        "\"${searchText.text}\" ${context.getString(R.string.in_search)}",
                                                                                     playlistType = PlaylistType.RADIO,
                                                                                     continuation = null,
                                                                                 ),
@@ -1067,8 +1081,8 @@ fun SearchScreen(
                                                 )
                                                 Spacer(modifier = Modifier.height(10.dp))
                                                 Button(onClick = {
-                                                    if (searchText.isNotEmpty()) {
-                                                        searchViewModel.searchAll(searchText)
+                                                    if (searchText.text.isNotEmpty()) {
+                                                        searchViewModel.searchAll(searchText.text)
                                                     }
                                                 }) {
                                                     Text(text = stringResource(id = R.string.retry))
