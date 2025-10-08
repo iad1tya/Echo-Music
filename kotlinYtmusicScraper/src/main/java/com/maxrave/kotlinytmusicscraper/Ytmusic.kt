@@ -261,7 +261,7 @@ class Ytmusic {
                 "user-agent",
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
             )
-            header("x-goog-api-key", "AIzaSyDyT5W0Jh49F30Pqqtyfdf7pDLFKLJoAnw")
+            header("x-goog-api-key", "YOUR_GOOGLE_API_KEY")
             header("x-user-agent", "grpc-web-javascript/0.1")
         }
     }
@@ -296,7 +296,7 @@ class Ytmusic {
 //    -H 'sec-fetch-mode: cors' \
 //    -H 'sec-fetch-site: cross-site' \
 //    -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0' \
-//    -H 'x-goog-api-key: AIzaSyDyT5W0Jh49F30Pqqtyfdf7pDLFKLJoAnw' \
+//    -H 'x-goog-api-key: YOUR_GOOGLE_API_KEY' \
 //    -H 'x-user-agent: grpc-web-javascript/0.1' \
 //    --data-raw '["O43z0dpjhgX20SCx4KAo"]'
 

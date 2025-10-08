@@ -53,7 +53,7 @@ data class YouTubeClient(
             YouTubeClient(
                 clientName = "ANDROID_MUSIC",
                 clientVersion = "7.27.52",
-                api_key = "AIzaSyAOghZGza2MQSZkY_zfZ370N-PUdXEo8AI",
+                api_key = "YOUR_YOUTUBE_API_KEY_1",
                 userAgent = USER_AGENT_ANDROID,
                 osName = "Android",
                 osVersion = "11",
@@ -64,7 +64,7 @@ data class YouTubeClient(
             YouTubeClient(
                 clientName = "ANDROID",
                 clientVersion = "17.13.3",
-                api_key = "AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w",
+                api_key = "YOUR_YOUTUBE_API_KEY_2",
                 userAgent = USER_AGENT_ANDROID,
             )
 
@@ -80,7 +80,7 @@ data class YouTubeClient(
             YouTubeClient(
                 clientName = "WEB_REMIX",
                 clientVersion = "1.20240819.01.00",
-                api_key = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30",
+                api_key = "YOUR_YOUTUBE_API_KEY_3",
                 userAgent = USER_AGENT_WEB,
                 referer = REFERER_YOUTUBE_MUSIC,
             )
@@ -89,7 +89,7 @@ data class YouTubeClient(
             YouTubeClient(
                 clientName = "WEB_EMBEDDED_PLAYER",
                 clientVersion = "1.20250310.01.00",
-                api_key = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30",
+                api_key = "YOUR_YOUTUBE_API_KEY_3",
                 userAgent = USER_AGENT_WEB,
                 referer = REFERER_YOUTUBE_MUSIC,
             )
@@ -98,7 +98,7 @@ data class YouTubeClient(
             YouTubeClient(
                 clientName = "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
                 clientVersion = "2.0",
-                api_key = "AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8",
+                api_key = "YOUR_YOUTUBE_API_KEY_4",
                 userAgent = "Mozilla/5.0 (PlayStation; PlayStation 4/12.00) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15",
             )
 
@@ -106,7 +106,7 @@ data class YouTubeClient(
             YouTubeClient(
                 clientName = "TVHTML5",
                 clientVersion = "7.20250312.16.00",
-                api_key = "AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8",
+                api_key = "YOUR_YOUTUBE_API_KEY_4",
                 userAgent = "Mozilla/5.0 (ChromiumStylePlatform) Cobalt/Version",
             )
 
@@ -117,7 +117,7 @@ data class YouTubeClient(
                 deviceMake = "Apple",
                 deviceModel = "iPhone16,2",
                 userAgent = USER_AGENT_IOS,
-                api_key = "AIzaSyB-63vPrdThhKuerbB2N_l7Kwwcxj6yUAc",
+                api_key = "YOUR_YOUTUBE_API_KEY_5",
                 osName = "iPhone",
                 osVersion = "17.5.1.21F90",
                 timeZone = "UTC",

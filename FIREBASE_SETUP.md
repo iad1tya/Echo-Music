@@ -17,7 +17,7 @@ The Firebase configuration file is located at `app/google-services.json` and con
 - Project ID: `echo-aab3b`
 - Project Number: `887842405081`
 - Package Names: `iad1tya.echo.music` (production) and `iad1tya.echo.music.dev` (debug)
-- API Key: `AIzaSyCvXEL8c5TOPmYUo33ghC7Cf64qYUGWfZg`
+- API Key: `YOUR_FIREBASE_API_KEY`
 
 ### 2. Build Configuration
 

@@ -380,7 +380,7 @@ class PoTokenWebView(
         private val TAG = PoTokenWebView::class.simpleName
 
         // Public API key used by BotGuard, which has been got by looking at BotGuard requests
-        const val GOOGLE_API_KEY = "AIzaSyDyT5W0Jh49F30Pqqtyfdf7pDLFKLJoAnw" // NOSONAR
+        const val GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY" // NOSONAR
         private const val REQUEST_KEY = "O43z0dpjhgX20SCx4KAo"
         const val USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
