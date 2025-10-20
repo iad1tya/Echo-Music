@@ -53,7 +53,7 @@
 ### Discovery and Search
 
 * **Smart Search:** Powerful search across YouTube Music.
-* **AI Recommendations:** Personalized song suggestions based on your listening habits.
+* **Best Recommendations:** Personalized song suggestions based on your listening habits.
 * **Browsing:** Explore curated categories such as Home, Charts, Podcasts, Moods, and Genres.
 * **Recently Played:** Access your recent tracks instantly.
 
