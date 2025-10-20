@@ -136,19 +136,23 @@ We welcome community contributions.
    ```
 6. **Open a Pull Request** on GitHub.
 
-### Development Guidelines
+---
+
+## Development Guidelines
 
 * Follow Kotlin best practices.
 * Write clear and meaningful commit messages.
 * Include tests for new functionality.
 * Update relevant documentation.
 
+---
 
 ## License
 
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
 See the [LICENSE](LICENSE) file for details.
 
+---
 
 ## Privacy
 
@@ -158,6 +162,7 @@ Echo Music is designed with user privacy in mind:
 * **Crash Reports:** Optional and disabled by default.
 * **Personal Data:** No personal information is collected without consent.
 
+---
 
 ## Documentation
 
@@ -165,6 +170,7 @@ Echo Music is designed with user privacy in mind:
 * **Additional Documentation:**
   [CONTRIBUTING.md](CONTRIBUTING.md) | [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | [SECURITY.md](SECURITY.md)
 
+---
 
 ## ☕ Support the Project
 <div align="center">
@@ -176,6 +182,7 @@ Echo Music is designed with user privacy in mind:
   </a>
 </div>
 
+---
 
 ## Contact
 
