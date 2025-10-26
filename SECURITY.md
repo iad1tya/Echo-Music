@@ -52,7 +52,7 @@ Echo Music is committed to user privacy:
 
 - **No personal data collection**: We don't collect personal information
 - **Local storage**: User data is stored locally on the device
-- **Optional analytics**: Firebase Analytics can be disabled in settings
+- **Analytics**: We collect minimal usage data and crash reports through Firebase Analytics to improve app stability and enhance the overall user experience.
 - **Open source**: All code is available for review
 
 ## Contact
