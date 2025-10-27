@@ -104,41 +104,6 @@
 
 ---
 
-## Contributing
-
-We welcome community contributions.
-
-1. **Fork** the repository.
-2. **Create a feature branch:**
-
-   ```bash
-   git checkout -b feature/new-feature
-   ```
-3. **Implement your changes** following our coding guidelines.
-4. **Run tests:**
-
-   ```bash
-   ./gradlew test
-   ```
-5. **Commit and push:**
-
-   ```bash
-   git commit -m "Add new feature"
-   git push origin feature/new-feature
-   ```
-6. **Open a Pull Request** on GitHub.
-
----
-
-## Development Guidelines
-
-* Follow Kotlin best practices.
-* Write clear and meaningful commit messages.
-* Include tests for new functionality.
-* Update relevant documentation.
-
----
-
 ## License
 
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
@@ -158,6 +123,16 @@ Only analytics data is collected to help improve your experience. Crash reports 
 * **Report Issues or Request Features:** [GitHub Issues](https://github.com/iad1tya/Echo-Music/issues)
 * **Additional Documentation:**
   [CONTRIBUTING.md](CONTRIBUTING.md) | [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | [SECURITY.md](SECURITY.md)
+
+---
+
+## Supporter
+<div align="center">
+  <p><strong>Thank you to the supporters who contributed a small amount and believed in this project — your support keeps Echo Music going.</strong></p>
+    <img src="assets/Supporter/EM.png" alt="Emagik" width="90"/>
+  </a>
+  <p><strong>Emagik</strong></p>
+</div>
 
 ---
 
