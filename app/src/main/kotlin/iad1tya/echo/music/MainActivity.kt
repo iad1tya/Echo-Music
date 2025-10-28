@@ -25,6 +25,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -110,6 +113,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.window.Dialog
@@ -145,6 +149,7 @@ import com.echo.innertube.models.WatchEndpoint
 import iad1tya.echo.music.constants.AppBarHeight
 import iad1tya.echo.music.constants.AppLanguageKey
 import iad1tya.echo.music.constants.CheckForUpdatesKey
+import iad1tya.echo.music.constants.DarkModeKey
 import iad1tya.echo.music.constants.DefaultOpenTabKey
 import iad1tya.echo.music.constants.DisableScreenshotKey
 import iad1tya.echo.music.constants.DynamicThemeKey
@@ -187,6 +192,7 @@ import iad1tya.echo.music.ui.screens.SplashScreen
 import iad1tya.echo.music.ui.screens.navigationBuilder
 import iad1tya.echo.music.ui.screens.search.LocalSearchScreen
 import iad1tya.echo.music.ui.screens.search.OnlineSearchScreen
+import iad1tya.echo.music.ui.screens.settings.DarkMode
 import iad1tya.echo.music.ui.screens.settings.NavigationTab
 import iad1tya.echo.music.ui.theme.ColorSaver
 import iad1tya.echo.music.ui.theme.DefaultThemeColor
@@ -361,8 +367,14 @@ class MainActivity : ComponentActivity() {
             var showSplash by remember { mutableStateOf(true) }
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
-            // Force dark mode always on
-            val useDarkTheme = true
+            
+            // Read dark mode preference
+            val darkModePreference by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.ON)
+            val useDarkTheme = when (darkModePreference) {
+                DarkMode.ON -> true
+                DarkMode.OFF -> false
+                DarkMode.AUTO -> isSystemInDarkTheme()
+            }
 
             LaunchedEffect(useDarkTheme) {
                 setSystemBarAppearance(useDarkTheme)
@@ -783,21 +795,26 @@ class MainActivity : ComponentActivity() {
                                     visible = shouldShowTopBar,
                                     enter = slideInHorizontally(
                                         initialOffsetX = { -it / 4 },
-                                        animationSpec = tween(durationMillis = 100)
-                                    ) + fadeIn(animationSpec = tween(durationMillis = 100)),
+                                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                                    ) + fadeIn(animationSpec = tween(durationMillis = 200, easing = LinearEasing)),
                                     exit = slideOutHorizontally(
                                         targetOffsetX = { -it / 4 },
-                                        animationSpec = tween(durationMillis = 100)
-                                    ) + fadeOut(animationSpec = tween(durationMillis = 100))
+                                        animationSpec = tween(durationMillis = 150, easing = FastOutLinearInEasing)
+                                    ) + fadeOut(animationSpec = tween(durationMillis = 150, easing = LinearEasing))
                                 ) {
                                     Row {
                                         TopAppBar(
                                             title = {
                                                 Text(
-                                                    text = currentTitleRes?.let { stringResource(it) } ?: "",
+                                                    text = if (navBackStackEntry?.destination?.route == Screens.Home.route) {
+                                                        "Echo"
+                                                    } else {
+                                                        currentTitleRes?.let { stringResource(it) } ?: ""
+                                                    },
                                                     style = MaterialTheme.typography.titleLarge.copy(
                                                         fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                                                        fontWeight = FontWeight.Bold
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = if (navBackStackEntry?.destination?.route == Screens.Home.route) 28.sp else MaterialTheme.typography.titleLarge.fontSize
                                                     ),
                                                 )
                                             },
@@ -811,7 +828,8 @@ class MainActivity : ComponentActivity() {
                                                 IconButton(onClick = { navController.navigate("stats") }) {
                                                     Icon(
                                                         painter = painterResource(R.drawable.stats),
-                                                        contentDescription = stringResource(R.string.stats)
+                                                        contentDescription = stringResource(R.string.stats),
+                                                        modifier = Modifier.size(20.dp)
                                                     )
                                                 }
                                                 IconButton(onClick = { showAccountDialog = true }) {
@@ -1010,7 +1028,7 @@ class MainActivity : ComponentActivity() {
                                         Crossfade(
                                             targetState = searchSource,
                                             label = "",
-                                            animationSpec = tween(150),
+                                            animationSpec = tween(200, easing = FastOutSlowInEasing),
                                             modifier =
                                             Modifier
                                                 .fillMaxSize()
@@ -1213,7 +1231,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 Box(Modifier.weight(1f)) {
-                                    // NavHost with animations
+                                    // NavHost with smooth animations
                                     NavHost(
                                         navController = navController,
                                         startDestination = when (tabOpenedFromShortcut ?: defaultOpenTab) {
@@ -1221,7 +1239,7 @@ class MainActivity : ComponentActivity() {
                                             NavigationTab.LIBRARY -> Screens.Library
                                             else -> Screens.Home
                                         }.route,
-                                        // Enter Transition
+                                        // Enter Transition - smoother with easing
                                         enterTransition = {
                                             val currentRouteIndex = navigationItems.indexOfFirst {
                                                 it.route == targetState.destination.route
@@ -1231,11 +1249,17 @@ class MainActivity : ComponentActivity() {
                                             }
 
                                             if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex)
-                                                slideInHorizontally { it / 4 } + fadeIn(tween(150))
+                                                slideInHorizontally(
+                                                    initialOffsetX = { it / 4 },
+                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                ) + fadeIn(tween(250, easing = LinearEasing))
                                             else
-                                                slideInHorizontally { -it / 4 } + fadeIn(tween(150))
+                                                slideInHorizontally(
+                                                    initialOffsetX = { -it / 4 },
+                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                ) + fadeIn(tween(250, easing = LinearEasing))
                                         },
-                                        // Exit Transition
+                                        // Exit Transition - smoother
                                         exitTransition = {
                                             val currentRouteIndex = navigationItems.indexOfFirst {
                                                 it.route == initialState.destination.route
@@ -1245,9 +1269,15 @@ class MainActivity : ComponentActivity() {
                                             }
 
                                             if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex)
-                                                slideOutHorizontally { -it / 4 } + fadeOut(tween(100))
+                                                slideOutHorizontally(
+                                                    targetOffsetX = { -it / 4 },
+                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                ) + fadeOut(tween(200, easing = LinearEasing))
                                             else
-                                                slideOutHorizontally { it / 4 } + fadeOut(tween(100))
+                                                slideOutHorizontally(
+                                                    targetOffsetX = { it / 4 },
+                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                ) + fadeOut(tween(200, easing = LinearEasing))
                                         },
                                         // Pop Enter Transition
                                         popEnterTransition = {
@@ -1259,9 +1289,15 @@ class MainActivity : ComponentActivity() {
                                             }
 
                                             if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex)
-                                                slideInHorizontally { it / 4 } + fadeIn(tween(150))
+                                                slideInHorizontally(
+                                                    initialOffsetX = { it / 4 },
+                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                ) + fadeIn(tween(250, easing = LinearEasing))
                                             else
-                                                slideInHorizontally { -it / 4 } + fadeIn(tween(150))
+                                                slideInHorizontally(
+                                                    initialOffsetX = { -it / 4 },
+                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                ) + fadeIn(tween(250, easing = LinearEasing))
                                         },
                                         // Pop Exit Transition
                                         popExitTransition = {
@@ -1273,9 +1309,15 @@ class MainActivity : ComponentActivity() {
                                             }
 
                                             if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex)
-                                                slideOutHorizontally { -it / 4 } + fadeOut(tween(100))
+                                                slideOutHorizontally(
+                                                    targetOffsetX = { -it / 4 },
+                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                ) + fadeOut(tween(200, easing = LinearEasing))
                                             else
-                                                slideOutHorizontally { it / 4 } + fadeOut(tween(100))
+                                                slideOutHorizontally(
+                                                    targetOffsetX = { it / 4 },
+                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                ) + fadeOut(tween(200, easing = LinearEasing))
                                         },
                                         modifier = Modifier.nestedScroll(
                                             if (navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } ||

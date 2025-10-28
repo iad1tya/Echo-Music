@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import iad1tya.echo.music.LocalPlayerAwareWindowInsets
 import iad1tya.echo.music.R
 import iad1tya.echo.music.constants.ChipSortTypeKey
+import iad1tya.echo.music.constants.DarkModeKey
 import iad1tya.echo.music.constants.DefaultOpenTabKey
 import iad1tya.echo.music.constants.DynamicThemeKey
 import iad1tya.echo.music.constants.GridItemSize
@@ -91,6 +92,12 @@ fun AppearanceSettings(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
+    // Dark mode preference
+    val (darkMode, onDarkModeChange) = rememberEnumPreference(
+        DarkModeKey,
+        defaultValue = DarkMode.ON
+    )
+    
     // Dynamic theme removed - always disabled
     // Dark mode forced on - removed theme settings
     // New player design removed - always use old design
@@ -321,6 +328,24 @@ fun AppearanceSettings(
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
             .verticalScroll(rememberScrollState()),
     ) {
+        PreferenceGroupTitle(
+            title = stringResource(R.string.theme),
+        )
+
+        EnumListPreference(
+            title = { Text(stringResource(R.string.dark_mode)) },
+            icon = { Icon(painterResource(R.drawable.dark_mode), null) },
+            selectedValue = darkMode,
+            onValueSelected = onDarkModeChange,
+            valueText = {
+                when (it) {
+                    DarkMode.ON -> stringResource(R.string.dark_mode_on)
+                    DarkMode.OFF -> stringResource(R.string.dark_mode_off)
+                    DarkMode.AUTO -> stringResource(R.string.dark_mode_auto)
+                }
+            },
+        )
+
         PreferenceGroupTitle(
             title = stringResource(R.string.player),
         )

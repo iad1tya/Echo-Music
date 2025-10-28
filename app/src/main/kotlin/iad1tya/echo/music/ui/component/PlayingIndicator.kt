@@ -3,6 +3,7 @@ package iad1tya.echo.music.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
@@ -89,8 +90,8 @@ fun PlayingIndicatorBox(
 ) {
     AnimatedVisibility(
         visible = isActive,
-        enter = fadeIn(tween(500)),
-        exit = fadeOut(tween(500)),
+        enter = fadeIn(tween(300, easing = LinearEasing)),
+        exit = fadeOut(tween(200, easing = LinearEasing)),
     ) {
         Box(
             contentAlignment = Alignment.Center,

@@ -283,30 +283,6 @@ fun AccountSettings(
                 .clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
-            PreferenceEntry(
-                title = { Text(stringResource(R.string.settings)) },
-                icon = {
-                    BadgedBox(
-                        badge = {
-                            if (latestVersionName != BuildConfig.VERSION_NAME) {
-                                Badge()
-                            }
-                        }
-                    ) {
-                        Icon(painterResource(R.drawable.settings), contentDescription = null)
-                    }
-                },
-                onClick = {
-                    onClose()
-                    navController.navigate("settings")
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-            )
-
-            Spacer(Modifier.height(4.dp))
-
             if (latestVersionName != BuildConfig.VERSION_NAME) {
                 PreferenceEntry(
                     title = {

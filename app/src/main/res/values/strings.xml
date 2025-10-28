@@ -8,7 +8,7 @@
 
 <resources>
     <!-- Bottom navigation -->
-    <string name="home">Echo</string>
+    <string name="home">Home</string>
     <string name="songs">Songs</string>
     <string name="artists">Artists</string>
     <string name="albums">Albums</string>
@@ -241,9 +241,13 @@
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
     <string name="enable_dynamic_theme">Enable dynamic theme</string>
+    <string name="dark_mode">Dark mode</string>
     <string name="dark_theme">Dark theme</string>
+    <string name="dark_mode_on">On</string>
     <string name="dark_theme_on">On</string>
+    <string name="dark_mode_off">Off</string>
     <string name="dark_theme_off">Off</string>
+    <string name="dark_mode_auto">Device default</string>
     <string name="dark_theme_follow_system">Follow system</string>
     <string name="pure_black">Pure black</string>
     <string name="customize_navigation_tabs">Customize navigation tabs</string>

@@ -2,6 +2,8 @@ package iad1tya.echo.music.ui.component
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ScrollState
@@ -62,8 +64,14 @@ fun BoxScope.HideOnScrollFAB(
 ) {
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
-        enter = slideInVertically { it },
-        exit = slideOutVertically { it },
+        enter = slideInVertically(
+            initialOffsetY = { it },
+            animationSpec = tween(250, easing = FastOutSlowInEasing)
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { it },
+            animationSpec = tween(200, easing = FastOutSlowInEasing)
+        ),
         modifier =
         Modifier
             .align(Alignment.BottomEnd)
@@ -93,8 +101,14 @@ fun BoxScope.HideOnScrollFAB(
 ) {
     AnimatedVisibility(
         visible = visible && scrollState.isScrollingUp(),
-        enter = slideInVertically { it },
-        exit = slideOutVertically { it },
+        enter = slideInVertically(
+            initialOffsetY = { it },
+            animationSpec = tween(250, easing = FastOutSlowInEasing)
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { it },
+            animationSpec = tween(200, easing = FastOutSlowInEasing)
+        ),
         modifier =
         Modifier
             .align(Alignment.BottomEnd)

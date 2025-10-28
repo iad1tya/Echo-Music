@@ -6,6 +6,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -1157,8 +1159,8 @@ fun LocalThumbnail(
 
         AnimatedVisibility(
             visible = isActive,
-            enter = fadeIn(tween(500)),
-            exit = fadeOut(tween(500))
+            enter = fadeIn(tween(250, easing = LinearEasing)),
+            exit = fadeOut(tween(200, easing = LinearEasing))
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -1184,8 +1186,8 @@ fun LocalThumbnail(
         if (showCenterPlay) {
             AnimatedVisibility(
                 visible = !(isActive && isPlaying),
-                enter = fadeIn(),
-                exit = fadeOut(),
+                enter = fadeIn(tween(200, easing = LinearEasing)),
+                exit = fadeOut(tween(150, easing = LinearEasing)),
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(8.dp)
@@ -1305,8 +1307,8 @@ fun BoxScope.OverlayPlayButton(
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(),
-        exit = fadeOut(),
+        enter = fadeIn(tween(200, easing = LinearEasing)),
+        exit = fadeOut(tween(150, easing = LinearEasing)),
         modifier = Modifier
             .align(Alignment.Center)
     ) {
@@ -1335,8 +1337,8 @@ fun BoxScope.OverlayEditButton(
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(),
-        exit = fadeOut(),
+        enter = fadeIn(tween(200, easing = LinearEasing)),
+        exit = fadeOut(tween(150, easing = LinearEasing)),
         modifier = Modifier
             .align(alignment)
             .then(if (alignment == Alignment.BottomEnd) Modifier.padding(8.dp) else Modifier)

@@ -322,7 +322,7 @@ fun ContentSettings(
         if (proxyEnabled) {
             PreferenceEntry(
                 title = { Text(stringResource(R.string.config_proxy)) },
-                icon = { Icon(painterResource(R.drawable.settings), null) },
+                icon = { Icon(painterResource(R.drawable.settings_outlined), null) },
                 onClick = {showProxyConfigurationDialog = true}
             )
         }

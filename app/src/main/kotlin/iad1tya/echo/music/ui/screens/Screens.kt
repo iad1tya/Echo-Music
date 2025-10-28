@@ -33,7 +33,14 @@ sealed class Screens(
         route = "library"
     )
 
+    object Settings : Screens(
+        titleId = R.string.settings,
+        iconIdInactive = R.drawable.settings_outlined,
+        iconIdActive = R.drawable.settings_filled,
+        route = "settings"
+    )
+
     companion object {
-        val MainScreens = listOf(Home, Search, Library)
+        val MainScreens = listOf(Home, Search, Library, Settings)
     }
 }

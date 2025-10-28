@@ -197,7 +197,7 @@ private fun QuickAccessSection(
             if (showCached) {
                 QuickAccessCard(
                     title = stringResource(R.string.cached_playlist),
-                    icon = R.drawable.trending_up,
+                    icon = R.drawable.cached,
                     backgroundColor = Color(0xFF26C6DA), // Shifted Cyan
                     onClick = { navController.navigate("cache_playlist/cached") },
                     modifier = Modifier.weight(1f)

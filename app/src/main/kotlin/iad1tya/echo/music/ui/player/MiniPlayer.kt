@@ -165,9 +165,11 @@ private fun NewMiniPlayer(
     var dragStartTime by remember { mutableLongStateOf(0L) }
     var totalDragDistance by remember { mutableFloatStateOf(0f) }
 
+    // Optimized animation spec for smoother, more responsive feel
     val animationSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessLow
+        stiffness = Spring.StiffnessMedium,
+        visibilityThreshold = 0.1f
     )
 
     val overlayAlpha by animateFloatAsState(

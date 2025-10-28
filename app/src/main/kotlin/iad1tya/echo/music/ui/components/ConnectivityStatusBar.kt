@@ -70,7 +70,7 @@ fun ConnectivityStatusBar(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
-                        painter = painterResource(id = if (isBluetoothEnabled) R.drawable.settings else R.drawable.error),
+                        painter = painterResource(id = if (isBluetoothEnabled) R.drawable.settings_outlined else R.drawable.error),
                         contentDescription = "Bluetooth status",
                         tint = if (isBluetoothEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)

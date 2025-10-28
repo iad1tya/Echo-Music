@@ -66,6 +66,7 @@ import iad1tya.echo.music.ui.screens.settings.PrivacySettings
 import iad1tya.echo.music.ui.screens.settings.RomanizationSettings
 import iad1tya.echo.music.ui.screens.settings.SettingsScreen
 import iad1tya.echo.music.ui.screens.settings.StorageSettings
+import iad1tya.echo.music.ui.screens.settings.SupporterScreen
 import iad1tya.echo.music.ui.screens.settings.UpdaterScreen
 import iad1tya.echo.music.ui.utils.ShowMediaInfo
 import iad1tya.echo.music.utils.rememberEnumPreference
@@ -311,6 +312,9 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/about") {
         AboutScreen(navController, scrollBehavior)
+    }
+    composable("settings/supporter") {
+        SupporterScreen(navController, scrollBehavior)
     }
     composable("login") {
         LoginScreen(navController)

@@ -3,6 +3,8 @@ package iad1tya.echo.music.ui.component
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -86,8 +88,8 @@ fun BottomSheetPage(
 
     AnimatedVisibility(
         visible = state.isVisible,
-        enter = fadeIn(animationSpec = tween(300)),
-        exit = fadeOut(animationSpec = tween(300)),
+        enter = fadeIn(animationSpec = tween(250, easing = LinearEasing)),
+        exit = fadeOut(animationSpec = tween(200, easing = LinearEasing)),
     ) {
         BackHandler {
             state.dismiss()
@@ -109,11 +111,11 @@ fun BottomSheetPage(
         visible = state.isVisible,
         enter = slideInVertically(
             initialOffsetY = { it },
-            animationSpec = tween(300)
+            animationSpec = tween(300, easing = FastOutSlowInEasing)
         ),
         exit = slideOutVertically(
             targetOffsetY = { it },
-            animationSpec = tween(300)
+            animationSpec = tween(250, easing = FastOutSlowInEasing)
         ),
         modifier = modifier,
     ) {

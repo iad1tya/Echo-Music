@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,7 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -60,6 +61,8 @@ fun AboutScreen(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     val uriHandler = LocalUriHandler.current
+    val isDarkTheme = MaterialTheme.colorScheme.surface == MaterialTheme.colorScheme.onSurface.copy(alpha = 0.87f) || 
+                      MaterialTheme.colorScheme.surface.red < 0.5f
 
     Column(
         modifier = Modifier
@@ -85,6 +88,7 @@ fun AboutScreen(
         Image(
             painter = painterResource(R.drawable.echo_logo),
             contentDescription = null,
+            colorFilter = if (!isDarkTheme) ColorFilter.tint(Color.Black) else null,
             modifier = Modifier
                 .size(120.dp)
                 .clip(CircleShape)
@@ -194,16 +198,16 @@ fun AboutScreen(
             }
         }
 
-        // Contact Email
+        // Discord Link
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { uriHandler.openUri("mailto:hello@echomusic.fun") }
+                .clickable { uriHandler.openUri("https://discord.com/invite/eNFNHaWN97") }
                 .padding(horizontal = 32.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(R.drawable.mail),
+                painter = painterResource(R.drawable.discord),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
@@ -211,12 +215,41 @@ fun AboutScreen(
             Spacer(Modifier.width(16.dp))
             Column {
                 Text(
-                    text = "Contact",
+                    text = "Discord",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "hello@echomusic.fun",
+                    text = "Join our community",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Telegram Link
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { uriHandler.openUri("https://t.me/EchoMusicApp") }
+                .padding(horizontal = 32.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.telegram),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Telegram",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Follow us on Telegram",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -251,6 +284,64 @@ fun AboutScreen(
             }
         }
 
+        // UPI Payment Link
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { uriHandler.openUri("https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=8840590272@kotak&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support") }
+                .padding(horizontal = 32.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.upi),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "UPI Payment",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Support via UPI",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Contact Email
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { uriHandler.openUri("mailto:hello@echomusic.fun") }
+                .padding(horizontal = 32.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.mail_filled),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Contact",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "hello@echomusic.fun",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
         // Privacy Policy
         Row(
             modifier = Modifier
@@ -262,7 +353,8 @@ fun AboutScreen(
             Icon(
                 painter = painterResource(R.drawable.lock),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
             )
             Spacer(Modifier.width(16.dp))
             Column {
@@ -290,7 +382,8 @@ fun AboutScreen(
             Icon(
                 painter = painterResource(R.drawable.info),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
             )
             Spacer(Modifier.width(16.dp))
             Column {
