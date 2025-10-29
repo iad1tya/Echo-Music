@@ -43,6 +43,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -115,7 +117,10 @@ fun AccountSettings(
         ) {
             Text(
                 text = stringResource(id = R.string.app_name),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                    fontWeight = FontWeight.Bold
+                ),
                 modifier = Modifier.padding(start = 4.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -232,7 +237,7 @@ fun AccountSettings(
                     }
                 )
             },
-            icon = { Icon(painterResource(R.drawable.token), null) },
+            icon = { Icon(painterResource(R.drawable.key), null) },
             onClick = {
                 if (!isLoggedIn) showTokenEditor = true
                 else if (!showToken) showToken = true
@@ -277,28 +282,5 @@ fun AccountSettings(
         }
 
         Spacer(Modifier.height(12.dp))
-
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-        ) {
-            if (latestVersionName != BuildConfig.VERSION_NAME) {
-                PreferenceEntry(
-                    title = {
-                        Text(text = stringResource(R.string.new_version_available))
-                    },
-                    description = latestVersionName,
-                    icon = {
-                        BadgedBox(badge = { Badge() }) {
-                            Icon(painterResource(R.drawable.update), null)
-                        }
-                    },
-                    onClick = {
-                        uriHandler.openUri("https://echomusic.fun")
-                    }
-                )
-            }
-        }
     }
 }

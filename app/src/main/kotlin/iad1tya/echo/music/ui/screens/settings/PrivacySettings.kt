@@ -23,6 +23,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import iad1tya.echo.music.LocalDatabase
@@ -188,7 +191,15 @@ fun PrivacySettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.privacy)) },
+        title = { 
+            Text(
+                text = stringResource(R.string.privacy),
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,
@@ -199,6 +210,7 @@ fun PrivacySettings(
                     contentDescription = null,
                 )
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }

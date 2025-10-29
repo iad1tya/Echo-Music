@@ -833,26 +833,20 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 }
                                                 IconButton(onClick = { showAccountDialog = true }) {
-                                                    BadgedBox(badge = {
-                                                        if (latestVersionName != BuildConfig.VERSION_NAME) {
-                                                            Badge()
-                                                        }
-                                                    }) {
-                                                        if (accountImageUrl != null) {
-                                                            AsyncImage(
-                                                                model = accountImageUrl,
-                                                                contentDescription = stringResource(R.string.account),
-                                                                modifier = Modifier
-                                                                    .size(24.dp)
-                                                                    .clip(CircleShape)
-                                                            )
-                                                        } else {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.account),
-                                                                contentDescription = stringResource(R.string.account),
-                                                                modifier = Modifier.size(24.dp)
-                                                            )
-                                                        }
+                                                    if (accountImageUrl != null) {
+                                                        AsyncImage(
+                                                            model = accountImageUrl,
+                                                            contentDescription = stringResource(R.string.account),
+                                                            modifier = Modifier
+                                                                .size(24.dp)
+                                                                .clip(CircleShape)
+                                                        )
+                                                    } else {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.account),
+                                                            contentDescription = stringResource(R.string.account),
+                                                            modifier = Modifier.size(24.dp)
+                                                        )
                                                     }
                                                 }
                                             },
@@ -1119,12 +1113,27 @@ class MainActivity : ComponentActivity() {
                                                 NavigationBarItem(
                                                     selected = isSelected,
                                                     icon = {
-                                                        Icon(
-                                                            painter = painterResource(
-                                                                id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
-                                                            ),
-                                                            contentDescription = null,
-                                                        )
+                                                        if (screen.route == Screens.Settings.route) {
+                                                            BadgedBox(badge = {
+                                                                if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                                                    Badge()
+                                                                }
+                                                            }) {
+                                                                Icon(
+                                                                    painter = painterResource(
+                                                                        id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                                                                    ),
+                                                                    contentDescription = null,
+                                                                )
+                                                            }
+                                                        } else {
+                                                            Icon(
+                                                                painter = painterResource(
+                                                                    id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                                                                ),
+                                                                contentDescription = null,
+                                                            )
+                                                        }
                                                     },
                                                     label = {
                                                         if (!slimNav) {

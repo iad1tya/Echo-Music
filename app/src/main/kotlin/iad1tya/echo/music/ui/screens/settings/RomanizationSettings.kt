@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -29,6 +30,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.toLowerCase
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
@@ -160,7 +164,15 @@ fun RomanizationSettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.lyrics_romanize_title)) },
+        title = { 
+            Text(
+                text = stringResource(R.string.lyrics_romanize_title),
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,
@@ -171,6 +183,7 @@ fun RomanizationSettings(
                     contentDescription = null,
                 )
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }
