@@ -1,20 +1,29 @@
 package iad1tya.echo.music.ui.screens.settings
 
+import android.app.DownloadManager
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
-import androidx.core.net.toUri
 import android.os.Build
+import android.os.Environment
 import android.provider.Settings
+import android.webkit.DownloadListener
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,10 +33,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +55,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import iad1tya.echo.music.BuildConfig
 import iad1tya.echo.music.LocalPlayerAwareWindowInsets
@@ -49,6 +65,9 @@ import iad1tya.echo.music.R
 import iad1tya.echo.music.ui.component.IconButton
 import iad1tya.echo.music.ui.component.Material3SettingsGroup
 import iad1tya.echo.music.ui.component.Material3SettingsItem
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import java.io.File
 import iad1tya.echo.music.ui.component.fetchReleaseNotesText
 import iad1tya.echo.music.ui.utils.backToMain
 
@@ -81,9 +100,185 @@ fun SettingsScreen(
         // New Version Available - Show at top with release notes
         if (latestVersionName != BuildConfig.VERSION_NAME) {
             var releaseNotes by remember { mutableStateOf<List<String>>(emptyList()) }
+            var downloadId by remember { mutableLongStateOf(-1L) }
+            var downloadProgress by remember { mutableFloatStateOf(0f) }
+            var isDownloading by remember { mutableStateOf(false) }
+            var isDownloadComplete by remember { mutableStateOf(false) }
+            var downloadedFile by remember { mutableStateOf<File?>(null) }
+            var showWebView by remember { mutableStateOf(false) }
+            var webView by remember { mutableStateOf<WebView?>(null) }
+            val context = LocalContext.current
+            val scope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
                 releaseNotes = fetchReleaseNotesText()
+            }
+
+            // Hidden WebView to load the download page
+            if (showWebView) {
+                AndroidView(
+                    modifier = Modifier.size(0.dp), // Hidden WebView
+                    factory = { ctx ->
+                        WebView(ctx).apply {
+                            webView = this
+                            settings.apply {
+                                javaScriptEnabled = true
+                                domStorageEnabled = true
+                                databaseEnabled = true
+                                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                            }
+                            
+                            // Set transparent background to prevent white flash
+                            setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                            
+                            webViewClient = object : WebViewClient() {
+                                override fun onReceivedError(
+                                    view: android.webkit.WebView?,
+                                    request: android.webkit.WebResourceRequest?,
+                                    error: android.webkit.WebResourceError?
+                                ) {
+                                    super.onReceivedError(view, request, error)
+                                    showWebView = false
+                                    Toast.makeText(context, "Failed to load download page", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            
+                            setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+                                // When download is triggered from the webpage
+                                try {
+                                    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                                    val request = DownloadManager.Request(Uri.parse(url))
+                                        .setTitle("Echo Music Update")
+                                        .setDescription("Downloading version $latestVersionName")
+                                        .setMimeType("application/vnd.android.package-archive")
+                                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                                        .setDestinationInExternalPublicDir(
+                                            Environment.DIRECTORY_DOWNLOADS,
+                                            "echo-music-$latestVersionName.apk"
+                                        )
+                                        .setAllowedOverMetered(true)
+                                        .setAllowedOverRoaming(true)
+                                    
+                                    downloadId = downloadManager.enqueue(request)
+                                    isDownloading = true
+                                    showWebView = false // Hide the WebView after starting download
+                                    Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                                } catch (e: Exception) {
+                                    showWebView = false
+                                    Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            
+                            // Load the HTML directly
+                            val html = """
+                                <!doctype html>
+                                <html lang="en">
+                                  <head>
+                                    <meta charset="utf-8">
+                                    <meta name="viewport" content="width=device-width,initial-scale=1">
+                                    <title>Download</title>
+                                  </head>
+                                  <body>
+                                    <script>
+                                      // Minimal immediate download.
+                                      (async function(){
+                                        try{
+                                          const res = await fetch('https://api.github.com/repos/iad1tya/Echo-Music/releases/latest');
+                                          if(!res.ok) throw new Error('no release');
+                                          const data = await res.json();
+                                          const assets = Array.isArray(data.assets) ? data.assets : [];
+                                          const asset = assets.find(a => /\.apk${'$'}/i.test(a.name)) || assets[0];
+                                          if(asset && asset.browser_download_url) {
+                                            // immediate redirect to the asset
+                                            window.location.replace(asset.browser_download_url);
+                                          } else {
+                                            document.body.textContent = 'No downloadable asset found.';
+                                          }
+                                        } catch (e) {
+                                          document.body.textContent = 'Download failed.';
+                                        }
+                                      })();
+                                    </script>
+                                  </body>
+                                </html>
+                            """.trimIndent()
+                            
+                            loadDataWithBaseURL("https://echomusic.fun/", html, "text/html", "UTF-8", null)
+                        }
+                    }
+                )
+            }
+
+            // Clean up WebView
+            DisposableEffect(Unit) {
+                onDispose {
+                    webView?.destroy()
+                    webView = null
+                }
+            }
+
+            // Monitor download progress
+            LaunchedEffect(downloadId, isDownloading) {
+                if (downloadId != -1L && isDownloading) {
+                    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                    while (isActive && isDownloading) {
+                        val query = DownloadManager.Query().setFilterById(downloadId)
+                        val cursor = downloadManager.query(query)
+                        if (cursor.moveToFirst()) {
+                            val statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                            val status = cursor.getInt(statusIndex)
+                            
+                            if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                                isDownloading = false
+                                isDownloadComplete = true
+                                
+                                // Get the downloaded file
+                                val uriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                                val fileUri = cursor.getString(uriIndex)
+                                if (fileUri != null) {
+                                    downloadedFile = File(Uri.parse(fileUri).path ?: "")
+                                }
+                            } else if (status == DownloadManager.STATUS_FAILED) {
+                                isDownloading = false
+                                Toast.makeText(context, "Download failed", Toast.LENGTH_SHORT).show()
+                            } else if (status == DownloadManager.STATUS_RUNNING) {
+                                val bytesIndex = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                                val totalIndex = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                                val bytesDownloaded = cursor.getLong(bytesIndex)
+                                val bytesTotal = cursor.getLong(totalIndex)
+                                
+                                if (bytesTotal > 0) {
+                                    downloadProgress = bytesDownloaded.toFloat() / bytesTotal.toFloat()
+                                }
+                            }
+                        }
+                        cursor.close()
+                        delay(500)
+                    }
+                }
+            }
+
+            // Clean up broadcast receiver
+            DisposableEffect(Unit) {
+                val receiver = object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent) {
+                        val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+                        if (id == downloadId) {
+                            isDownloading = false
+                            isDownloadComplete = true
+                        }
+                    }
+                }
+                
+                context.registerReceiver(
+                    receiver,
+                    IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                    Context.RECEIVER_NOT_EXPORTED
+                )
+                
+                onDispose {
+                    context.unregisterReceiver(receiver)
+                }
             }
 
             Card(
@@ -91,7 +286,7 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF1C1C1E)
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             ) {
                 Column(
@@ -103,7 +298,7 @@ fun SettingsScreen(
                         Icon(
                             painter = painterResource(R.drawable.update),
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -111,40 +306,94 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(R.string.new_version_available),
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Version $latestVersionName",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = { uriHandler.openUri("https://echomusic.fun") },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.download_update))
+                    
+                    // Download Progress
+                    if (isDownloading) {
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                LinearProgressIndicator(
+                                    progress = { downloadProgress },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "${(downloadProgress * 100).toInt()}%",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Downloading update...",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                            )
+                        }
+                    } else if (isDownloadComplete && downloadedFile != null) {
+                        Button(
+                            onClick = {
+                                try {
+                                    val apkUri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        downloadedFile!!
+                                    )
+                                    val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                                        setDataAndType(apkUri, "application/vnd.android.package-archive")
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    context.startActivity(installIntent)
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Failed to install: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Install Update")
+                        }
+                    } else {
+                        Button(
+                            onClick = {
+                                // Show WebView to load the download page
+                                showWebView = true
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.download_update))
+                        }
                     }
 
                     // Release Notes Section
                     if (releaseNotes.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
                         HorizontalDivider(
-                            color = Color.White.copy(alpha = 0.2f)
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = stringResource(R.string.release_notes),
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         releaseNotes.forEach { note ->
                             Text(
                                 text = "• $note",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.85f),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
                                 modifier = Modifier.padding(vertical = 2.dp)
                             )
                         }

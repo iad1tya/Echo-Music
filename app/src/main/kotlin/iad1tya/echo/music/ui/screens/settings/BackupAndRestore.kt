@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import iad1tya.echo.music.LocalPlayerAwareWindowInsets
@@ -104,7 +106,7 @@ fun BackupAndRestore(
 
     Column(
         Modifier
-            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal))
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(
@@ -147,6 +149,15 @@ fun BackupAndRestore(
             onClick = {
                 importPlaylistFromCsv.launch(arrayOf("text/csv"))
             }
+        )
+        
+        // Bottom spacer - allows content to scroll under the floating miniplayer
+        // Extra height moves miniplayer visual position up
+        Spacer(Modifier.height(80.dp))
+        Spacer(
+            Modifier.windowInsetsPadding(
+                LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Bottom)
+            )
         )
     }
 

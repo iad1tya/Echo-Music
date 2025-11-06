@@ -3,6 +3,7 @@ package iad1tya.echo.music.ui.screens.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -134,7 +135,7 @@ fun PrivacySettings(
 
     Column(
         Modifier
-            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal))
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(
@@ -187,6 +188,15 @@ fun PrivacySettings(
             icon = { Icon(painterResource(R.drawable.screenshot), null) },
             checked = disableScreenshot,
             onCheckedChange = onDisableScreenshotChange,
+        )
+        
+        // Bottom spacer - allows content to scroll under the floating miniplayer
+        // Extra height moves miniplayer visual position up
+        Spacer(Modifier.height(80.dp))
+        Spacer(
+            Modifier.windowInsetsPadding(
+                LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Bottom)
+            )
         )
     }
 

@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -224,7 +226,7 @@ fun ContentSettings(
 
     Column(
         Modifier
-            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
+            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top))
             .verticalScroll(rememberScrollState()),
     ) {
         PreferenceGroupTitle(title = stringResource(R.string.general))
@@ -384,6 +386,15 @@ fun ContentSettings(
                 }
             },
             onValueSelected = onQuickPicksChange,
+        )
+        
+        // Bottom spacer - allows content to scroll under the floating miniplayer
+        // Extra height moves miniplayer visual position up
+        Spacer(Modifier.height(80.dp))
+        Spacer(
+            Modifier.windowInsetsPadding(
+                LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Bottom)
+            )
         )
     }
 

@@ -571,8 +571,12 @@ class MainActivity : ComponentActivity() {
                     }
 
                     val shouldShowNavigationBar = remember(navBackStackEntry, active) {
-                        navBackStackEntry?.destination?.route == null ||
-                                navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } &&
+                        val currentRoute = navBackStackEntry?.destination?.route
+                        val isSettingsScreen = currentRoute?.startsWith("settings/") == true
+                        
+                        (currentRoute == null ||
+                                navigationItems.fastAny { it.route == currentRoute } ||
+                                isSettingsScreen) &&
                                 !active
                     }
 
@@ -591,6 +595,14 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    // Calculate responsive mini player spacing based on screen dimensions
+                    val miniPlayerExtraSpacing = remember(configuration.screenHeightDp, configuration.screenWidthDp) {
+                        // Responsive spacing that maintains consistent visual distance across screen sizes
+                        // Use a combination of screen height and a minimum baseline
+                        val baseSpacing = (configuration.screenHeightDp * 0.012f).dp
+                        baseSpacing.coerceIn(6.dp, 16.dp)
+                    }
+
                     val navigationBarHeight by animateDpAsState(
                         targetValue = if (shouldShowNavigationBar && !showRail) NavigationBarHeight else 0.dp,
                         animationSpec = NavigationBarAnimationSpec,
@@ -601,7 +613,7 @@ class MainActivity : ComponentActivity() {
                         rememberBottomSheetState(
                             dismissedBound = 0.dp,
                             collapsedBound = bottomInset +
-                                (if (!showRail && shouldShowNavigationBar) getNavPadding() else 0.dp) +
+                                (if (!showRail && shouldShowNavigationBar) getNavPadding() + miniPlayerExtraSpacing else 0.dp) +
                                 MiniPlayerHeight - 24.dp,
                             expandedBound = maxHeight,
                         )
@@ -1124,11 +1136,23 @@ class MainActivity : ComponentActivity() {
                                             navController = navController,
                                             pureBlack = pureBlack
                                         )
+                                        // Calculate responsive vertical padding based on screen dimensions
+                                        val responsiveVerticalPadding = remember(configuration.screenHeightDp, configuration.screenWidthDp) {
+                                            // Adaptive spacing that maintains consistent visual distance
+                                            // Adjust based on both screen height and aspect ratio
+                                            val aspectRatio = configuration.screenWidthDp.toFloat() / configuration.screenHeightDp.toFloat()
+                                            val baseSpacing = (configuration.screenHeightDp * 0.022f).dp
+                                            
+                                            // Adjust for different aspect ratios (wider screens get slightly more padding)
+                                            val aspectAdjustment = if (aspectRatio > 0.6f) 1.1f else 1.0f
+                                            (baseSpacing * aspectAdjustment).coerceIn(14.dp, 28.dp)
+                                        }
+                                        
                                         // Custom Pill-shaped Navigation Bar with Glassmorphism
                                         Box(
                                             modifier = Modifier
                                                 .align(Alignment.BottomCenter)
-                                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                                .padding(horizontal = 16.dp, vertical = responsiveVerticalPadding)
                                                 .offset {
                                                     if (navigationBarHeight == 0.dp) {
                                                         IntOffset(
