@@ -4,13 +4,16 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 /**
@@ -30,9 +33,10 @@ fun Material3SettingsGroup(
         title?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp, top = 8.dp)
+                modifier = Modifier.padding(start = 20.dp, bottom = 10.dp, top = 12.dp)
             )
         }
         
@@ -41,9 +45,9 @@ fun Material3SettingsGroup(
             modifier = Modifier
                 .fillMaxWidth()
                 .animateContentSize(),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                containerColor = Color.Transparent
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
@@ -71,24 +75,27 @@ private fun Material3SettingsItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 .clickable(
                     enabled = item.onClick != null,
                     onClick = { item.onClick?.invoke() }
                 )
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon with background
+            // Modern icon with circular background
             item.icon?.let { icon ->
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .size(44.dp)
+                        .clip(CircleShape)
                         .background(
-                            MaterialTheme.colorScheme.primary.copy(
-                                alpha = if (item.isHighlighted) 0.15f else 0.1f
-                            )
+                            if (item.isHighlighted)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -106,8 +113,8 @@ private fun Material3SettingsItemRow(
                                 tint = if (item.isHighlighted) 
                                     MaterialTheme.colorScheme.primary 
                                 else 
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                modifier = Modifier.size(24.dp)
+                                    MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(26.dp)
                             )
                         }
                     } else {
@@ -117,13 +124,13 @@ private fun Material3SettingsItemRow(
                             tint = if (item.isHighlighted) 
                                 MaterialTheme.colorScheme.primary 
                             else 
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                            modifier = Modifier.size(24.dp)
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(26.dp)
                         )
                     }
                 }
                 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
             }
             
             // Title and description
@@ -131,14 +138,24 @@ private fun Material3SettingsItemRow(
                 modifier = Modifier.weight(1f)
             ) {
                 // Title content
-                ProvideTextStyle(MaterialTheme.typography.titleMedium) {
+                ProvideTextStyle(
+                    MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                    )
+                ) {
                     item.title()
                 }
                 
                 // Description if provided
                 item.description?.let { desc ->
-                    Spacer(modifier = Modifier.height(2.dp))
-                    desc()
+                    Spacer(modifier = Modifier.height(6.dp))
+                    ProvideTextStyle(
+                        MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        )
+                    ) {
+                        desc()
+                    }
                 }
             }
             
@@ -147,18 +164,6 @@ private fun Material3SettingsItemRow(
                 Spacer(modifier = Modifier.width(8.dp))
                 trailing()
             }
-        }
-        
-        // Divider
-        if (showDivider) {
-            HorizontalDivider(
-                modifier = Modifier.padding(
-                    start = if (item.icon != null) 76.dp else 20.dp,
-                    end = 20.dp
-                ),
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-            )
         }
     }
 }

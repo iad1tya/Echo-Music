@@ -143,11 +143,6 @@ fun AppearanceSettings(
         defaultValue = GridItemSize.SMALL
     )
 
-    val (slimNav, onSlimNavChange) = rememberPreference(
-        SlimNavBarKey,
-        defaultValue = false
-    )
-
     val (swipeToSong, onSwipeToSongChange) = rememberPreference(
         SwipeToSongKey,
         defaultValue = false
@@ -555,13 +550,6 @@ fun AppearanceSettings(
             icon = { Icon(painterResource(R.drawable.swipe), null) },
             checked = swipeToRemoveSong,
             onCheckedChange = onSwipeToRemoveSongChange
-        )
-
-        SwitchPreference(
-            title = { Text(stringResource(R.string.slim_navbar)) },
-            icon = { Icon(painterResource(R.drawable.nav_bar), null) },
-            checked = slimNav,
-            onCheckedChange = onSlimNavChange
         )
 
         EnumListPreference(

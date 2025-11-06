@@ -5,6 +5,24 @@ All notable changes to Echo Music will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4] - 2025-11-06
+
+### Changed
+- **🎨 Widget Redesign**
+  - Changed widget to modern pill-shaped design with 50dp corner radius
+  - Album art now displays as circular instead of rounded square
+  - Widget background changed to black for better contrast
+  - Reduced widget height from 110dp to 80dp for more compact appearance
+  - Optimized element sizes: album art (60dp), play button (48dp), reduced text sizes
+
+- **🎯 UI Improvements**
+  - Mini player positioned closer to bottom navigation bar for improved visual flow
+  - Reduced spacing between mini player and navigation bar
+
+### Fixed
+- Widget layout optimization to eliminate wasted space
+- Improved widget visual hierarchy
+
 ## [2.0.1] - 2025-10-22
 
 - Fixed Audio routing features for greater flexibility and control

@@ -65,8 +65,8 @@ fun SettingsScreen(
 
     Column(
         Modifier
+            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal))
             .background(MaterialTheme.colorScheme.background)
-            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
     ) {
@@ -165,7 +165,7 @@ fun SettingsScreen(
             )
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
         // Player & Content Section (moved up and combined with content)
         Material3SettingsGroup(
@@ -184,7 +184,7 @@ fun SettingsScreen(
             )
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
         // Privacy & Security Section
         Material3SettingsGroup(
@@ -198,7 +198,7 @@ fun SettingsScreen(
             )
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
         // Storage & Data Section
         Material3SettingsGroup(
@@ -217,9 +217,9 @@ fun SettingsScreen(
             )
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
-        // System & About Section
+        // System & Info Section
         Material3SettingsGroup(
             title = stringResource(R.string.settings_section_system),
             items = buildList {
@@ -291,7 +291,8 @@ fun SettingsScreen(
             }
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        // Bottom padding for navbar + mini player
+        Spacer(modifier = Modifier.height(150.dp))
     }
 
     TopAppBar(
@@ -305,7 +306,8 @@ fun SettingsScreen(
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.background,
+            scrolledContainerColor = MaterialTheme.colorScheme.background
         ),
         scrollBehavior = scrollBehavior
     )
