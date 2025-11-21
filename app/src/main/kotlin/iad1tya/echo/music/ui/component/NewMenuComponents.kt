@@ -57,43 +57,42 @@ fun NewActionButton(
         label = "content"
     )
 
-    Card(
+    Column(
         modifier = modifier
-            .clickable(enabled = enabled) { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = animatedBackground
-        ),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+            .clickable(enabled = enabled) { onClick() }
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = animatedBackground
+            ),
+            shape = RoundedCornerShape(50),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 2.dp
+            )
         ) {
             Box(
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 icon()
             }
-            
-            Spacer(modifier = Modifier.height(6.dp))
-            
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelMedium,
-                color = animatedContent,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.basicMarquee()
-            )
         }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = animatedContent,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.basicMarquee()
+        )
     }
 }
 

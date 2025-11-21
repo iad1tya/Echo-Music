@@ -5,9 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,9 +73,11 @@ import iad1tya.echo.music.ui.component.PreferenceEntry
 import iad1tya.echo.music.ui.component.ReleaseNotesCard
 import iad1tya.echo.music.ui.component.SwitchPreference
 import iad1tya.echo.music.ui.component.TextFieldDialog
+import iad1tya.echo.music.ui.component.AccountSwitcherDropdown
 import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.viewmodels.HomeViewModel
 import iad1tya.echo.music.viewmodels.AccountSettingsViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun AccountSettings(
@@ -81,6 +87,7 @@ fun AccountSettings(
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    val coroutineScope = rememberCoroutineScope()
 
     val (accountNamePref, onAccountNameChange) = rememberPreference(AccountNameKey, "")
     val (accountEmail, onAccountEmailChange) = rememberPreference(AccountEmailKey, "")
@@ -99,9 +106,14 @@ fun AccountSettings(
     val accountSettingsViewModel: AccountSettingsViewModel = hiltViewModel()
     val accountName by homeViewModel.accountName.collectAsState()
     val accountImageUrl by homeViewModel.accountImageUrl.collectAsState()
+    
+    // Get accounts from ViewModel
+    val allAccounts by accountSettingsViewModel.allAccounts.collectAsState()
+    val activeAccount by accountSettingsViewModel.activeAccount.collectAsState()
 
     var showToken by remember { mutableStateOf(false) }
     var showTokenEditor by remember { mutableStateOf(false) }
+    var showAccountSwitcher by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -131,23 +143,34 @@ fun AccountSettings(
 
         Spacer(Modifier.height(12.dp))
 
-        val accountSectionModifier = Modifier.clickable {
-            onClose()
-            if (isLoggedIn) {
-                navController.navigate("account")
-            } else {
-                navController.navigate("login")
-            }
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = accountSectionModifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 18.dp, vertical = 12.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(
+                        if (showAccountSwitcher) 
+                            RoundedCornerShape(topStart = 50.dp, topEnd = 50.dp)
+                        else 
+                            RoundedCornerShape(50.dp)
+                    )
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = androidx.compose.material3.ripple(),
+                        onClick = {
+                            if (isLoggedIn) {
+                                showAccountSwitcher = !showAccountSwitcher
+                            } else {
+                                onClose()
+                                navController.navigate("login")
+                            }
+                        }
+                    )
+                    .padding(horizontal = 18.dp, vertical = 12.dp)
+            ) {
             if (isLoggedIn && accountImageUrl != null) {
                 AsyncImage(
                     model = accountImageUrl,
@@ -156,10 +179,11 @@ fun AccountSettings(
                     modifier = Modifier.size(40.dp).clip(CircleShape)
                 )
             } else {
-                Icon(
-                    painter = painterResource(R.drawable.login),
+                Image(
+                    painter = painterResource(R.drawable.google),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
+                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(androidx.compose.ui.graphics.Color.White)
                 )
             }
 
@@ -167,17 +191,34 @@ fun AccountSettings(
 
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = if (isLoggedIn) accountName else stringResource(R.string.login),
+                    text = if (isLoggedIn) accountName else "Google Login",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(start = 5.dp)
                 )
+                // Show account count if multiple accounts
+                if (isLoggedIn && allAccounts.size > 1) {
+                    Text(
+                        text = stringResource(R.string.accounts_count, allAccounts.size),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 5.dp)
+                    )
+                }
             }
 
             if (isLoggedIn) {
                 OutlinedButton(
                     onClick = {
-                        accountSettingsViewModel.logoutAndClearSyncedContent(context, onInnerTubeCookieChange)
+                        coroutineScope.launch {
+                            activeAccount?.let { account ->
+                                accountSettingsViewModel.logoutAccount(
+                                    context = context,
+                                    accountId = account.id,
+                                    onCookieChange = onInnerTubeCookieChange
+                                )
+                            }
+                        }
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -187,6 +228,30 @@ fun AccountSettings(
                     Text(stringResource(R.string.action_logout))
                 }
             }
+        }
+
+            // Account Switcher Dropdown - appears directly below the account section
+            AccountSwitcherDropdown(
+                expanded = showAccountSwitcher,
+                accounts = allAccounts,
+                activeAccountId = activeAccount?.id,
+                onSwitchAccount = { accountId ->
+                    coroutineScope.launch {
+                        accountSettingsViewModel.switchAccount(accountId)
+                        showAccountSwitcher = false
+                    }
+                },
+                onAddAccount = {
+                    showAccountSwitcher = false
+                    onClose()
+                    navController.navigate("login")
+                },
+                onManageAccounts = {
+                    showAccountSwitcher = false
+                    onClose()
+                    navController.navigate("account")
+                }
+            )
         }
 
         Spacer(Modifier.height(4.dp))
@@ -227,27 +292,40 @@ fun AccountSettings(
             )
         }
 
-        PreferenceEntry(
-            title = {
-                Text(
-                    when {
-                        !isLoggedIn -> stringResource(R.string.advanced_login)
-                        showToken -> stringResource(R.string.token_shown)
-                        else -> stringResource(R.string.token_hidden)
-                    }
-                )
-            },
-            icon = { Icon(painterResource(R.drawable.key), null) },
-            onClick = {
-                if (!isLoggedIn) showTokenEditor = true
-                else if (!showToken) showToken = true
-                else showTokenEditor = true
-            },
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(50))
                 .background(MaterialTheme.colorScheme.surface)
-        )
+                .clickable {
+                    if (!isLoggedIn) showTokenEditor = true
+                    else if (!showToken) showToken = true
+                    else showTokenEditor = true
+                }
+                .padding(horizontal = 18.dp, vertical = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.key),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(Modifier.width(16.dp))
+
+                Text(
+                    text = when {
+                        !isLoggedIn -> stringResource(R.string.advanced_login)
+                        showToken -> stringResource(R.string.token_shown)
+                        else -> stringResource(R.string.token_hidden)
+                    },
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
 
         Spacer(Modifier.height(4.dp))
 

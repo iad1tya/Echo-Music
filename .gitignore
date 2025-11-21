@@ -51,6 +51,7 @@ captures/
 
 # IntelliJ
 *.iml
+.idea/
 .idea/workspace.xml
 
 # Keystore files

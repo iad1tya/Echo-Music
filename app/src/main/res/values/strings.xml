@@ -273,6 +273,11 @@
     <string name="login">Login</string>
     <string name="not_logged_in">Not logged in</string>
     <string name="login_failed">Login failed</string>
+    <string name="switch_account">Switch Account</string>
+    <string name="add_account">Add Account</string>
+    <string name="manage">Manage</string>
+    <string name="active_account">Active Account</string>
+    <string name="accounts_count">%d accounts</string>
 
     <string name="content_language">Default content language</string>
     <string name="content_country">Default content country</string>

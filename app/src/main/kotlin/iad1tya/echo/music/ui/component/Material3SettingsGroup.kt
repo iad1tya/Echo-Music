@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 
@@ -43,7 +44,7 @@ fun Material3SettingsGroup(
                 .animateContentSize(),
             shape = RoundedCornerShape(50),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                containerColor = Color(0xFF0d0d0d)
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {

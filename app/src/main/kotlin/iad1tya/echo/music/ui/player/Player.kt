@@ -68,6 +68,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -75,6 +76,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -150,6 +152,7 @@ import iad1tya.echo.music.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import kotlin.math.roundToInt
@@ -225,6 +228,13 @@ fun BottomSheetPlayer(
     }
     val gradientColorsCache = remember { mutableMapOf<String, List<Color>>() }
     var showAudioRoutingDialog by remember { mutableStateOf(false) }
+    
+    val audioRoutingSheetState = rememberBottomSheetState(
+        dismissedBound = 0.dp,
+        expandedBound = state.expandedBound,
+        collapsedBound = 0.dp,
+        initialAnchor = 1
+    )
 
     if (!canSkipNext && automix.isNotEmpty()) {
         playerConnection.service.addToQueueAutomix(automix[0], 0)
@@ -501,7 +511,7 @@ fun BottomSheetPlayer(
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
                 modifier =
                 Modifier
                     .fillMaxWidth()
@@ -510,6 +520,76 @@ fun BottomSheetPlayer(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
+                    // Detect if thumbnail is rectangular (video) or square (audio-only)
+                    var isRectangularThumbnail by remember { mutableStateOf(false) }
+                    
+                    LaunchedEffect(mediaMetadata.thumbnailUrl) {
+                        mediaMetadata.thumbnailUrl?.let { thumbnailUrl ->
+                            try {
+                                val imageLoader = coil3.ImageLoader.Builder(context).build()
+                                val request = ImageRequest.Builder(context)
+                                    .data(thumbnailUrl)
+                                    .build()
+                                
+                                val result = imageLoader.execute(request)
+                                if (result is coil3.request.SuccessResult) {
+                                    val image = result.image
+                                    val width = image.width
+                                    val height = image.height
+                                    
+                                    // Check if aspect ratio is closer to 16:9 (1.77) than 1:1 (square)
+                                    // Consider it rectangular if aspect ratio > 1.3
+                                    val aspectRatio = width.toFloat() / height.toFloat()
+                                    isRectangularThumbnail = aspectRatio > 1.3f
+                                }
+                            } catch (e: Exception) {
+                                // If we can't load, default to false
+                                isRectangularThumbnail = false
+                            }
+                        }
+                    }
+                    
+                    // Switch to Video button - above song title (only show for rectangular thumbnails)
+                    if (mediaMetadata.id.isNotEmpty() && isRectangularThumbnail) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(Color.White)
+                                .clickable {
+                                    // Pause the current song before switching to video
+                                    playerConnection.player.pause()
+                                    val intent = Intent(context, VideoPlayerActivity::class.java).apply {
+                                        putExtra("VIDEO_ID", mediaMetadata.id)
+                                        putExtra("START_POSITION", playerConnection.player.currentPosition)
+                                    }
+                                    context.startActivity(intent)
+                                }
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.play),
+                                    contentDescription = "Switch to Video",
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    "Switch to Video",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    } else {
+                        // Placeholder to maintain consistent spacing
+                        Spacer(Modifier.height(40.dp))
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    
                     AnimatedContent(
                         targetState = mediaMetadata.title,
                         transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -642,14 +722,16 @@ fun BottomSheetPlayer(
 
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = if (mediaMetadata.id.isNotEmpty()) 48.dp else 8.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(audioRoutingShape)
+                                .background(textButtonColor)
                                 .clickable {
-                                    showAudioRoutingDialog = true
+                                    audioRoutingSheetState.expandSoft()
                                 }
                         ) {
                             // Detect current audio device
@@ -720,10 +802,11 @@ fun BottomSheetPlayer(
                     Box(
                         modifier =
                         Modifier
+                            .padding(top = if (mediaMetadata.id.isNotEmpty()) 48.dp else 8.dp)
                             .size(40.dp)
                             .clip(RoundedCornerShape(24.dp))
                             .clickable {
-                                showAudioRoutingDialog = true
+                                audioRoutingSheetState.expandSoft()
                             },
                     ) {
                         // Detect current audio device
@@ -774,6 +857,7 @@ fun BottomSheetPlayer(
                         contentAlignment = Alignment.Center,
                         modifier =
                         Modifier
+                            .padding(top = if (mediaMetadata.id.isNotEmpty()) 48.dp else 8.dp)
                             .size(40.dp)
                             .clip(RoundedCornerShape(24.dp))
                             .clickable {
@@ -1142,21 +1226,20 @@ fun BottomSheetPlayer(
                             }
                     )
                     
-                Row(
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier =
                     Modifier
                         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                        .padding(bottom = queueSheetState.collapsedBound + 48.dp),
+                        .padding(bottom = queueSheetState.collapsedBound),
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.weight(1f),
                     ) {
-                        val screenWidth = LocalConfiguration.current.screenWidthDp
-                        val thumbnailSize = (screenWidth * 0.4).dp
                         Thumbnail(
                             sliderPositionProvider = { sliderPosition },
-                            modifier = Modifier.size(thumbnailSize),
+                            modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
                             isPlayerExpanded = state.isExpanded,
                             onToggleLyrics = {
                                 if (lyricsSheetState.isExpanded) {
@@ -1167,21 +1250,12 @@ fun BottomSheetPlayer(
                             }
                         )
                     }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier =
-                        Modifier
-                            .weight(1f)
-                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
-                    ) {
-                        Spacer(Modifier.weight(1f))
 
-                        mediaMetadata?.let {
-                            controlsContent(it)
-                        }
-
-                        Spacer(Modifier.weight(1f))
+                    mediaMetadata?.let {
+                        controlsContent(it)
                     }
+
+                    Spacer(Modifier.height(30.dp))
                 }
                 }
             }
@@ -1306,8 +1380,22 @@ fun BottomSheetPlayer(
             }
         }
         
-        // Audio Routing Dialog
-        if (showAudioRoutingDialog) {
+        // Audio Routing Bottom Sheet
+        BottomSheet(
+            state = audioRoutingSheetState,
+            background = { 
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(
+                            if (useBlackBackground) Color.Black 
+                            else MaterialTheme.colorScheme.surfaceContainer
+                        )
+                ) 
+            },
+            onDismiss = { },
+            collapsedContent = {}
+        ) {
             val audioManager = try {
                 context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
             } catch (e: Exception) {
@@ -1415,38 +1503,65 @@ fun BottomSheetPlayer(
                 false
             }
             
-            AlertDialog(
-                onDismissRequest = { showAudioRoutingDialog = false },
-                title = { 
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        if (useBlackBackground) Color.Black 
+                        else MaterialTheme.colorScheme.surfaceContainer
+                    )
+                    .padding(24.dp)
+                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+            ) {
+                // Header with close button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         "Audio Output",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
-                text = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextBackgroundColor
+                    )
+                    FilledTonalIconButton(
+                        onClick = { audioRoutingSheetState.collapseSoft() },
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = textButtonColor
+                        )
                     ) {
+                        Icon(
+                            painter = painterResource(R.drawable.close),
+                            contentDescription = "Close",
+                            tint = iconButtonColor
+                        )
+                    }
+                }
+                
+                Spacer(Modifier.height(24.dp))
+                
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                         // Connected Devices Section
                         if (hasBluetoothDevice || hasWiredHeadset || hasUsbDevice || (!hasBluetoothDevice && !hasWiredHeadset && !hasUsbDevice)) {
                             Text(
                                 "CONNECTED DEVICES",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                                style = MaterialTheme.typography.labelLarge,
+                                color = TextBackgroundColor.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
                             
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                ),
-                                shape = RoundedCornerShape(16.dp)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(textButtonColor.copy(alpha = 0.3f)),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Column(modifier = Modifier.padding(8.dp)) {
                         
                         // Phone Speaker (only show if no external devices are connected)
                         if (!hasBluetoothDevice && !hasWiredHeadset && !hasUsbDevice) {
@@ -1462,7 +1577,7 @@ fun BottomSheetPlayer(
                                     } catch (e: Exception) {
                                         Toast.makeText(context, "Failed to switch audio output: ${e.message}", Toast.LENGTH_SHORT).show()
                                     }
-                                    showAudioRoutingDialog = false
+                                    audioRoutingSheetState.collapseSoft()
                                 }
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -1526,7 +1641,7 @@ fun BottomSheetPlayer(
                                         } catch (e: Exception) {
                                             Toast.makeText(context, "Failed to switch audio output", Toast.LENGTH_SHORT).show()
                                         }
-                                        showAudioRoutingDialog = false
+                                        audioRoutingSheetState.collapseSoft()
                                     }
                                     .padding(horizontal = 16.dp, vertical = 14.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -1590,7 +1705,7 @@ fun BottomSheetPlayer(
                                         } catch (e: Exception) {
                                             Toast.makeText(context, "Failed to switch audio output", Toast.LENGTH_SHORT).show()
                                         }
-                                        showAudioRoutingDialog = false
+                                        audioRoutingSheetState.collapseSoft()
                                     }
                                     .padding(horizontal = 16.dp, vertical = 14.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -1659,7 +1774,7 @@ fun BottomSheetPlayer(
                                         } catch (e: Exception) {
                                             Toast.makeText(context, "Failed to switch to Bluetooth: ${e.message}", Toast.LENGTH_SHORT).show()
                                         }
-                                        showAudioRoutingDialog = false
+                                        audioRoutingSheetState.collapseSoft()
                                     }
                                     .padding(horizontal = 16.dp, vertical = 14.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -1705,7 +1820,7 @@ fun BottomSheetPlayer(
                                         } catch (e: Exception) {
                                             Toast.makeText(context, "Cannot open Bluetooth settings", Toast.LENGTH_SHORT).show()
                                         }
-                                        showAudioRoutingDialog = false
+                                        audioRoutingSheetState.collapseSoft()
                                     }
                                     .padding(horizontal = 16.dp, vertical = 14.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -1743,7 +1858,7 @@ fun BottomSheetPlayer(
                                         } catch (e: Exception) {
                                             Toast.makeText(context, "Cannot open Bluetooth settings", Toast.LENGTH_SHORT).show()
                                         }
-                                        showAudioRoutingDialog = false
+                                        audioRoutingSheetState.collapseSoft()
                                     }
                                     .padding(horizontal = 16.dp, vertical = 14.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -1797,6 +1912,7 @@ fun BottomSheetPlayer(
                         ) {
                         
                         // WiFi Audio devices - Google Cast integration
+                        val coroutineScope = rememberCoroutineScope()
                         val castContext = try {
                             CastContext.getSharedInstance(context)
                         } catch (e: Exception) {
@@ -1847,22 +1963,73 @@ fun BottomSheetPlayer(
                             null
                         }
                         
-                        // Get all WiFi/Cast routes
-                        val allWifiRoutes = try {
-                            if (mediaRouter != null && selector != null) {
-                                mediaRouter.getRoutes().filter { route ->
-                                    (route.matchesSelector(selector) && 
-                                    !route.isDefaultOrBluetooth &&
-                                    route.isEnabled) || 
-                                    route.description?.contains("Cast", ignoreCase = true) == true ||
-                                    route.name.contains("Cast", ignoreCase = true)
+                        // State to track discovered routes
+                        var discoveredRoutes by remember { mutableStateOf<List<MediaRouter.RouteInfo>>(emptyList()) }
+                        var isScanning by remember { mutableStateOf(false) }
+                        
+                        // Add MediaRouter callback to actively scan for Cast devices
+                        DisposableEffect(mediaRouter, selector) {
+                            isScanning = true
+                            val callback = object : MediaRouter.Callback() {
+                                override fun onRouteAdded(router: MediaRouter, route: MediaRouter.RouteInfo) {
+                                    discoveredRoutes = router.routes.filter { r ->
+                                        (selector?.let { r.matchesSelector(it) } == true && 
+                                        !r.isDefaultOrBluetooth &&
+                                        r.isEnabled) || 
+                                        r.description?.contains("Cast", ignoreCase = true) == true ||
+                                        r.name.contains("Cast", ignoreCase = true)
+                                    }
+                                    isScanning = false
                                 }
-                            } else {
-                                emptyList()
+                                
+                                override fun onRouteRemoved(router: MediaRouter, route: MediaRouter.RouteInfo) {
+                                    discoveredRoutes = router.routes.filter { r ->
+                                        (selector?.let { r.matchesSelector(it) } == true && 
+                                        !r.isDefaultOrBluetooth &&
+                                        r.isEnabled) || 
+                                        r.description?.contains("Cast", ignoreCase = true) == true ||
+                                        r.name.contains("Cast", ignoreCase = true)
+                                    }
+                                }
+                                
+                                override fun onRouteChanged(router: MediaRouter, route: MediaRouter.RouteInfo) {
+                                    discoveredRoutes = router.routes.filter { r ->
+                                        (selector?.let { r.matchesSelector(it) } == true && 
+                                        !r.isDefaultOrBluetooth &&
+                                        r.isEnabled) || 
+                                        r.description?.contains("Cast", ignoreCase = true) == true ||
+                                        r.name.contains("Cast", ignoreCase = true)
+                                    }
+                                }
                             }
-                        } catch (e: Exception) {
-                            emptyList()
+                            
+                            if (mediaRouter != null && selector != null) {
+                                mediaRouter.addCallback(selector, callback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+                                // Initial update
+                                discoveredRoutes = mediaRouter.routes.filter { r ->
+                                    (r.matchesSelector(selector) && 
+                                    !r.isDefaultOrBluetooth &&
+                                    r.isEnabled) || 
+                                    r.description?.contains("Cast", ignoreCase = true) == true ||
+                                    r.name.contains("Cast", ignoreCase = true)
+                                }
+                                // Set scanning to false after initial load
+                                coroutineScope.launch {
+                                    kotlinx.coroutines.delay(2000)
+                                    isScanning = false
+                                }
+                            }
+                            
+                            onDispose {
+                                if (mediaRouter != null) {
+                                    mediaRouter.removeCallback(callback)
+                                }
+                                isScanning = false
+                            }
                         }
+                        
+                        // Get all WiFi/Cast routes
+                        val allWifiRoutes = discoveredRoutes
                         
                         val connectedWifiRoutes = allWifiRoutes.filter { 
                             it.connectionState == MediaRouter.RouteInfo.CONNECTION_STATE_CONNECTED 
@@ -1883,7 +2050,7 @@ fun BottomSheetPlayer(
                                         .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
                                         .clickable {
                                             Toast.makeText(context, "Playing on ${session.castDevice?.friendlyName}", Toast.LENGTH_SHORT).show()
-                                            showAudioRoutingDialog = false
+                                            audioRoutingSheetState.collapseSoft()
                                         }
                                         .padding(horizontal = 16.dp, vertical = 14.dp),
                                     verticalAlignment = Alignment.CenterVertically
@@ -1926,7 +2093,7 @@ fun BottomSheetPlayer(
                                         .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
                                         .clickable {
                                             Toast.makeText(context, "Playing on ${route.name}", Toast.LENGTH_SHORT).show()
-                                            showAudioRoutingDialog = false
+                                            audioRoutingSheetState.collapseSoft()
                                         }
                                         .padding(horizontal = 16.dp, vertical = 14.dp),
                                     verticalAlignment = Alignment.CenterVertically
@@ -1977,7 +2144,7 @@ fun BottomSheetPlayer(
                                                 } catch (e: Exception) {
                                                     Toast.makeText(context, "Failed to connect: ${e.message}", Toast.LENGTH_SHORT).show()
                                                 }
-                                                showAudioRoutingDialog = false
+                                                audioRoutingSheetState.collapseSoft()
                                             }
                                             .padding(horizontal = 16.dp, vertical = 14.dp),
                                         verticalAlignment = Alignment.CenterVertically
@@ -2006,7 +2173,7 @@ fun BottomSheetPlayer(
                                     }
                                 }
                             } else {
-                                // No WiFi/Cast devices found - show scan button
+                                // No WiFi/Cast devices found - show scanning status
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -2030,33 +2197,46 @@ fun BottomSheetPlayer(
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                             Text(
-                                                "No devices found",
+                                                if (isScanning) "Scanning..." else "No devices found",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                             )
                                         }
                                     }
-                                    Spacer(Modifier.height(12.dp))
-                                    FilledTonalButton(
-                                        onClick = {
-                                            try {
-                                                // Trigger Cast device discovery
-                                                castContext?.sessionManager?.endCurrentSession(true)
-                                                Toast.makeText(context, "Scanning for Cast devices...", Toast.LENGTH_SHORT).show()
-                                            } catch (e: Exception) {
-                                                Toast.makeText(context, "Failed to scan: ${e.message}", Toast.LENGTH_SHORT).show()
-                                            }
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.sync),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(Modifier.width(8.dp))
-                                        Text("Scan for Devices")
+                                    if (!isScanning) {
+                                        Spacer(Modifier.height(12.dp))
+                                        FilledTonalButton(
+                                            onClick = {
+                                                isScanning = true
+                                                try {
+                                                    // Re-trigger discovery by removing and re-adding callback
+                                                    mediaRouter?.let { router ->
+                                                        selector?.let { sel ->
+                                                            // Force a refresh of the route discovery
+                                                            Toast.makeText(context, "Scanning for devices...", Toast.LENGTH_SHORT).show()
+                                                        }
+                                                    }
+                                                    // Auto-stop scanning after 3 seconds
+                                                    coroutineScope.launch {
+                                                        kotlinx.coroutines.delay(3000)
+                                                        isScanning = false
+                                                    }
+                                                } catch (e: Exception) {
+                                                    Toast.makeText(context, "Failed to scan: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                    isScanning = false
+                                                }
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.sync),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Scan Again")
+                                        }
                                     }
                                 }
                             }
@@ -2093,14 +2273,7 @@ fun BottomSheetPlayer(
                         }
                         } // Close WiFi Card Column
                     } // Close WiFi Card
-                    } // Close main Column in text
-                },
-                confirmButton = {
-                    TextButton(onClick = { showAudioRoutingDialog = false }) {
-                        Text("Close")
-                    }
+                    } // Close main Column
                 }
-            )
+            }
         }
-    }
-}

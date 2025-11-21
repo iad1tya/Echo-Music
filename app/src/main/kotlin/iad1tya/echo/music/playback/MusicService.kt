@@ -56,6 +56,9 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
+import androidx.media3.cast.CastPlayer
+import androidx.media3.cast.SessionAvailabilityListener
+import com.google.android.gms.cast.framework.CastContext
 import com.google.common.util.concurrent.MoreExecutors
 import com.echo.innertube.YouTube
 import com.echo.innertube.models.SongItem
@@ -212,6 +215,11 @@ class MusicService :
 
     lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaLibrarySession
+    
+    // Google Cast support
+    private var castPlayer: CastPlayer? = null
+    private var castContext: CastContext? = null
+    private var isCastSessionAvailable = false
 
     private var isAudioEffectSessionOpened = false
     private var loudnessEnhancer: LoudnessEnhancer? = null
@@ -262,6 +270,28 @@ class MusicService :
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         setupAudioFocusRequest()
+        
+        // Initialize Google Cast
+        try {
+            castContext = CastContext.getSharedInstance(this)
+            castPlayer = CastPlayer(castContext!!).apply {
+                setSessionAvailabilityListener(object : SessionAvailabilityListener {
+                    override fun onCastSessionAvailable() {
+                        this@MusicService.isCastSessionAvailable = true
+                        // Switch to cast player when session becomes available
+                        this@MusicService.switchToCastPlayer()
+                    }
+
+                    override fun onCastSessionUnavailable() {
+                        this@MusicService.isCastSessionAvailable = false
+                        // Switch back to local player when session ends
+                        this@MusicService.switchToLocalPlayer()
+                    }
+                })
+            }
+        } catch (e: Exception) {
+            Log.e("MusicService", "Failed to initialize Cast: ${e.message}")
+        }
 
         mediaLibrarySessionCallback.apply {
             toggleLike = ::toggleLike
@@ -537,6 +567,54 @@ class MusicService :
 
     fun hasAudioFocusForPlayback(): Boolean {
         return hasAudioFocus
+    }
+    
+    /**
+     * Switch playback to Google Cast device
+     * Note: Media3 CastPlayer automatically handles playback transfer when a Cast session is available
+     */
+    private fun switchToCastPlayer() {
+        val currentPlayer = player
+        val playWhenReady = currentPlayer.playWhenReady
+        val currentPosition = currentPlayer.currentPosition
+        val currentMediaItemIndex = currentPlayer.currentMediaItemIndex
+        val currentMediaItems = currentPlayer.mediaItems.toList()
+        
+        castPlayer?.let { cast ->
+            // Transfer state to cast player
+            cast.setMediaItems(currentMediaItems, currentMediaItemIndex, currentPosition)
+            cast.playWhenReady = playWhenReady
+            cast.prepare()
+            
+            // Pause local player to avoid concurrent playback
+            player.pause()
+            
+            Log.d("MusicService", "Transferred playback to Cast player")
+        }
+    }
+    
+    /**
+     * Switch playback back to local ExoPlayer
+     */
+    private fun switchToLocalPlayer() {
+        castPlayer?.let { cast ->
+            val playWhenReady = cast.playWhenReady
+            val currentPosition = cast.currentPosition
+            val currentMediaItemIndex = cast.currentMediaItemIndex
+            val currentMediaItems = cast.mediaItems.toList()
+            
+            // Transfer state back to local player
+            if (currentMediaItems.isNotEmpty()) {
+                player.setMediaItems(currentMediaItems, currentMediaItemIndex, currentPosition)
+                player.playWhenReady = playWhenReady
+                player.prepare()
+            }
+            
+            // Stop cast player
+            cast.stop()
+            
+            Log.d("MusicService", "Transferred playback to local player")
+        }
     }
 
     private fun waitOnNetworkError() {
@@ -1148,9 +1226,30 @@ class MusicService :
         super.onPlayerError(error)
         val isConnectionError = (error.cause?.cause is PlaybackException) &&
                 (error.cause?.cause as PlaybackException).errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
+        
+        // Check if it's a URL expiration or HTTP 403/410 error
+        val isUrlExpiredError = error.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS ||
+                error.errorCode == PlaybackException.ERROR_CODE_IO_INVALID_HTTP_CONTENT_TYPE ||
+                error.message?.contains("403") == true ||
+                error.message?.contains("410") == true
 
         if (!isNetworkConnected.value || isConnectionError) {
             waitOnNetworkError()
+            return
+        }
+        
+        // If URL expired, try to refresh and continue playback
+        if (isUrlExpiredError) {
+            val currentPosition = player.currentPosition
+            val currentIndex = player.currentMediaItemIndex
+            scope.launch {
+                delay(500) // Brief delay before retry
+                if (currentIndex < player.mediaItemCount) {
+                    player.seekTo(currentIndex, currentPosition)
+                    player.prepare()
+                    player.play()
+                }
+            }
             return
         }
 
@@ -1195,22 +1294,24 @@ class MusicService :
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             val mediaId = dataSpec.key ?: error("No media id")
 
+            // Check if the content is already downloaded/cached
             if (downloadCache.isCached(
                     mediaId,
                     dataSpec.position,
                     if (dataSpec.length >= 0) dataSpec.length else 1
-                ) ||
-                playerCache.isCached(mediaId, dataSpec.position, CHUNK_LENGTH)
+                )
             ) {
                 scope.launch(Dispatchers.IO) { recoverSong(mediaId) }
                 return@Factory dataSpec
             }
 
+            // Check if we have a valid cached URL (not expired)
             songUrlCache[mediaId]?.takeIf { it.second > System.currentTimeMillis() }?.let {
                 scope.launch(Dispatchers.IO) { recoverSong(mediaId) }
                 return@Factory dataSpec.withUri(it.first.toUri())
             }
 
+            // Need to fetch a new URL - either first time or URL expired
             val playbackData = runBlocking(Dispatchers.IO) {
                 YTPlayerUtils.playerResponseForPlayback(
                     mediaId,
@@ -1272,7 +1373,7 @@ class MusicService :
 
                 songUrlCache[mediaId] =
                     streamUrl to System.currentTimeMillis() + (nonNullPlayback.streamExpiresInSeconds * 1000L)
-                return@Factory dataSpec.withUri(streamUrl.toUri()).subrange(dataSpec.uriPositionOffset, CHUNK_LENGTH)
+                return@Factory dataSpec.withUri(streamUrl.toUri())
             }
         }
     }
@@ -1413,6 +1514,14 @@ class MusicService :
         player.removeListener(this)
         player.removeListener(sleepTimer)
         player.release()
+        
+        // Release cast player
+        castPlayer?.apply {
+            setSessionAvailabilityListener(null)
+            release()
+        }
+        castPlayer = null
+        
         super.onDestroy()
     }
 

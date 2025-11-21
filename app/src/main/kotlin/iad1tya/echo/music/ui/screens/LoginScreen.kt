@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import iad1tya.echo.music.LocalPlayerAwareWindowInsets
 import iad1tya.echo.music.R
@@ -34,6 +35,7 @@ import iad1tya.echo.music.ui.component.IconButton
 import iad1tya.echo.music.ui.utils.backToMain
 import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.utils.reportException
+import iad1tya.echo.music.viewmodels.LoginViewModel
 import com.echo.innertube.YouTube
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -45,15 +47,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var visitorData by rememberPreference(VisitorDataKey, "")
     var dataSyncId by rememberPreference(DataSyncIdKey, "")
-    var innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
-    var accountName by rememberPreference(AccountNameKey, "")
-    var accountEmail by rememberPreference(AccountEmailKey, "")
-    var accountChannelHandle by rememberPreference(AccountChannelHandleKey, "")
 
     var webView: WebView? = null
 
@@ -62,6 +61,10 @@ fun LoginScreen(
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
             .fillMaxSize(),
         factory = { context ->
+            // Clear all cookies before login to ensure fresh session
+            CookieManager.getInstance().removeAllCookies(null)
+            CookieManager.getInstance().flush()
+            
             WebView(context).apply {
                 webViewClient = object : WebViewClient() {
                     override fun onPageFinished(view: WebView, url: String?) {
@@ -69,18 +72,39 @@ fun LoginScreen(
                         loadUrl("javascript:Android.onRetrieveDataSyncId(window.yt.config_.DATASYNC_ID)")
 
                         if (url?.startsWith("https://music.youtube.com") == true) {
-                            innerTubeCookie = CookieManager.getInstance().getCookie(url)
+                            val newCookie = CookieManager.getInstance().getCookie(url)
                             coroutineScope.launch {
+                                // Temporarily set cookie for API call
+                                YouTube.cookie = newCookie
+                                YouTube.visitorData = visitorData
+                                YouTube.dataSyncId = dataSyncId
+                                
                                 YouTube.accountInfo().onSuccess {
-                                    accountName = it.name
-                                    accountEmail = it.email.orEmpty()
-                                    accountChannelHandle = it.channelHandle.orEmpty()
+                                    val name = it.name
+                                    val email = it.email.orEmpty()
+                                    val handle = it.channelHandle.orEmpty()
+                                    val thumbnail = it.thumbnailUrl
                                     
-                                    // Auto-close and show success toast
-                                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                                    navController.navigateUp()
+                                    // Save account using AccountManager
+                                    viewModel.addAccount(
+                                        name = name,
+                                        email = email,
+                                        channelHandle = handle,
+                                        thumbnailUrl = thumbnail,
+                                        innerTubeCookie = newCookie,
+                                        visitorData = visitorData,
+                                        dataSyncId = dataSyncId
+                                    ).onSuccess {
+                                        // AccountManager will apply preferences automatically
+                                        Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                                        navController.navigateUp()
+                                    }.onFailure {
+                                        reportException(it)
+                                        Toast.makeText(context, "Failed to save account", Toast.LENGTH_SHORT).show()
+                                    }
                                 }.onFailure {
                                     reportException(it)
+                                    Toast.makeText(context, "Failed to get account info", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }

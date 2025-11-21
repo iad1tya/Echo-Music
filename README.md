@@ -136,6 +136,10 @@ Only analytics data is collected to help improve your experience. Crash reports 
     <img src="assets/Supporter/EM.png" alt="Emagik" width="90"/>
   </a>
   <p><strong>Emagik</strong></p>
+  <br>
+    <img src="assets/Supporter/AdamPoy.png" alt="AdamPoy" width="90"/>
+  </a>
+  <p><strong>AdamPoy</strong></p>
 </div>
 
 ---
@@ -160,6 +164,13 @@ Only analytics data is collected to help improve your experience. Crash reports 
   <a href="https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=8840590272@kotak&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support">
     <img src="assets/upi.svg" alt="UPI" width="110"/>
   </a>
+</div>
+
+### Cryptocurrency
+<div align="center">
+  <p><strong>Bitcoin:</strong> <code>bc1qcvyr7eekha8uytmffcvgzf4h7xy7shqzke35fy</code></p>
+  <p><strong>Ethereum:</strong> <code>0x51bc91022E2dCef9974D5db2A0e22d57B360e700</code></p>
+  <p><strong>Solana:</strong> <code>9wjca3EQnEiqzqgy7N5iqS1JGXJiknMQv6zHgL96t94S</code></p>
 </div>
 
 ---

@@ -349,24 +349,6 @@ fun AppearanceSettings(
                 )
             )
         )
-        
-        PreferenceGroupTitle(
-            title = stringResource(R.string.theme),
-        )
-
-        EnumListPreference(
-            title = { Text(stringResource(R.string.dark_mode)) },
-            icon = { Icon(painterResource(R.drawable.dark_mode), null) },
-            selectedValue = darkMode,
-            onValueSelected = onDarkModeChange,
-            valueText = {
-                when (it) {
-                    DarkMode.ON -> stringResource(R.string.dark_mode_on)
-                    DarkMode.OFF -> stringResource(R.string.dark_mode_off)
-                    DarkMode.AUTO -> stringResource(R.string.dark_mode_auto)
-                }
-            },
-        )
 
         PreferenceGroupTitle(
             title = stringResource(R.string.player),

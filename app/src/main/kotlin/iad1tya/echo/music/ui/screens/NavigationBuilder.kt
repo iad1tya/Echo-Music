@@ -49,6 +49,7 @@ import iad1tya.echo.music.ui.screens.artist.ArtistItemsScreen
 import iad1tya.echo.music.ui.screens.artist.ArtistScreen
 import iad1tya.echo.music.ui.screens.artist.ArtistSongsScreen
 import iad1tya.echo.music.ui.screens.library.LibraryScreen
+import iad1tya.echo.music.ui.player.VideoPlayerScreen
 import iad1tya.echo.music.ui.screens.playlist.AutoPlaylistScreen
 import iad1tya.echo.music.ui.screens.playlist.LocalPlaylistScreen
 import iad1tya.echo.music.ui.screens.playlist.OnlinePlaylistScreen
@@ -67,8 +68,10 @@ import iad1tya.echo.music.ui.screens.settings.RomanizationSettings
 import iad1tya.echo.music.ui.screens.settings.SettingsScreen
 import iad1tya.echo.music.ui.screens.settings.StorageSettings
 import iad1tya.echo.music.ui.screens.settings.SupporterScreen
+import iad1tya.echo.music.ui.screens.settings.SupporterScreen
 import iad1tya.echo.music.ui.screens.settings.UpdaterScreen
 import iad1tya.echo.music.ui.utils.ShowMediaInfo
+import iad1tya.echo.music.ui.player.VideoPlayerScreen
 import iad1tya.echo.music.utils.rememberEnumPreference
 import iad1tya.echo.music.utils.rememberPreference
 
@@ -318,5 +321,18 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("login") {
         LoginScreen(navController)
+    }
+    composable(
+        route = "video/{videoId}",
+        arguments = listOf(
+            navArgument("videoId") {
+                type = NavType.StringType
+            }
+        )
+    ) {
+        VideoPlayerScreen(
+            videoId = it.arguments?.getString("videoId") ?: "",
+            navController = navController
+        )
     }
 }

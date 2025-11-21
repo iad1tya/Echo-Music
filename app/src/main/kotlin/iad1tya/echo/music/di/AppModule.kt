@@ -7,8 +7,10 @@ import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import iad1tya.echo.music.constants.MaxSongCacheSizeKey
+import iad1tya.echo.music.db.AccountDao
 import iad1tya.echo.music.db.InternalDatabase
 import iad1tya.echo.music.db.MusicDatabase
+import iad1tya.echo.music.repositories.AccountRepository
 import iad1tya.echo.music.utils.dataStore
 import iad1tya.echo.music.utils.get
 import dagger.Module
@@ -37,6 +39,21 @@ object AppModule {
     fun provideDatabase(
         @ApplicationContext context: Context,
     ): MusicDatabase = InternalDatabase.newInstance(context)
+
+    @Singleton
+    @Provides
+    fun provideAccountDao(database: MusicDatabase): AccountDao {
+        return database.delegate.accountDao
+    }
+
+    @Singleton
+    @Provides
+    fun provideAccountRepository(
+        accountDao: AccountDao,
+        @ApplicationContext context: Context
+    ): AccountRepository {
+        return AccountRepository(accountDao, context)
+    }
 
     @Singleton
     @Provides

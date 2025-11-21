@@ -340,6 +340,61 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val checkForUpdates by rememberPreference(CheckForUpdatesKey, defaultValue = true)
+            
+            // Request all runtime permissions at app startup
+            val permissionsLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestMultiplePermissions()
+            ) { permissions ->
+                val deniedPermissions = permissions.filterValues { !it }.keys
+                if (deniedPermissions.isNotEmpty()) {
+                    Toast.makeText(
+                        this,
+                        "Some permissions were denied. App features may be limited.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+            
+            LaunchedEffect(Unit) {
+                val permissionsToRequest = mutableListOf<String>()
+                
+                // Notification permission (Android 13+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                        permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+                
+                // Bluetooth permissions (Android 12+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                        permissionsToRequest.add(Manifest.permission.BLUETOOTH_CONNECT)
+                    }
+                    if (checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                        permissionsToRequest.add(Manifest.permission.BLUETOOTH_SCAN)
+                    }
+                }
+                
+                // Location permissions for Cast device discovery (all Android versions)
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+                }
+                if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                }
+                
+                // Nearby WiFi devices (Android 13+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (checkSelfPermission(Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED) {
+                        permissionsToRequest.add(Manifest.permission.NEARBY_WIFI_DEVICES)
+                    }
+                }
+                
+                // Request all permissions at once
+                if (permissionsToRequest.isNotEmpty()) {
+                    permissionsLauncher.launch(permissionsToRequest.toTypedArray())
+                }
+            }
 
             LaunchedEffect(checkForUpdates) {
                 if (checkForUpdates) {
@@ -469,7 +524,7 @@ class MainActivity : ComponentActivity() {
 
                     val navigationItems = remember { Screens.MainScreens }
                     val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
-                    val (useNewMiniPlayerDesign) = rememberPreference(UseNewMiniPlayerDesignKey, defaultValue = false)
+                    val (useNewMiniPlayerDesign) = rememberPreference(UseNewMiniPlayerDesignKey, defaultValue = true)
                     val defaultOpenTab = remember {
                         dataStore[DefaultOpenTabKey].toEnum(defaultValue = NavigationTab.HOME)
                     }

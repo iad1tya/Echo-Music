@@ -18,8 +18,8 @@ android {
         applicationId = "iad1tya.echo.music"
         minSdk = 26
         targetSdk = 36
-        versionCode = 300
-        versionName = "3.0.0"
+        versionCode = 310
+        versionName = "3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -204,6 +204,7 @@ dependencies {
     implementation(libs.media3)
     implementation(libs.media3.session)
     implementation(libs.media3.okhttp)
+    implementation(libs.media3.ui)
     implementation(libs.media3.cast)
     implementation(libs.mediarouter)
     implementation(libs.cast.framework)
@@ -230,6 +231,9 @@ dependencies {
     coreLibraryDesugaring(libs.desugaring)
 
     implementation(libs.timber)
+    
+    // QR Code generation
+    implementation("com.google.zxing:core:3.5.3")
     
     // Firebase
     implementation(platform(libs.firebase.bom))
