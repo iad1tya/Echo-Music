@@ -1,17 +1,20 @@
 package iad1tya.echo.music.ui.player
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.mediarouter.media.MediaRouter
 import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaControlIntent
@@ -1918,9 +1921,26 @@ fun BottomSheetPlayer(
                         
                         // WiFi Audio devices - Google Cast integration
                         val coroutineScope = rememberCoroutineScope()
-                        val castContext = try {
-                            CastContext.getSharedInstance(context)
-                        } catch (e: Exception) {
+                        
+                        // Check for required permissions before initializing Cast
+                        val hasRequiredPermissions = remember {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                // Android 13+: Only NEARBY_WIFI_DEVICES permission is needed
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.NEARBY_WIFI_DEVICES) == PackageManager.PERMISSION_GRANTED
+                            } else {
+                                // Android 12 and below: Location permission is required
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                            }
+                        }
+                        
+                        val castContext = if (hasRequiredPermissions) {
+                            try {
+                                CastContext.getSharedInstance(context)
+                            } catch (e: Exception) {
+                                null
+                            }
+                        } else {
                             null
                         }
                         
@@ -1950,21 +1970,29 @@ fun BottomSheetPlayer(
                             }
                         }
                         
-                        val mediaRouter = try {
-                            MediaRouter.getInstance(context)
-                        } catch (e: Exception) {
+                        val mediaRouter = if (hasRequiredPermissions) {
+                            try {
+                                MediaRouter.getInstance(context)
+                            } catch (e: Exception) {
+                                null
+                            }
+                        } else {
                             null
                         }
                         
-                        val selector = try {
-                            MediaRouteSelector.Builder()
-                                .addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
-                                .addControlCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)
-                                .addControlCategory(com.google.android.gms.cast.CastMediaControlIntent.categoryForCast(
-                                    com.google.android.gms.cast.CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID
-                                ))
-                                .build()
-                        } catch (e: Exception) {
+                        val selector = if (hasRequiredPermissions) {
+                            try {
+                                MediaRouteSelector.Builder()
+                                    .addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
+                                    .addControlCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)
+                                    .addControlCategory(com.google.android.gms.cast.CastMediaControlIntent.categoryForCast(
+                                        com.google.android.gms.cast.CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID
+                                    ))
+                                    .build()
+                            } catch (e: Exception) {
+                                null
+                            }
+                        } else {
                             null
                         }
                         
@@ -1972,8 +2000,13 @@ fun BottomSheetPlayer(
                         var discoveredRoutes by remember { mutableStateOf<List<MediaRouter.RouteInfo>>(emptyList()) }
                         var isScanning by remember { mutableStateOf(false) }
                         
-                        // Add MediaRouter callback to actively scan for Cast devices
-                        DisposableEffect(mediaRouter, selector) {
+                        // Add MediaRouter callback to actively scan for Cast devices - only if permissions granted
+                        DisposableEffect(mediaRouter, selector, hasRequiredPermissions) {
+                            if (!hasRequiredPermissions) {
+                                isScanning = false
+                                return@DisposableEffect onDispose { }
+                            }
+                            
                             isScanning = true
                             val callback = object : MediaRouter.Callback() {
                                 override fun onRouteAdded(router: MediaRouter, route: MediaRouter.RouteInfo) {
@@ -2009,25 +2042,34 @@ fun BottomSheetPlayer(
                             }
                             
                             if (mediaRouter != null && selector != null) {
-                                mediaRouter.addCallback(selector, callback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
-                                // Initial update
-                                discoveredRoutes = mediaRouter.routes.filter { r ->
-                                    (r.matchesSelector(selector) && 
-                                    !r.isDefaultOrBluetooth &&
-                                    r.isEnabled) || 
-                                    r.description?.contains("Cast", ignoreCase = true) == true ||
-                                    r.name.contains("Cast", ignoreCase = true)
-                                }
-                                // Set scanning to false after initial load
-                                coroutineScope.launch {
-                                    kotlinx.coroutines.delay(2000)
+                                try {
+                                    mediaRouter.addCallback(selector, callback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+                                    // Initial update
+                                    discoveredRoutes = mediaRouter.routes.filter { r ->
+                                        (r.matchesSelector(selector) && 
+                                        !r.isDefaultOrBluetooth &&
+                                        r.isEnabled) || 
+                                        r.description?.contains("Cast", ignoreCase = true) == true ||
+                                        r.name.contains("Cast", ignoreCase = true)
+                                    }
+                                    // Set scanning to false after initial load
+                                    coroutineScope.launch {
+                                        kotlinx.coroutines.delay(2000)
+                                        isScanning = false
+                                    }
+                                } catch (e: Exception) {
+                                    // Handle any exceptions during MediaRouter operations
                                     isScanning = false
                                 }
                             }
                             
                             onDispose {
-                                if (mediaRouter != null) {
-                                    mediaRouter.removeCallback(callback)
+                                try {
+                                    if (mediaRouter != null) {
+                                        mediaRouter.removeCallback(callback)
+                                    }
+                                } catch (e: Exception) {
+                                    // Ignore exceptions during cleanup
                                 }
                                 isScanning = false
                             }
@@ -2290,13 +2332,17 @@ fun BottomSheetPlayer(
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                             Text(
-                                                if (isScanning) "Scanning..." else "No devices found",
+                                                when {
+                                                    !hasRequiredPermissions -> "Grant location permission to discover devices"
+                                                    isScanning -> "Scanning..."
+                                                    else -> "No devices found"
+                                                },
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                             )
                                         }
                                     }
-                                    if (!isScanning) {
+                                    if (!isScanning && hasRequiredPermissions) {
                                         Spacer(Modifier.height(12.dp))
                                         FilledTonalButton(
                                             onClick = {

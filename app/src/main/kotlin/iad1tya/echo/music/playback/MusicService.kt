@@ -2,10 +2,12 @@
 
 package iad1tya.echo.music.playback
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.SQLException
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -13,7 +15,9 @@ import android.media.audiofx.AudioEffect
 import android.media.audiofx.LoudnessEnhancer
 import android.net.ConnectivityManager
 import android.os.Binder
+import android.os.Build
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.edit
@@ -276,26 +280,43 @@ class MusicService :
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         setupAudioFocusRequest()
         
-        // Initialize Google Cast
+        // Initialize Google Cast - only if permissions are granted
+        // On Android 12 and below, location permission is required for Cast device discovery
         try {
-            castContext = CastContext.getSharedInstance(this)
-            castPlayer = CastPlayer(castContext!!).apply {
-                setSessionAvailabilityListener(object : SessionAvailabilityListener {
-                    override fun onCastSessionAvailable() {
-                        this@MusicService.isCastSessionAvailable = true
-                        // Switch to cast player when session becomes available
-                        this@MusicService.switchToCastPlayer()
-                    }
+            val hasRequiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // Android 13+: Only NEARBY_WIFI_DEVICES permission is needed
+                ContextCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) == PackageManager.PERMISSION_GRANTED
+            } else {
+                // Android 12 and below: Location permission is required
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            }
+            
+            if (hasRequiredPermissions) {
+                castContext = CastContext.getSharedInstance(this)
+                castPlayer = CastPlayer(castContext!!).apply {
+                    setSessionAvailabilityListener(object : SessionAvailabilityListener {
+                        override fun onCastSessionAvailable() {
+                            this@MusicService.isCastSessionAvailable = true
+                            // Switch to cast player when session becomes available
+                            this@MusicService.switchToCastPlayer()
+                        }
 
-                    override fun onCastSessionUnavailable() {
-                        this@MusicService.isCastSessionAvailable = false
-                        // Switch back to local player when session ends
-                        this@MusicService.switchToLocalPlayer()
-                    }
-                })
+                        override fun onCastSessionUnavailable() {
+                            this@MusicService.isCastSessionAvailable = false
+                            // Switch back to local player when session ends
+                            this@MusicService.switchToLocalPlayer()
+                        }
+                    })
+                }
+                Log.d("MusicService", "Cast initialized successfully")
+            } else {
+                Log.d("MusicService", "Skipping Cast initialization - required permissions not granted")
             }
         } catch (e: Exception) {
-            Log.e("MusicService", "Failed to initialize Cast: ${e.message}")
+            Log.e("MusicService", "Failed to initialize Cast: ${e.message}", e)
+            castContext = null
+            castPlayer = null
         }
         
         // Initialize DLNA (placeholder for future full implementation)
