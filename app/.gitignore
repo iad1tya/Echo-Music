@@ -1,2 +1,8 @@
 /build
 /release
+
+# Sensitive files
+google-services.json
+*.keystore
+*.jks
+persistent-debug.keystore

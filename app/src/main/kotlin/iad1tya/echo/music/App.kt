@@ -56,16 +56,31 @@ class App : Application(), SingletonImageLoader.Factory {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
 
-        // Initialize Firebase
-        FirebaseApp.initializeApp(this)
-        
-        // Enable Firebase Crashlytics collection
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-        
-        // Set user properties for Firebase Analytics
-        FirebaseAnalytics.getInstance(this).apply {
-            setUserProperty("app_version", BuildConfig.VERSION_NAME)
-            setUserProperty("architecture", BuildConfig.ARCHITECTURE)
+        // Initialize Firebase with error handling
+        try {
+            val firebaseApp = FirebaseApp.initializeApp(this)
+            if (firebaseApp != null) {
+                // Enable Firebase Crashlytics collection
+                try {
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to enable Crashlytics")
+                }
+                
+                // Set user properties for Firebase Analytics
+                try {
+                    FirebaseAnalytics.getInstance(this).apply {
+                        setUserProperty("app_version", BuildConfig.VERSION_NAME)
+                        setUserProperty("architecture", BuildConfig.ARCHITECTURE)
+                    }
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to set Firebase Analytics properties")
+                }
+            } else {
+                Timber.w("Firebase initialization returned null - continuing without Firebase")
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to initialize Firebase - app will continue without Firebase services")
         }
 
         // تهيئة إعدادات التطبيق عند الإقلاع
