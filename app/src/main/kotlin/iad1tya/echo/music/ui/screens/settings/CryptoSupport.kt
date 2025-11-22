@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -55,72 +54,131 @@ fun CryptoSelectionDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
-            )
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier.padding(28.dp)
             ) {
+                // Header
                 Text(
-                    text = "Choose Cryptocurrency",
-                    style = MaterialTheme.typography.titleLarge.copy(
+                    text = "Select a cryptocurrency",
+                    style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold
-                    )
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(28.dp))
 
+                // Crypto options as cards
                 CryptoType.values().forEachIndexed { index, crypto ->
-                    Row(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onCryptoSelected(crypto) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .clickable { onCryptoSelected(crypto) },
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        ),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 0.dp,
+                            pressedElevation = 2.dp
+                        )
                     ) {
-                        if (crypto == CryptoType.BITCOIN) {
-                            Image(
-                                painter = painterResource(crypto.icon),
-                                contentDescription = crypto.displayName,
-                                modifier = Modifier.size(32.dp),
-                                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White)
-                            )
-                        } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .background(
+                                        when (crypto) {
+                                            CryptoType.BITCOIN -> Color(0xFFF7931A).copy(alpha = 0.15f)
+                                            CryptoType.ETHEREUM -> Color(0xFF627EEA).copy(alpha = 0.15f)
+                                            CryptoType.SOLANA -> Color(0xFF14F195).copy(alpha = 0.15f)
+                                        },
+                                        RoundedCornerShape(16.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (crypto == CryptoType.BITCOIN) {
+                                    Image(
+                                        painter = painterResource(crypto.icon),
+                                        contentDescription = crypto.displayName,
+                                        modifier = Modifier.size(32.dp),
+                                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
+                                            Color(0xFFF7931A)
+                                        )
+                                    )
+                                } else {
+                                    Icon(
+                                        painter = painterResource(crypto.icon),
+                                        contentDescription = crypto.displayName,
+                                        modifier = Modifier.size(32.dp),
+                                        tint = when (crypto) {
+                                            CryptoType.ETHEREUM -> Color(0xFF627EEA)
+                                            CryptoType.SOLANA -> Color(0xFF14F195)
+                                            else -> MaterialTheme.colorScheme.primary
+                                        }
+                                    )
+                                }
+                            }
+
+                            Spacer(Modifier.width(18.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = crypto.displayName,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = when (crypto) {
+                                        CryptoType.BITCOIN -> "BTC Network"
+                                        CryptoType.ETHEREUM -> "ETH Network"
+                                        CryptoType.SOLANA -> "SOL Network"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
                             Icon(
-                                painter = painterResource(crypto.icon),
-                                contentDescription = crypto.displayName,
-                                modifier = Modifier.size(32.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                painter = painterResource(R.drawable.arrow_forward),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-
-                        Spacer(Modifier.width(16.dp))
-
-                        Text(
-                            text = crypto.displayName,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium
-                            )
-                        )
                     }
 
                     if (index < CryptoType.values().size - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                        Spacer(Modifier.height(12.dp))
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
 
-                androidx.compose.material3.TextButton(
+                // Cancel button
+                androidx.compose.material3.FilledTonalButton(
                     onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text("Cancel")
+                    Text(
+                        "Cancel",
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
                 }
             }
         }
@@ -210,14 +268,20 @@ fun CryptoDetailsDialog(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(
-                        text = cryptoType.address,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                        ),
-                        modifier = Modifier.padding(12.dp),
-                        textAlign = TextAlign.Center
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = cryptoType.address,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(20.dp))

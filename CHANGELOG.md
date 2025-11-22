@@ -5,6 +5,31 @@ All notable changes to Echo Music will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2025-11-22
+- Video Quality: Added support for 1080p playback.
+- DLNA: Introduced DLNA streaming support (suggested by owenconnor98).
+- Lyrics: Improved layout and performance of lyrics on tablet devices.
+
+## [3.1] - 2025-11-22
+- “Switch to Video” Restored
+The switch-to-video button is back, letting you move to the song’s video with a single tap.
+- Nearby Devices Permission Update
+Added required Wi-Fi and Location permissions to improve nearby device discovery.
+- Google Cast Improvements
+Internal refinements to casting functionality. Thanks to owenconnor98 for the contribution.
+- Music Page Visual Update
+Removed the black background behind the artwork for a cleaner, more consistent look.
+- Redesigned Audio Output Window
+The audio output selector has been refreshed for better clarity.
+- Multi-Account Support
+You can now add and switch between multiple accounts easily. Suggested by job_done.
+- Playback Stability Fix
+Fixed an issue where music stopped playing due to URL expiration.
+- Updated Mini Player
+The mini player now features a modern pill-shaped design.
+
+## [3.0.0] - 2025-11-x
+
 ## [2.0.8] - 2025-11-11
 
 ## [2.0.1] - 2025-10-22

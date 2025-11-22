@@ -136,6 +136,15 @@ This document provides a comprehensive overview of all features available in Ech
 ### Widget Support
 - **Home Screen Widget**: Quick access to playback controls
 
+### Streaming & Casting
+- **Chromecast**: Cast music to Chromecast-enabled devices
+- **DLNA/UPnP**: Stream music to any DLNA/UPnP compatible device
+  - Automatic device discovery on local network
+  - Support for speakers, TVs, and media renderers
+  - Real-time playback control
+  - Stream from YouTube Music to network devices
+  - Compatible with popular DLNA devices (Smart TVs, Sonos, etc.)
+
 ### Notifications
 - **Rich Notifications**: Detailed media notifications
 - **Notification Actions**: Quick actions from notifications
@@ -181,6 +190,7 @@ This document provides a comprehensive overview of all features available in Ech
 - **Android Auto**: Full Android Auto support
 - **Wear OS**: Smartwatch integration
 - **Chromecast**: Cast to Chromecast devices
+- **DLNA/UPnP**: Stream to DLNA/UPnP compatible devices
 - **Bluetooth**: Enhanced Bluetooth support
 
 ## Accessibility Features

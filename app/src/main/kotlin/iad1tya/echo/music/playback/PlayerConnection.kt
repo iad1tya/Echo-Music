@@ -129,6 +129,11 @@ class PlayerConnection(
     override fun onPlaybackStateChanged(state: Int) {
         playbackState.value = state
         error.value = player.playerError
+        
+        // Clear error when playback is ready and playing successfully
+        if (state == Player.STATE_READY && player.playerError == null) {
+            error.value = null
+        }
     }
 
     override fun onPlayWhenReadyChanged(
@@ -146,6 +151,11 @@ class PlayerConnection(
         currentMediaItemIndex.value = player.currentMediaItemIndex
         currentWindowIndex.value = player.getCurrentQueueIndex()
         updateCanSkipPreviousAndNext()
+        
+        // Clear error when successfully transitioning to a new media item
+        if (player.playerError == null) {
+            error.value = null
+        }
     }
 
     override fun onTimelineChanged(

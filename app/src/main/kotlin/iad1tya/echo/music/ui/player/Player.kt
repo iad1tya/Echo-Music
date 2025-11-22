@@ -149,6 +149,7 @@ import iad1tya.echo.music.ui.utils.ShowMediaInfo
 import iad1tya.echo.music.utils.makeTimeString
 import iad1tya.echo.music.utils.rememberEnumPreference
 import iad1tya.echo.music.utils.rememberPreference
+import iad1tya.echo.music.LocalDLNAManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -235,6 +236,10 @@ fun BottomSheetPlayer(
         collapsedBound = 0.dp,
         initialAnchor = 1
     )
+    
+    val dlnaManager = LocalDLNAManager.current
+    val dlnaDevices by dlnaManager.devices.collectAsState()
+    val selectedDLNADevice by dlnaManager.selectedDevice.collectAsState()
 
     if (!canSkipNext && automix.isNotEmpty()) {
         playerConnection.service.addToQueueAutomix(automix[0], 0)
@@ -774,7 +779,7 @@ fun BottomSheetPlayer(
                                     .size(24.dp)
                             )
                         }
-
+                        
                         Box(
                             modifier = Modifier
                                 .size(42.dp)
@@ -1889,10 +1894,10 @@ fun BottomSheetPlayer(
                     } // Close Card
                     } // Close if (has connected devices)
                     
-                    // WiFi & Cast Devices Section
+                    // WiFi, Cast & DLNA Devices Section
                     Spacer(Modifier.height(20.dp))
                     Text(
-                        "WIFI & CAST DEVICES",
+                        "WIFI, CAST & DLNA DEVICES",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
@@ -2172,8 +2177,96 @@ fun BottomSheetPlayer(
                                         }
                                     }
                                 }
-                            } else {
-                                // No WiFi/Cast devices found - show scanning status
+                            }
+                            
+                            // Add DLNA Devices to the list
+                            if (selectedDLNADevice != null) {
+                                // DLNA device is currently selected/playing
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                                        .clickable {
+                                            dlnaManager.selectDevice(null)
+                                            Toast.makeText(context, "Switched to local playback", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.wifi_proxy),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(Modifier.width(16.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            selectedDLNADevice!!.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            "${selectedDLNADevice!!.manufacturer} • ${selectedDLNADevice!!.modelName} • DLNA",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    Icon(
+                                        painter = painterResource(R.drawable.check),
+                                        contentDescription = "Currently playing",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            } else if (dlnaDevices.isNotEmpty()) {
+                                // Show available DLNA devices
+                                dlnaDevices.forEach { device ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .clickable {
+                                                dlnaManager.selectDevice(device)
+                                                Toast.makeText(context, "Selected ${device.name}", Toast.LENGTH_SHORT).show()
+                                                audioRoutingSheetState.collapseSoft()
+                                            }
+                                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.wifi_proxy),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(28.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(Modifier.width(16.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                device.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Text(
+                                                "${device.manufacturer} • ${device.modelName} • DLNA",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Show scan button if no devices found (WiFi or DLNA)
+                            if (availableWifiRoutes.isEmpty() && connectedWifiRoutes.isEmpty() && 
+                                castSession.value == null && dlnaDevices.isEmpty() && selectedDLNADevice == null) {
+                                // No WiFi/Cast/DLNA devices found - show scanning status
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -2191,7 +2284,7 @@ fun BottomSheetPlayer(
                                         Spacer(Modifier.width(16.dp))
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "WiFi Audio & Cast Devices",
+                                                "WiFi, Cast & DLNA Devices",
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Medium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -2209,16 +2302,19 @@ fun BottomSheetPlayer(
                                             onClick = {
                                                 isScanning = true
                                                 try {
-                                                    // Re-trigger discovery by removing and re-adding callback
+                                                    // Scan for both WiFi/Cast and DLNA devices
                                                     mediaRouter?.let { router ->
                                                         selector?.let { sel ->
-                                                            // Force a refresh of the route discovery
-                                                            Toast.makeText(context, "Scanning for devices...", Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(context, "Scanning for WiFi & Cast devices...", Toast.LENGTH_SHORT).show()
                                                         }
                                                     }
-                                                    // Auto-stop scanning after 3 seconds
+                                                    // Also trigger DLNA discovery
+                                                    dlnaManager.startDiscovery()
+                                                    Toast.makeText(context, "Scanning for DLNA devices...", Toast.LENGTH_SHORT).show()
+                                                    
+                                                    // Auto-stop scanning after 5 seconds
                                                     coroutineScope.launch {
-                                                        kotlinx.coroutines.delay(3000)
+                                                        kotlinx.coroutines.delay(5000)
                                                         isScanning = false
                                                     }
                                                 } catch (e: Exception) {
@@ -2235,7 +2331,7 @@ fun BottomSheetPlayer(
                                                 modifier = Modifier.size(20.dp)
                                             )
                                             Spacer(Modifier.width(8.dp))
-                                            Text("Scan Again")
+                                            Text("Scan for Devices")
                                         }
                                     }
                                 }
@@ -2273,7 +2369,7 @@ fun BottomSheetPlayer(
                         }
                         } // Close WiFi Card Column
                     } // Close WiFi Card
-                    } // Close main Column
-                }
-            }
-        }
+                } // Close spacing Column
+            } // Close main Column
+        } // Close Audio Routing BottomSheet and Player BottomSheet
+}

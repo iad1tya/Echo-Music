@@ -56,6 +56,8 @@
 * **Playlist Management:** Create, edit, sync, and organize playlists with intuitive long-press actions.
 * **Sleep Timer:** Automatically stop playback after a set duration.
 * **Widgets:** Quick access from your home screen.
+* **DLNA/UPnP Support:** Stream music to compatible network devices (Smart TVs, speakers, etc.). [Learn more](DLNA_SETUP.md)
+* **Chromecast:** Cast to Chromecast-enabled devices.
 
 ---
 

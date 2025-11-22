@@ -128,7 +128,7 @@ fun AccountSettings(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(id = R.string.app_name),
+                text = stringResource(R.string.account),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
                     fontWeight = FontWeight.Bold

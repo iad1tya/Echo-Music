@@ -354,27 +354,23 @@ fun LyricsScreen(
                             )
                         }
                     }
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        Column(modifier = Modifier.weight(1f).fillMaxSize()) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Lyrics(sliderPositionProvider = { sliderPosition })
-                            }
-                        }
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxSize()
-                                .padding(horizontal = 48.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            when (sliderStyle) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Lyrics(sliderPositionProvider = { sliderPosition })
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 48.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        when (sliderStyle) {
                                 SliderStyle.DEFAULT -> {
                                     Slider(
                                         value = (sliderPosition ?: position).toFloat(),
@@ -530,7 +526,6 @@ fun LyricsScreen(
                         }
                     }
                 }
-            }
             else -> {
                 Column(
                     modifier = Modifier

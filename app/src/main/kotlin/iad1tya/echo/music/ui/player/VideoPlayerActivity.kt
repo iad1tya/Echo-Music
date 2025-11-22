@@ -36,6 +36,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.ui.PlayerView
 import com.echo.innertube.YouTube
 import com.echo.innertube.models.YouTubeClient
@@ -105,6 +106,7 @@ class VideoPlayerActivity : ComponentActivity() {
     data class VideoQuality(
         val label: String,
         val url: String,
+        val audioUrl: String? = null,
         val height: Int?,
         val bitrate: Int?
     )
@@ -161,15 +163,29 @@ class VideoPlayerActivity : ComponentActivity() {
         }
         
         // Function to load/switch video quality
-        fun loadVideo(url: String, seekToPosition: Long? = null) {
-            val mediaItem = MediaItem.fromUri(url)
+        fun loadVideo(videoUrl: String, audioUrl: String? = null, seekToPosition: Long? = null) {
             val dataSourceFactory = DefaultHttpDataSource.Factory()
                 .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
                 .setConnectTimeoutMs(10000)
                 .setReadTimeoutMs(10000)
             
-            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(mediaItem)
+            val mediaSource = if (audioUrl != null) {
+                // High quality: merge separate video and audio streams
+                val videoMediaItem = MediaItem.fromUri(videoUrl)
+                val audioMediaItem = MediaItem.fromUri(audioUrl)
+                
+                val videoSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(videoMediaItem)
+                val audioSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(audioMediaItem)
+                
+                MergingMediaSource(videoSource, audioSource)
+            } else {
+                // Combined format (video+audio in one stream)
+                val mediaItem = MediaItem.fromUri(videoUrl)
+                ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+            }
             
             // Save playback position (use seekToPosition if provided, otherwise use current position)
             val position = seekToPosition ?: (exoPlayer?.currentPosition ?: 0)
@@ -216,23 +232,29 @@ class VideoPlayerActivity : ComponentActivity() {
                     val results = deferredResults.awaitAll()
                     val qualities = mutableListOf<VideoQuality>()
                     var lastError: String? = null
+                    var bestAudioUrl: String? = null
                     
                     for ((client, result) in results) {
                         result.onSuccess { playerResponse ->
                             if (playerResponse.playabilityStatus.status == "OK") {
                                 val streamingData = playerResponse.streamingData
                                 if (streamingData != null) {
-                                    // Prioritize combined formats that have both video and audio
                                     val formats = streamingData.formats ?: emptyList()
                                     val adaptiveFormats = streamingData.adaptiveFormats ?: emptyList()
                                     
-                                    // First, try to get combined formats (video + audio)
+                                    // Find best audio stream for merging with video
+                                    val audioFormat = adaptiveFormats
+                                        .filter { it.mimeType?.contains("audio") == true && it.url != null }
+                                        .maxByOrNull { it.bitrate ?: 0 }
+                                    bestAudioUrl = audioFormat?.url
+                                    
+                                    // First, try combined formats (video + audio) - these work without merging
                                     formats.forEach { format ->
                                         if (format.mimeType?.contains("video") == true && 
                                             format.url != null && 
                                             !format.url.isNullOrEmpty()) {
                                             
-                                            val url = format.url!! // Force non-null since we checked
+                                            val url = format.url!!
                                             val qualityLabel = format.qualityLabel ?: 
                                                 format.height?.let { "${it}p" } ?: 
                                                 "Unknown"
@@ -241,6 +263,7 @@ class VideoPlayerActivity : ComponentActivity() {
                                                 VideoQuality(
                                                     label = qualityLabel,
                                                     url = url,
+                                                    audioUrl = null, // Combined format doesn't need separate audio
                                                     height = format.height,
                                                     bitrate = format.bitrate
                                                 )
@@ -248,27 +271,27 @@ class VideoPlayerActivity : ComponentActivity() {
                                         }
                                     }
                                     
-                                    // Only use adaptive formats if no combined formats found
-                                    if (qualities.isEmpty()) {
-                                        adaptiveFormats.forEach { format ->
-                                            if (format.mimeType?.contains("video") == true && 
-                                                format.url != null && 
-                                                !format.url.isNullOrEmpty()) {
-                                                
-                                                val url = format.url!!
-                                                val qualityLabel = format.qualityLabel ?: 
-                                                    format.height?.let { "${it}p" } ?: 
-                                                    "Unknown"
-                                                
-                                                qualities.add(
-                                                    VideoQuality(
-                                                        label = qualityLabel,
-                                                        url = url,
-                                                        height = format.height,
-                                                        bitrate = format.bitrate
-                                                    )
+                                    // Add adaptive (high quality) video formats with audio merging
+                                    adaptiveFormats.forEach { format ->
+                                        if (format.mimeType?.contains("video") == true && 
+                                            format.url != null && 
+                                            !format.url.isNullOrEmpty() &&
+                                            bestAudioUrl != null) {
+                                            
+                                            val url = format.url!!
+                                            val qualityLabel = format.qualityLabel ?: 
+                                                format.height?.let { "${it}p" } ?: 
+                                                "Unknown"
+                                            
+                                            qualities.add(
+                                                VideoQuality(
+                                                    label = qualityLabel,
+                                                    url = url,
+                                                    audioUrl = bestAudioUrl, // Will merge video+audio
+                                                    height = format.height,
+                                                    bitrate = format.bitrate
                                                 )
-                                            }
+                                            )
                                         }
                                     }
                                 }
@@ -352,7 +375,7 @@ class VideoPlayerActivity : ComponentActivity() {
                             
                             if (autoQuality != null) {
                                 selectedQuality = autoQuality
-                                loadVideo(autoQuality.url, startPosition)
+                                loadVideo(autoQuality.url, autoQuality.audioUrl, startPosition)
                                 isLoading = false
                             } else {
                                 errorMessage = "No video formats available"
@@ -620,7 +643,7 @@ class VideoPlayerActivity : ComponentActivity() {
                                         )
                                         .clickable {
                                             selectedQuality = quality
-                                            loadVideo(quality.url)
+                                            loadVideo(quality.url, quality.audioUrl)
                                             showQualityMenu = false
                                             showControls = false
                                         }

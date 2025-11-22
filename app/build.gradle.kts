@@ -18,8 +18,8 @@ android {
         applicationId = "iad1tya.echo.music"
         minSdk = 26
         targetSdk = 36
-        versionCode = 310
-        versionName = "3.1"
+        versionCode = 311
+        versionName = "3.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -209,6 +209,9 @@ dependencies {
     implementation(libs.mediarouter)
     implementation(libs.cast.framework)
     implementation(libs.squigglyslider)
+    
+    // DLNA/UPnP Support
+    implementation(libs.nanohttpd)
 
     implementation(libs.room.runtime)
     implementation(libs.kuromoji.ipadic)

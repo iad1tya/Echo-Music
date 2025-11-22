@@ -94,32 +94,7 @@ class MusicDatabase(
         PlaylistSongMapPreview::class,
     ],
     version = 25,
-    exportSchema = true,
-    autoMigrations = [
-        AutoMigration(from = 2, to = 3),
-        AutoMigration(from = 3, to = 4),
-        AutoMigration(from = 4, to = 5),
-        AutoMigration(from = 5, to = 6, spec = Migration5To6::class),
-        AutoMigration(from = 6, to = 7, spec = Migration6To7::class),
-        AutoMigration(from = 7, to = 8, spec = Migration7To8::class),
-        AutoMigration(from = 8, to = 9),
-        AutoMigration(from = 9, to = 10, spec = Migration9To10::class),
-        AutoMigration(from = 10, to = 11, spec = Migration10To11::class),
-        AutoMigration(from = 11, to = 12, spec = Migration11To12::class),
-        AutoMigration(from = 12, to = 13, spec = Migration12To13::class),
-        AutoMigration(from = 13, to = 14, spec = Migration13To14::class),
-        AutoMigration(from = 14, to = 15),
-        AutoMigration(from = 15, to = 16),
-        AutoMigration(from = 16, to = 17, spec = Migration16To17::class),
-        AutoMigration(from = 17, to = 18),
-        AutoMigration(from = 18, to = 19, spec = Migration18To19::class),
-        AutoMigration(from = 19, to = 20, spec = Migration19To20::class),
-        AutoMigration(from = 20, to = 21, spec = Migration20To21::class),
-        AutoMigration(from = 21, to = 22, spec = Migration21To22::class),
-        AutoMigration(from = 22, to = 23, spec = Migration22To23::class),
-        AutoMigration(from = 23, to = 24),
-        AutoMigration(from = 24, to = 25)
-    ],
+    exportSchema = false,
 )
 @TypeConverters(Converters::class)
 abstract class InternalDatabase : RoomDatabase() {
