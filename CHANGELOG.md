@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.1] - 2025-11-22
 - Video Quality: Added support for upto 1080p playback.
-- DLNA: Introduced DLNA streaming support (suggested by owenconnor98).
+- DLNA: Introduced DLNA streaming support (suggestion by owenconnor98).
 - Lyrics: Improved layout and performance of lyrics on tablet devices.
 
 ## [3.1] - 2025-11-22
