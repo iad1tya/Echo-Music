@@ -5,6 +5,16 @@ All notable changes to Echo Music will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.3] - 2025-11-22
+- Fixed a database migration issue.  
+  The schema was at version 25, but only a **1 → 2** migration was defined.  
+  Any install starting from another version had no valid upgrade path, causing the app to crash during migration.  
+  All required migration steps are now in place so upgrades work correctly across versions.
+
+**Thanks to:** pixelated_buttons and justkev_3611
+
+## [3.1.2] - 2025-11-22
+
 ## [3.1.1] - 2025-11-22
 - Video Quality: Added support for upto 1080p playback.
 - DLNA: Introduced DLNA streaming support (suggestion by owenconnor98).
