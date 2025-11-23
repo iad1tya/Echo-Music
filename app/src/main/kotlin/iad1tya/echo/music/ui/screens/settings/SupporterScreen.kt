@@ -304,7 +304,7 @@ fun SupporterScreen(
                     icon = painterResource(R.drawable.upi),
                     title = "UPI Payment",
                     subtitle = "Direct payment (India only)",
-                    onClick = { uriHandler.openUri("https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=8840590272@kotak&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support") },
+                    onClick = { uriHandler.openUri("https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=iad1tya@upi&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support") },
                     isLast = false
                 )
                 

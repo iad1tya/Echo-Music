@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +17,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -277,12 +282,32 @@ fun SuggestionItem(
     onFillTextField: () -> Unit,
     pureBlack: Boolean
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+    
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .height(SuggestionItemHeight)
-            .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface)
+            .background(
+                if (isFocused) {
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                } else if (pureBlack) {
+                    Color.Black
+                } else {
+                    MaterialTheme.colorScheme.surface
+                }
+            )
+            .onFocusChanged { isFocused = it.isFocused }
+            .focusable()
+            .onKeyEvent { keyEvent ->
+                if (keyEvent.key == Key.Enter || keyEvent.key == Key.DirectionCenter) {
+                    onClick()
+                    true
+                } else {
+                    false
+                }
+            }
             .clickable(onClick = onClick)
             .padding(end = SearchBarIconOffsetX)
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)),
