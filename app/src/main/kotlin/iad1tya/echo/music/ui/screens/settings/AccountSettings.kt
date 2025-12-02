@@ -329,6 +329,39 @@ fun AccountSettings(
 
         Spacer(Modifier.height(4.dp))
 
+        // Settings button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surface)
+                .clickable {
+                    onClose()
+                    navController.navigate("settings")
+                }
+                .padding(horizontal = 18.dp, vertical = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.settings_outlined),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(Modifier.width(16.dp))
+
+                Text(
+                    text = stringResource(R.string.settings),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+
+        Spacer(Modifier.height(4.dp))
+
         if (isLoggedIn) {
             SwitchPreference(
                 title = { Text(stringResource(R.string.more_content)) },

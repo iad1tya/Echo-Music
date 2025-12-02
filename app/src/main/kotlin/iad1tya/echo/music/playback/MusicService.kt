@@ -241,6 +241,7 @@ class MusicService :
 
     override fun onCreate() {
         super.onCreate()
+        try {
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider(
                 this,
@@ -294,7 +295,8 @@ class MusicService :
             
             if (hasRequiredPermissions) {
                 castContext = CastContext.getSharedInstance(this)
-                castPlayer = CastPlayer(castContext!!).apply {
+                if (castContext != null) {
+                    castPlayer = CastPlayer(castContext!!).apply {
                     setSessionAvailabilityListener(object : SessionAvailabilityListener {
                         override fun onCastSessionAvailable() {
                             this@MusicService.isCastSessionAvailable = true
@@ -308,8 +310,11 @@ class MusicService :
                             this@MusicService.switchToLocalPlayer()
                         }
                     })
+                    }
+                    Log.d("MusicService", "Cast initialized successfully")
+                } else {
+                    Log.d("MusicService", "CastContext unavailable")
                 }
-                Log.d("MusicService", "Cast initialized successfully")
             } else {
                 Log.d("MusicService", "Skipping Cast initialization - required permissions not granted")
             }
@@ -321,43 +326,48 @@ class MusicService :
         
         // Initialize DLNA (placeholder for future full implementation)
         try {
-            dlnaManager.start()
-            Log.d("MusicService", "DLNA service initialized")
-            
-            // Monitor DLNA device selection changes
-            scope.launch {
-                dlnaManager.selectedDevice.collect { device ->
-                    if (device != null) {
-                        Log.d("MusicService", "DLNA device selected: ${device.name}")
-                        // If currently playing, stream to DLNA device
-                        if (player.playbackState == Player.STATE_READY && player.currentMediaItem != null) {
-                            val metadata = currentMediaMetadata.value
-                            val mediaUrl = player.currentMediaItem?.localConfiguration?.uri?.toString() ?: ""
-                            
-                            if (mediaUrl.isNotEmpty()) {
-                                val success = dlnaManager.playMedia(
-                                    mediaUrl = mediaUrl,
-                                    title = metadata?.title ?: "",
-                                    artist = metadata?.artists?.firstOrNull()?.name ?: ""
-                                )
+            if (::dlnaManager.isInitialized) {
+                dlnaManager.start()
+                Log.d("MusicService", "DLNA service initialized")
+                
+                // Monitor DLNA device selection changes
+                scope.launch {
+                    dlnaManager.selectedDevice.collect { device ->
+                        if (device != null) {
+                            Log.d("MusicService", "DLNA device selected: ${device.name}")
+                            // If currently playing, stream to DLNA device
+                            if (player.playbackState == Player.STATE_READY && player.currentMediaItem != null) {
+                                val metadata = currentMediaMetadata.value
+                                val mediaUrl = player.currentMediaItem?.localConfiguration?.uri?.toString() ?: ""
                                 
-                                if (success) {
-                                    // Pause local player
-                                    player.pause()
+                                if (mediaUrl.isNotEmpty()) {
+                                    val success = dlnaManager.playMedia(
+                                        mediaUrl = mediaUrl,
+                                        title = metadata?.title ?: "",
+                                        artist = metadata?.artists?.firstOrNull()?.name ?: ""
+                                    )
+                                    
+                                    if (success) {
+                                        // Pause local player
+                                        player.pause()
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        Log.d("MusicService", "DLNA device deselected, resuming local playback")
-                        // Resume local playback if it was paused for DLNA
-                        if (player.playbackState == Player.STATE_READY && !player.playWhenReady) {
-                            player.play()
+                        } else {
+                            Log.d("MusicService", "DLNA device deselected, resuming local playback")
+                            // Resume local playback if it was paused for DLNA
+                            if (player.playbackState == Player.STATE_READY && !player.playWhenReady) {
+                                player.play()
+                            }
                         }
                     }
                 }
+            } else {
+                Log.w("MusicService", "DLNA manager not initialized by Hilt")
             }
         } catch (e: Exception) {
-            Log.e("MusicService", "Failed to initialize DLNA: ${e.message}")
+            Log.e("MusicService", "Failed to initialize DLNA: ${e.message}", e)
+            reportException(e)
         }
 
         mediaLibrarySessionCallback.apply {
@@ -384,7 +394,12 @@ class MusicService :
         val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
         controllerFuture.addListener({ controllerFuture.get() }, MoreExecutors.directExecutor())
 
-        connectivityManager = getSystemService()!!
+        connectivityManager = getSystemService() ?: run {
+            Log.e("MusicService", "ConnectivityManager not available")
+            // Create a dummy ConnectivityManager reference won't be used
+            stopSelf()
+            return
+        }
         connectivityObserver = NetworkConnectivityObserver(this)
 
         scope.launch {
@@ -518,6 +533,23 @@ class MusicService :
                     saveQueueToDisk()
                 }
             }
+        }
+        } catch (e: Exception) {
+            Log.e("MusicService", "Critical error during service initialization", e)
+            reportException(e)
+            // Try to cleanup partially initialized components
+            try {
+                if (::player.isInitialized) {
+                    player.release()
+                }
+                if (::mediaSession.isInitialized) {
+                    mediaSession.release()
+                }
+            } catch (cleanupError: Exception) {
+                Log.e("MusicService", "Error during cleanup", cleanupError)
+            }
+            stopSelf()
+            throw e // Re-throw to let system know service failed to start
         }
     }
 
@@ -664,7 +696,12 @@ class MusicService :
      * Switch playback back to local ExoPlayer
      */
     private fun switchToLocalPlayer() {
-        castPlayer?.let { cast ->
+        val cast = castPlayer ?: run {
+            Log.w("MusicService", "Attempted to switch from Cast player but castPlayer is null")
+            return
+        }
+        
+        try {
             val playWhenReady = cast.playWhenReady
             val currentPosition = cast.currentPosition
             val currentMediaItemIndex = cast.currentMediaItemIndex
@@ -681,6 +718,9 @@ class MusicService :
             cast.stop()
             
             Log.d("MusicService", "Transferred playback to local player")
+        } catch (e: Exception) {
+            Log.e("MusicService", "Failed to switch to local player", e)
+            reportException(e)
         }
     }
 
@@ -1349,6 +1389,9 @@ class MusicService :
 
     override fun onPlayerError(error: PlaybackException) {
         super.onPlayerError(error)
+        Log.e("MusicService", "Playback error: ${error.message}", error)
+        
+        try {
         val isConnectionError = (error.cause?.cause is PlaybackException) &&
                 (error.cause?.cause as PlaybackException).errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
         
@@ -1399,6 +1442,16 @@ class MusicService :
         } else {
             stopOnError()
         }
+        } catch (e: Exception) {
+            Log.e("MusicService", "Exception in error handler", e)
+            reportException(e)
+            // Fallback: just stop the player
+            try {
+                player.pause()
+            } catch (fallbackError: Exception) {
+                Log.e("MusicService", "Failed to pause player in fallback", fallbackError)
+            }
+        }
     }
 
     private fun createCacheDataSource(): CacheDataSource.Factory =
@@ -1433,7 +1486,14 @@ class MusicService :
     private fun createDataSourceFactory(): DataSource.Factory {
         val songUrlCache = HashMap<String, Pair<String, Long>>()
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
-            val mediaId = dataSpec.key ?: error("No media id")
+            val mediaId = dataSpec.key ?: run {
+                Log.e("MusicService", "DataSpec has no media id key")
+                throw PlaybackException(
+                    getString(R.string.error_unknown),
+                    null,
+                    PlaybackException.ERROR_CODE_REMOTE_ERROR
+                )
+            }
 
             // Check if the content is already downloaded/cached
             if (downloadCache.isCached(
@@ -1502,7 +1562,7 @@ class MusicService :
                             codecs = format.mimeType.split("codecs=")[1].removeSurrounding("\""),
                             bitrate = format.bitrate,
                             sampleRate = format.audioSampleRate,
-                            contentLength = format.contentLength!!,
+                            contentLength = format.contentLength ?: 0L,
                             loudnessDb = nonNullPlayback.audioConfig?.loudnessDb,
                             playbackUrl = nonNullPlayback.playbackTracking?.videostatsPlaybackUrl?.baseUrl
                         )

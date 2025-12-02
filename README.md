@@ -160,7 +160,7 @@ Only analytics data is collected to help improve your experience. Crash reports 
   <a href="https://buymeacoffee.com/iad1tya">
     <img src="assets/bmac.png" alt="Buy Me a Coffee" width="150"/>
   </a>
-  <a href="https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=8840590272@kotak&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support">
+  <a href="https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=iad1tya@upi&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support">
     <img src="assets/upi.svg" alt="UPI" width="110"/>
   </a>
 </div>

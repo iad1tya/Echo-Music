@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
@@ -109,7 +110,7 @@ fun OnlineSearchScreen(
                 onFillTextField = {
                     onQueryChange(TextFieldValue(history.query, TextRange(history.query.length)))
                 },
-                modifier = Modifier.animateItem(),
+                modifier = Modifier.animateItem().focusable(),
                 pureBlack = pureBlack
             )
         }
@@ -125,7 +126,7 @@ fun OnlineSearchScreen(
                 onFillTextField = {
                     onQueryChange(TextFieldValue(query, TextRange(query.length)))
                 },
-                modifier = Modifier.animateItem(),
+                modifier = Modifier.animateItem().focusable(),
                 pureBlack = pureBlack
             )
         }
@@ -261,6 +262,7 @@ fun OnlineSearchScreen(
                         }
                     )
                     .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface)
+                    .focusable()
                     .animateItem()
             )
         }

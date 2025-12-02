@@ -150,17 +150,35 @@
 -keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$ViewComponentBuilderEntryPoint
 -keep @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
 
-## Media3/ExoPlayer Rules
+## Media3/ExoPlayer Rules - Enhanced to prevent service crashes
 -keep class androidx.media3.** { *; }
 -keep interface androidx.media3.** { *; }
+-keepclassmembers class androidx.media3.** { *; }
 -dontwarn androidx.media3.**
 
 # Keep ExoPlayer classes
 -keep class com.google.android.exoplayer2.** { *; }
+-keepclassmembers class com.google.android.exoplayer2.** { *; }
 -dontwarn com.google.android.exoplayer2.**
 
-# Keep MediaSession
+# Keep MediaSession and Player classes
 -keep class androidx.media3.session.** { *; }
+-keep class androidx.media3.common.Player { *; }
+-keep class androidx.media3.common.Player$* { *; }
+-keep interface androidx.media3.common.Player$* { *; }
+-keep class androidx.media3.exoplayer.ExoPlayer { *; }
+-keepclassmembers class androidx.media3.exoplayer.ExoPlayer { *; }
+
+# Keep PlaybackException and error handling
+-keep class androidx.media3.common.PlaybackException { *; }
+-keepclassmembers class androidx.media3.common.PlaybackException { *; }
+
+# Keep MediaItem and related classes
+-keep class androidx.media3.common.MediaItem { *; }
+-keep class androidx.media3.common.MediaItem$* { *; }
+-keep class androidx.media3.common.MediaMetadata { *; }
+
+# Keep legacy media support
 -keep class androidx.media.** { *; }
 
 ## DataStore Rules
@@ -196,10 +214,54 @@
 -keep class iad1tya.echo.music.models.** { *; }
 -keep class iad1tya.echo.music.db.entities.** { *; }
 
-## Keep service classes
--keep class * extends android.app.Service
--keep class * extends androidx.media3.session.MediaLibraryService
--keep class * extends androidx.media3.session.MediaSessionService
+## Keep service classes - Critical for preventing service crashes
+-keep class * extends android.app.Service {
+    <init>(...);
+    void onCreate();
+    void onDestroy();
+    int onStartCommand(android.content.Intent, int, int);
+    android.os.IBinder onBind(android.content.Intent);
+}
+-keep class * extends androidx.media3.session.MediaLibraryService {
+    <init>(...);
+    *** onCreate();
+    *** onDestroy();
+    *** onGetSession(...);
+}
+-keep class * extends androidx.media3.session.MediaSessionService {
+    <init>(...);
+    *** onCreate();
+    *** onDestroy();
+}
+
+## Keep MusicService specifically to prevent crashes
+-keep class iad1tya.echo.music.playback.MusicService {
+    <init>();
+    *** player;
+    *** mediaSession;
+    *** database;
+    *** connectivityManager;
+    *** connectivityObserver;
+    *** onCreate();
+    *** onDestroy();
+    *** onBind(...);
+    *** onPlayerError(...);
+    public *** *;
+}
+
+## Keep ExoDownloadService
+-keep class iad1tya.echo.music.playback.ExoDownloadService {
+    <init>();
+    *** onCreate();
+    *** onDestroy();
+    public *** *;
+}
+
+## Keep Binder classes
+-keep class * extends android.os.Binder {
+    <init>();
+    public *** *;
+}
 
 ## JSON Rules - Fix VerifyError
 -keep class org.json.** { *; }

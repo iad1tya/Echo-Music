@@ -312,7 +312,7 @@ fun AboutScreen(
                     title = "UPI Payment",
                     subtitle = "Support via UPI (India)",
                     iconSize = 27.dp,
-                    onClick = { uriHandler.openUri("https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=8840590272@kotak&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support") }
+                    onClick = { uriHandler.openUri("https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=iad1tya@upi&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support") }
                 )
                 
                 HorizontalDivider(
