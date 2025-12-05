@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -65,17 +67,7 @@ fun AmbientModeScreen(
     
     // State for options
     var showAlbumArt by remember { mutableStateOf(false) }
-    var lyricsColor by remember { mutableStateOf(Color.White) }
     var areControlsVisible by remember { mutableStateOf(false) }
-
-    // Color options
-    val colorOptions = listOf(
-        Color.White,
-        Color(0xFFFFD700), // Gold
-        Color(0xFF00BFFF), // Deep Sky Blue
-        Color(0xFFFF69B4), // Hot Pink
-        Color(0xFF00FF7F)  // Spring Green
-    )
 
     // Force Landscape and Fullscreen
     DisposableEffect(Unit) {
@@ -116,7 +108,7 @@ fun AmbientModeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .clickable { areControlsVisible = !areControlsVisible }
+            .background(Color.Black)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -159,85 +151,69 @@ fun AmbientModeScreen(
                 // Actually, Lyrics.kt might handle its own colors.
                 // Let's try CompositionLocalProvider(LocalContentColor provides lyricsColor)
                 
-                 androidx.compose.runtime.CompositionLocalProvider(
-                     androidx.compose.material3.LocalContentColor provides lyricsColor
-                 ) {
-                     Lyrics(
-                         sliderPositionProvider = { playerConnection.player.currentPosition },
-                         isVisible = true,
-                         modifier = Modifier.fillMaxSize()
-                     )
-                 }
+                Lyrics(
+                    sliderPositionProvider = { playerConnection.player.currentPosition },
+                    isVisible = true,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
 
-        // Controls Overlay
+        // Controls Overlay (Replaced by Floating Settings Icon)
+        /*
         AnimatedVisibility(
             visible = areControlsVisible,
             modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(bottom = 24.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.DarkGray.copy(alpha = 0.5f))
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Toggle Album Art
-                IconButton(onClick = { showAlbumArt = !showAlbumArt }) {
-                    Icon(
-                        painter = painterResource(if (showAlbumArt) R.drawable.insert_photo else R.drawable.hide_image),
-                        contentDescription = "Toggle Album Art",
-                        tint = Color.White
-                    )
-                }
-
-                // Change Color
-                IconButton(onClick = {
-                    val nextColorIndex = (colorOptions.indexOf(lyricsColor) + 1) % colorOptions.size
-                    lyricsColor = colorOptions[nextColorIndex]
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.palette),
-                        contentDescription = "Change Color",
-                        tint = lyricsColor
-                    )
-                }
-                
-                // Close
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.close),
-                        contentDescription = "Close",
-                        tint = Color.White
-                    )
-                }
-            }
-        }
+        ) { ... }
+        */
         
-        // Metadata (Top Left, Subtly visible)
-        if (areControlsVisible) {
-             mediaMetadata?.let { metadata ->
-                 Column(
-                     modifier = Modifier
-                         .align(Alignment.TopStart)
-                         .padding(32.dp)
-                 ) {
-                     Text(
-                         text = metadata.title,
-                         style = MaterialTheme.typography.titleLarge,
-                         fontWeight = FontWeight.Bold,
-                         color = Color.White
-                     )
-                     Text(
-                         text = metadata.artists.joinToString { it.name },
-                         style = MaterialTheme.typography.titleMedium,
-                         color = Color.White.copy(alpha = 0.7f)
-                     )
-                 }
-             }
+        // Permanent Settings Icon (Top Right)
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            IconButton(onClick = { areControlsVisible = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.settings_outlined),
+                    contentDescription = "Settings",
+                    tint = Color.White.copy(alpha = 0.5f), // Dimmed to prevent burn-in
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            DropdownMenu(
+                expanded = areControlsVisible,
+                onDismissRequest = { areControlsVisible = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Album Art") },
+                    onClick = { 
+                        showAlbumArt = !showAlbumArt
+                        areControlsVisible = false 
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(if (showAlbumArt) R.drawable.insert_photo else R.drawable.hide_image),
+                            contentDescription = null
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Exit Ambient Mode") },
+                    onClick = { 
+                        areControlsVisible = false
+                        navController.popBackStack() 
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.close),
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
         }
     }
 }

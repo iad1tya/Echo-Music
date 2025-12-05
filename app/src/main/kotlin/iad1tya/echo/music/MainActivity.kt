@@ -1358,83 +1358,99 @@ class MainActivity : ComponentActivity() {
                                         }.route,
                                         // Enter Transition - smoother with easing
                                         enterTransition = {
-                                            val currentRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == targetState.destination.route
-                                            }
-                                            val previousRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == initialState.destination.route
-                                            }
+                                            if (targetState.destination.route == "ambient_mode") {
+                                                fadeIn(animationSpec = tween(700, easing = LinearEasing))
+                                            } else {
+                                                val currentRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == targetState.destination.route
+                                                }
+                                                val previousRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == initialState.destination.route
+                                                }
 
-                                            if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex)
-                                                slideInHorizontally(
-                                                    initialOffsetX = { it / 4 },
-                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
-                                                ) + fadeIn(tween(250, easing = LinearEasing))
-                                            else
-                                                slideInHorizontally(
-                                                    initialOffsetX = { -it / 4 },
-                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
-                                                ) + fadeIn(tween(250, easing = LinearEasing))
+                                                if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex)
+                                                    slideInHorizontally(
+                                                        initialOffsetX = { it / 4 },
+                                                        animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                    ) + fadeIn(tween(250, easing = LinearEasing))
+                                                else
+                                                    slideInHorizontally(
+                                                        initialOffsetX = { -it / 4 },
+                                                        animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                    ) + fadeIn(tween(250, easing = LinearEasing))
+                                            }
                                         },
                                         // Exit Transition - smoother
                                         exitTransition = {
-                                            val currentRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == initialState.destination.route
-                                            }
-                                            val targetRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == targetState.destination.route
-                                            }
+                                            if (initialState.destination.route == "ambient_mode") {
+                                                fadeOut(animationSpec = tween(700, easing = LinearEasing))
+                                            } else {
+                                                val currentRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == initialState.destination.route
+                                                }
+                                                val targetRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == targetState.destination.route
+                                                }
 
-                                            if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex)
-                                                slideOutHorizontally(
-                                                    targetOffsetX = { -it / 4 },
-                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
-                                                ) + fadeOut(tween(200, easing = LinearEasing))
-                                            else
-                                                slideOutHorizontally(
-                                                    targetOffsetX = { it / 4 },
-                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
-                                                ) + fadeOut(tween(200, easing = LinearEasing))
+                                                if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex)
+                                                    slideOutHorizontally(
+                                                        targetOffsetX = { -it / 4 },
+                                                        animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                    ) + fadeOut(tween(200, easing = LinearEasing))
+                                                else
+                                                    slideOutHorizontally(
+                                                        targetOffsetX = { it / 4 },
+                                                        animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                    ) + fadeOut(tween(200, easing = LinearEasing))
+                                            }
                                         },
                                         // Pop Enter Transition
                                         popEnterTransition = {
-                                            val currentRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == targetState.destination.route
-                                            }
-                                            val previousRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == initialState.destination.route
-                                            }
+                                            if (targetState.destination.route == "ambient_mode") {
+                                                fadeIn(animationSpec = tween(700, easing = LinearEasing))
+                                            } else {
+                                                val currentRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == targetState.destination.route
+                                                }
+                                                val previousRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == initialState.destination.route
+                                                }
 
-                                            if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex)
-                                                slideInHorizontally(
-                                                    initialOffsetX = { it / 4 },
-                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
-                                                ) + fadeIn(tween(250, easing = LinearEasing))
-                                            else
-                                                slideInHorizontally(
-                                                    initialOffsetX = { -it / 4 },
-                                                    animationSpec = tween(250, easing = FastOutSlowInEasing)
-                                                ) + fadeIn(tween(250, easing = LinearEasing))
+                                                if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex)
+                                                    slideInHorizontally(
+                                                        initialOffsetX = { it / 4 },
+                                                        animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                    ) + fadeIn(tween(250, easing = LinearEasing))
+                                                else
+                                                    slideInHorizontally(
+                                                        initialOffsetX = { -it / 4 },
+                                                        animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                                    ) + fadeIn(tween(250, easing = LinearEasing))
+                                            }
                                         },
                                         // Pop Exit Transition
                                         popExitTransition = {
-                                            val currentRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == initialState.destination.route
-                                            }
-                                            val targetRouteIndex = navigationItems.indexOfFirst {
-                                                it.route == targetState.destination.route
-                                            }
+                                            if (initialState.destination.route == "ambient_mode") {
+                                                fadeOut(animationSpec = tween(700, easing = LinearEasing))
+                                            } else {
+                                                val currentRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == initialState.destination.route
+                                                }
+                                                val targetRouteIndex = navigationItems.indexOfFirst {
+                                                    it.route == targetState.destination.route
+                                                }
 
-                                            if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex)
-                                                slideOutHorizontally(
-                                                    targetOffsetX = { -it / 4 },
-                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
-                                                ) + fadeOut(tween(200, easing = LinearEasing))
-                                            else
-                                                slideOutHorizontally(
-                                                    targetOffsetX = { it / 4 },
-                                                    animationSpec = tween(200, easing = FastOutLinearInEasing)
-                                                ) + fadeOut(tween(200, easing = LinearEasing))
+                                                if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex)
+                                                    slideOutHorizontally(
+                                                        targetOffsetX = { -it / 4 },
+                                                        animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                    ) + fadeOut(tween(200, easing = LinearEasing))
+                                                else
+                                                    slideOutHorizontally(
+                                                        targetOffsetX = { it / 4 },
+                                                        animationSpec = tween(200, easing = FastOutLinearInEasing)
+                                                    ) + fadeOut(tween(200, easing = LinearEasing))
+                                            }
                                         },
                                         modifier = Modifier.nestedScroll(
                                             if (navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } ||
