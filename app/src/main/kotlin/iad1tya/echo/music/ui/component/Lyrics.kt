@@ -155,6 +155,7 @@ import iad1tya.echo.music.lyrics.LyricsTranslationHelper
 fun Lyrics(
     sliderPositionProvider: () -> Long?,
     modifier: Modifier = Modifier,
+    isVisible: Boolean = true,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val menuState = LocalMenuState.current
@@ -348,19 +349,18 @@ fun Lyrics(
         }
     }
     
-    LaunchedEffect(lines, autoTranslateLyrics, translateLanguage, openRouterApiKey) {
-        if (autoTranslateLyrics && openRouterApiKey.isNotEmpty() && lines.isNotEmpty()) {
-             // Check if already translated to avoid re-translating on recomposition
-             // We can check the first line's translated flow value but it's a flow.
-             // For simplicity, we just trigger it. The helper should handle cancellation.
-             
-            LyricsTranslationHelper.translateLyrics(
-                lyrics = lines.filter { it.text.isNotBlank() }, // Helper might handle this
-                targetLanguage = translateLanguage,
-                apiKey = openRouterApiKey,
-                model = openRouterModel,
-                scope = scope
-            )
+    LaunchedEffect(lines, autoTranslateLyrics, openRouterApiKey, isVisible) {
+        if (isVisible && autoTranslateLyrics && openRouterApiKey.isNotBlank() && lines.isNotEmpty()) {
+            val needsTranslation = lines.any { it.translatedTextFlow.value == null }
+            if (needsTranslation) {
+                LyricsTranslationHelper.translateLyrics(
+                    lyrics = lines,
+                    targetLanguage = translateLanguage,
+                    apiKey = openRouterApiKey,
+                    model = openRouterModel,
+                    scope = scope
+                )
+            }
         }
     }
 

@@ -110,7 +110,8 @@ fun LyricsScreen(
     onBackClick: () -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
-    backgroundAlpha: Float = 1f // Add this parameter
+    backgroundAlpha: Float = 1f, // Add this parameter
+    isVisible: Boolean = true // Add this parameter
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
@@ -361,7 +362,7 @@ fun LyricsScreen(
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Lyrics(sliderPositionProvider = { sliderPosition })
+                        Lyrics(sliderPositionProvider = { sliderPosition }, isVisible = isVisible)
                     }
                     Column(
                         modifier = Modifier
@@ -605,7 +606,7 @@ fun LyricsScreen(
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        Lyrics(sliderPositionProvider = { sliderPosition })
+                        Lyrics(sliderPositionProvider = { sliderPosition }, isVisible = isVisible)
                     }
                     Column(
                         modifier = Modifier
