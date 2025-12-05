@@ -621,6 +621,10 @@ class MainActivity : ComponentActivity() {
                     val inSearchScreen = remember(navBackStackEntry) {
                         navBackStackEntry?.destination?.route?.startsWith("search/") == true
                     }
+                    
+                    val isAmbientMode = remember(navBackStackEntry) {
+                        navBackStackEntry?.destination?.route == "ambient_mode"
+                    }
 
                     val shouldShowSearchBar = remember(active, navBackStackEntry) {
                         active ||
@@ -628,14 +632,14 @@ class MainActivity : ComponentActivity() {
                                 inSearchScreen
                     }
 
-                    val shouldShowNavigationBar = remember(navBackStackEntry, active) {
-                        true
+                    val shouldShowNavigationBar = remember(navBackStackEntry, active, isAmbientMode) {
+                        !isAmbientMode
                     }
 
                     val isLandscape = remember(configuration) {
                         configuration.screenWidthDp > configuration.screenHeightDp
                     }
-                    val showRail = isLandscape && !inSearchScreen
+                    val showRail = isLandscape && !inSearchScreen && !isAmbientMode
 
                     val getNavPadding: () -> Dp = remember {
                         {
@@ -1166,7 +1170,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             bottomBar = {
-                                if (!showRail) {
+                                if (!isAmbientMode) {
+                                    if (!showRail) {
                                     Box {
                                         BottomSheetPlayer(
                                             state = playerBottomSheetState,
@@ -1292,6 +1297,7 @@ class MainActivity : ComponentActivity() {
                                             .height(bottomInsetDp)
                                     )
                                 }
+                            }
                             },
                             modifier = Modifier
                                 .fillMaxSize()
@@ -1450,15 +1456,17 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        BottomSheetMenu(
-                            state = LocalMenuState.current,
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        )
+                        if (!isAmbientMode) {
+                            BottomSheetMenu(
+                                state = LocalMenuState.current,
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            )
 
-                        BottomSheetPage(
-                            state = LocalBottomSheetPageState.current,
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        )
+                            BottomSheetPage(
+                                state = LocalBottomSheetPageState.current,
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            )
+                        }
 
                         if (showAccountDialog) {
                             AccountSettingsDialog(

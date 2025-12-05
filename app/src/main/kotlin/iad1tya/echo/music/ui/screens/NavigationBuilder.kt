@@ -43,6 +43,7 @@ import iad1tya.echo.music.ui.component.BottomSheet
 import iad1tya.echo.music.ui.component.BottomSheetMenu
 import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.rememberBottomSheetState
+import iad1tya.echo.music.ui.player.AmbientModeScreen
 import iad1tya.echo.music.ui.screens.BrowseScreen
 import iad1tya.echo.music.ui.screens.artist.ArtistAlbumsScreen
 import iad1tya.echo.music.ui.screens.artist.ArtistItemsScreen
@@ -339,5 +340,8 @@ fun NavGraphBuilder.navigationBuilder(
             videoId = it.arguments?.getString("videoId") ?: "",
             navController = navController
         )
+    }
+    composable("ambient_mode") {
+        AmbientModeScreen(navController)
     }
 }
