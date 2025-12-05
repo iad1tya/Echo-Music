@@ -25,7 +25,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -53,8 +56,20 @@ import iad1tya.echo.music.LocalPlayerConnection
 import iad1tya.echo.music.R
 import iad1tya.echo.music.ui.component.Lyrics
 import iad1tya.echo.music.utils.rememberEnumPreference
+import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.constants.PlayerBackgroundStyleKey
 import iad1tya.echo.music.constants.PlayerBackgroundStyle
+import iad1tya.echo.music.constants.AmbientModeDullBackgroundKey
+import iad1tya.echo.music.db.entities.LyricsEntity
+import iad1tya.echo.music.di.LyricsHelperEntryPoint
+import iad1tya.echo.music.LocalDatabase
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import kotlin.math.abs
 
 @Composable
 fun AmbientModeScreen(
@@ -64,26 +79,49 @@ fun AmbientModeScreen(
     val activity = context as? Activity
     val playerConnection = LocalPlayerConnection.current ?: return
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    
+    val currentLyrics by playerConnection.currentLyrics.collectAsState(initial = null)
+    val database = LocalDatabase.current
+    val scope = rememberCoroutineScope()
+        
     // State for options
     var showAlbumArt by remember { mutableStateOf(false) }
     var areControlsVisible by remember { mutableStateOf(false) }
+
+    val (isDullBackground, onDullBackgroundChange) = rememberPreference(AmbientModeDullBackgroundKey, false)
+
+    // Auto-fetch lyrics if missing (mirrors LyricsScreen logic)
+    LaunchedEffect(mediaMetadata?.id, currentLyrics) {
+        if (mediaMetadata != null && currentLyrics == null) {
+            delay(500)
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val entryPoint = EntryPointAccessors.fromApplication(
+                        context.applicationContext,
+                        LyricsHelperEntryPoint::class.java
+                    )
+                    val lyricsHelper = entryPoint.lyricsHelper()
+                    val lyrics = lyricsHelper.getLyrics(mediaMetadata!!)
+                    database.query {
+                        upsert(LyricsEntity(mediaMetadata!!.id, lyrics))
+                    }
+                } catch (e: Exception) {
+                    // Handle error
+                }
+            }
+        }
+    }
 
     // Force Landscape and Fullscreen
     DisposableEffect(Unit) {
         val originalOrientation = activity?.requestedOrientation ?: ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         
-        // Hide system bars and dim screen
+        // Hide system bars
         activity?.window?.let { window ->
             val insetsController = WindowCompat.getInsetsController(window, window.decorView)
             insetsController.hide(WindowInsetsCompat.Type.systemBars())
             insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            
-            val layoutParams = window.attributes
-            layoutParams.screenBrightness = 0.01f
-            window.attributes = layoutParams
         }
 
         onDispose {
@@ -100,18 +138,54 @@ fun AmbientModeScreen(
         }
     }
 
+    // Handle Brightness Change
+    LaunchedEffect(isDullBackground) {
+        activity?.window?.let { window ->
+            val layoutParams = window.attributes
+            layoutParams.screenBrightness = if (isDullBackground) 0.01f else WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            window.attributes = layoutParams
+        }
+    }
+
     BackHandler {
         navController.popBackStack()
     }
+
+    var totalDrag by remember { mutableStateOf(0f) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
             .background(Color.Black)
+            .background(Color.Black)
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onDragEnd = { totalDrag = 0f },
+                    onDragCancel = { totalDrag = 0f }
+                ) { change, dragAmount ->
+                    change.consume()
+                    totalDrag += dragAmount
+                    val threshold = 100f // Threshold in pixels for sensitivity
+
+                    if (abs(totalDrag) > threshold) {
+                         if (totalDrag < 0) {
+                             // Swipe Left -> Next Song
+                             playerConnection.player.seekToNext()
+                         } else {
+                             // Swipe Right -> Previous Song
+                             playerConnection.player.seekToPrevious()
+                         }
+                         // Reset to avoid multiple triggers for the same swipe motion
+                         totalDrag = 0f 
+                    }
+                }
+            }
     ) {
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(if (isDullBackground) 0.3f else 1f), // Dull background effect
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Album Art Section (Left, if enabled)
@@ -197,6 +271,20 @@ fun AmbientModeScreen(
                         Icon(
                             painter = painterResource(if (showAlbumArt) R.drawable.insert_photo else R.drawable.hide_image),
                             contentDescription = null
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Dull Background") },
+                    onClick = { 
+                        onDullBackgroundChange(!isDullBackground)
+                        areControlsVisible = false 
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(if (isDullBackground) R.drawable.contrast else R.drawable.contrast),
+                            contentDescription = null,
+                            tint = if (isDullBackground) MaterialTheme.colorScheme.primary else LocalContentColor.current
                         )
                     }
                 )
