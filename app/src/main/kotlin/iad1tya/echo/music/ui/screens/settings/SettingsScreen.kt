@@ -304,6 +304,19 @@ fun SettingsScreen(
         )
         
         Spacer(modifier = Modifier.height(8.dp))
+
+        // AI - Separate
+        Material3SettingsGroup(
+            items = listOf(
+                Material3SettingsItem(
+                    icon = painterResource(R.drawable.discover_tune),
+                    title = { Text("AI") },
+                    onClick = { navController.navigate("settings/ai") }
+                )
+            )
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
         
         // Content - Separate
         Material3SettingsGroup(

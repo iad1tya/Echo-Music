@@ -142,6 +142,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
+import iad1tya.echo.music.constants.OpenRouterApiKey
+import iad1tya.echo.music.constants.OpenRouterModelKey
+import iad1tya.echo.music.constants.AutoTranslateLyricsKey
+import iad1tya.echo.music.constants.TranslateLanguageKey
+import iad1tya.echo.music.lyrics.LyricsTranslationHelper
 
 @RequiresApi(Build.VERSION_CODES.M)
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -173,6 +178,12 @@ fun Lyrics(
     val romanizeKyrgyzLyrics by rememberPreference(LyricsRomanizeKyrgyzKey, true)
     val romanizeMacedonianLyrics by rememberPreference(LyricsRomanizeMacedonianKey, true)
     val romanizeCyrillicByLine by rememberPreference(LyricsRomanizeCyrillicByLineKey, false)
+    
+    val openRouterApiKey by rememberPreference(OpenRouterApiKey, "")
+    val openRouterModel by rememberPreference(OpenRouterModelKey, "mistralai/mistral-small-3.1-24b-instruct:free")
+    val autoTranslateLyrics by rememberPreference(AutoTranslateLyricsKey, false)
+    val translateLanguage by rememberPreference(TranslateLanguageKey, "en")
+    
     val scope = rememberCoroutineScope()
 
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
@@ -336,6 +347,23 @@ fun Lyrics(
             }
         }
     }
+    
+    LaunchedEffect(lines, autoTranslateLyrics, translateLanguage, openRouterApiKey) {
+        if (autoTranslateLyrics && openRouterApiKey.isNotEmpty() && lines.isNotEmpty()) {
+             // Check if already translated to avoid re-translating on recomposition
+             // We can check the first line's translated flow value but it's a flow.
+             // For simplicity, we just trigger it. The helper should handle cancellation.
+             
+            LyricsTranslationHelper.translateLyrics(
+                lyrics = lines.filter { it.text.isNotBlank() }, // Helper might handle this
+                targetLanguage = translateLanguage,
+                apiKey = openRouterApiKey,
+                model = openRouterModel,
+                scope = scope
+            )
+        }
+    }
+
     val isSynced =
         remember(lyrics) {
             !lyrics.isNullOrEmpty() && lyrics.startsWith("[")
@@ -773,6 +801,24 @@ fun Lyrics(
                                     modifier = Modifier.padding(top = 2.dp)
                                 )
                             }
+                        }
+                        
+                         // Translated Lyrics
+                        val translatedText by item.translatedTextFlow.collectAsState()
+                        translatedText?.let { translation ->
+                            val isError = translation.startsWith("Error:")
+                            Text(
+                                text = translation,
+                                fontSize = 20.sp,
+                                color = if (isError) Color.Red else Color.Yellow,
+                                textAlign = when (lyricsTextPosition) {
+                                    LyricsPosition.LEFT -> TextAlign.Left
+                                    LyricsPosition.CENTER -> TextAlign.Center
+                                    LyricsPosition.RIGHT -> TextAlign.Right
+                                },
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(top = 4.dp).alpha(0.9f)
+                            )
                         }
                     }
                 }
