@@ -378,6 +378,42 @@ fun PlayerMenu(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
+                                playerConnection.playQueue(YouTubeQueue.radio(mediaMetadata))
+                                onDismiss()
+                            }
+                            .padding(horizontal = 20.dp, vertical = 14.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.radio),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = stringResource(R.string.start_radio),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    shape = RoundedCornerShape(50),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 2.dp
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
                                 if (mediaMetadata.artists.size == 1) {
                                     navController.navigate("artist/${mediaMetadata.artists[0].id}")
                                     playerBottomSheetState.collapseSoft()
