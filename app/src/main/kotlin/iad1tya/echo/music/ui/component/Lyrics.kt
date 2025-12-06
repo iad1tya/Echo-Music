@@ -1114,10 +1114,51 @@ fun Lyrics(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // Pass the potentially multi-line lyrics to the color picker
-                                shareDialogData = Triple(lyricsText, songTitle, artists)
-                                showColorPickerDialog = true
                                 showShareDialog = false
+                                showProgressDialog = true
+                                scope.launch {
+                                    try {
+                                        val screenWidth = configuration.screenWidthDp
+                                        val screenHeight = configuration.screenHeightDp
+                                        
+                                        // Use default colors based on theme
+                                        val bgColor = if (useDarkTheme) Color(0xFF121212).toArgb() else Color(0xFFF5F5F5).toArgb()
+                                        val txtColor = if (useDarkTheme) Color.White.toArgb() else Color.Black.toArgb()
+                                        val secTxtColor = if (useDarkTheme) Color.White.copy(alpha = 0.7f).toArgb() else Color.Black.copy(alpha = 0.7f).toArgb()
+
+                                        val image = ComposeToImage.createLyricsImage(
+                                            context = context,
+                                            coverArtUrl = mediaMetadata?.thumbnailUrl,
+                                            songTitle = songTitle,
+                                            artistName = artists,
+                                            lyrics = lyricsText,
+                                            width = (screenWidth * density.density).toInt(),
+                                            height = (screenHeight * density.density).toInt(),
+                                            backgroundColor = bgColor,
+                                            textColor = txtColor,
+                                            secondaryTextColor = secTxtColor,
+                                        )
+                                        val timestamp = System.currentTimeMillis()
+                                        val filename = "lyrics_$timestamp"
+                                        val uri = ComposeToImage.saveBitmapAsFile(context, image, filename)
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "image/png"
+                                            putExtra(Intent.EXTRA_STREAM, uri)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(Intent.createChooser(shareIntent, "Share Lyrics"))
+                                    } catch (e: Throwable) {
+                                        val errorMessage = if (e is OutOfMemoryError) {
+                                            "Out of memory while generating image. Please try selecting fewer lines."
+                                        } else {
+                                            "Failed to create image: ${e.message}"
+                                        }
+                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                        e.printStackTrace()
+                                    } finally {
+                                        showProgressDialog = false
+                                    }
+                                }
                             }
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -1156,199 +1197,7 @@ fun Lyrics(
         }
     }
 
-    if (showColorPickerDialog && shareDialogData != null) {
-        val (lyricsText, songTitle, artists) = shareDialogData!!
-        val coverUrl = mediaMetadata?.thumbnailUrl
-        val paletteColors = remember { mutableStateListOf<Color>() }
 
-        val previewCardWidth = configuration.screenWidthDp.dp * 0.90f
-        val previewPadding = 20.dp * 2
-        val previewBoxPadding = 28.dp * 2
-        val previewAvailableWidth = previewCardWidth - previewPadding - previewBoxPadding
-        val previewBoxHeight = 340.dp
-        val headerFooterEstimate = (48.dp + 14.dp + 16.dp + 20.dp + 8.dp + 28.dp * 2)
-        val previewAvailableHeight = previewBoxHeight - headerFooterEstimate
-
-        val textStyleForMeasurement = TextStyle(
-            color = previewTextColor,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        val textMeasurer = rememberTextMeasurer()
-
-        rememberAdjustedFontSize(
-            text = lyricsText,
-            maxWidth = previewAvailableWidth,
-            maxHeight = previewAvailableHeight,
-            density = density,
-            initialFontSize = 50.sp,
-            minFontSize = 22.sp,
-            style = textStyleForMeasurement,
-            textMeasurer = textMeasurer
-        )
-
-        LaunchedEffect(coverUrl) {
-            if (coverUrl != null) {
-                withContext(Dispatchers.IO) {
-                    try {
-                        val loader = ImageLoader(context)
-                        val req = ImageRequest.Builder(context).data(coverUrl).allowHardware(false).build()
-                        val result = loader.execute(req)
-                        val bmp = result.image?.toBitmap()
-                        if (bmp != null) {
-                            val palette = Palette.from(bmp).generate()
-                            val swatches = palette.swatches.sortedByDescending { it.population }
-                            val colors = swatches.map { Color(it.rgb) }
-                                .filter { color ->
-                                    val hsv = FloatArray(3)
-                                    android.graphics.Color.colorToHSV(color.toArgb(), hsv)
-                                    hsv[1] > 0.2f
-                                }
-                            paletteColors.clear()
-                            paletteColors.addAll(colors.take(5))
-                        }
-                    } catch (_: Exception) {}
-                }
-            }
-        }
-
-        BasicAlertDialog(onDismissRequest = { showColorPickerDialog = false }) {
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(20.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.customize_colors),
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(340.dp)
-                            .padding(8.dp)
-                    ) {
-                        LyricsImageCard(
-                            lyricText = lyricsText,
-                            mediaMetadata = mediaMetadata ?: return@Box,
-                            backgroundColor = previewBackgroundColor,
-                            textColor = previewTextColor,
-                            secondaryTextColor = previewSecondaryTextColor
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(18.dp))
-
-                    Text(text = stringResource(id = R.string.background_color), style = MaterialTheme.typography.titleMedium)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                        (paletteColors + listOf(Color(0xFF242424), Color(0xFF121212), Color.White, Color.Black, Color(0xFFF5F5F5))).distinct().take(8).forEach { color ->
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(color, shape = RoundedCornerShape(8.dp))
-                                    .clickable { previewBackgroundColor = color }
-                                    .border(
-                                        2.dp,
-                                        if (previewBackgroundColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                            )
-                        }
-                    }
-
-                    Text(text = stringResource(id = R.string.text_color), style = MaterialTheme.typography.titleMedium)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                        (paletteColors + listOf(Color.White, Color.Black, Color(0xFF1DB954))).distinct().take(8).forEach { color ->
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(color, shape = RoundedCornerShape(8.dp))
-                                    .clickable { previewTextColor = color }
-                                    .border(
-                                        2.dp,
-                                        if (previewTextColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                            )
-                        }
-                    }
-
-                    Text(text = stringResource(id = R.string.secondary_text_color), style = MaterialTheme.typography.titleMedium)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                        (paletteColors.map { it.copy(alpha = 0.7f) } + listOf(Color.White.copy(alpha = 0.7f), Color.Black.copy(alpha = 0.7f), Color(0xFF1DB954))).distinct().take(8).forEach { color ->
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .background(color, shape = RoundedCornerShape(8.dp))
-                                    .clickable { previewSecondaryTextColor = color }
-                                    .border(
-                                        2.dp,
-                                        if (previewSecondaryTextColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Button(
-                        onClick = {
-                            showColorPickerDialog = false
-                            showProgressDialog = true
-                            scope.launch {
-                                try {
-                                    val screenWidth = configuration.screenWidthDp
-                                    val screenHeight = configuration.screenHeightDp
-
-                                    val image = ComposeToImage.createLyricsImage(
-                                        context = context,
-                                        coverArtUrl = coverUrl,
-                                        songTitle = songTitle,
-                                        artistName = artists,
-                                        lyrics = lyricsText,
-                                        width = (screenWidth * density.density).toInt(),
-                                        height = (screenHeight * density.density).toInt(),
-                                        backgroundColor = previewBackgroundColor.toArgb(),
-                                        textColor = previewTextColor.toArgb(),
-                                        secondaryTextColor = previewSecondaryTextColor.toArgb(),
-                                    )
-                                    val timestamp = System.currentTimeMillis()
-                                    val filename = "lyrics_$timestamp"
-                                    val uri = ComposeToImage.saveBitmapAsFile(context, image, filename)
-                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                        type = "image/png"
-                                        putExtra(Intent.EXTRA_STREAM, uri)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    }
-                                    context.startActivity(Intent.createChooser(shareIntent, "Share Lyrics"))
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "Failed to create image: ${e.message}", Toast.LENGTH_SHORT).show()
-                                } finally {
-                                    showProgressDialog = false
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(id = R.string.share))
-                    }
-                }
-            }
-        }
-        } // إغلاق else block
     }
 }
 

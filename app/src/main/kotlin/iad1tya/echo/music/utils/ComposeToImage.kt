@@ -174,21 +174,7 @@ object ComposeToImage {
         secondaryTxtColor: Int,
         backgroundColor: Int
     ) {
-        val logoSize = (cardSize * 0.05f).toInt()
-
-        val rawLogo = context.getDrawable(R.drawable.small_icon)?.toBitmap(logoSize, logoSize)
-        val logo = rawLogo?.let { source ->
-            val colored = createBitmap(source.width, source.height)
-            val canvasLogo = Canvas(colored)
-            val paint = Paint().apply {
-                colorFilter = PorterDuffColorFilter(backgroundColor, PorterDuff.Mode.SRC_IN)
-                isAntiAlias = true
-            }
-            canvasLogo.drawBitmap(source, 0f, 0f, paint)
-            colored
-        }
-
-        val appName = context.getString(R.string.app_name)
+        val appName = "echomusic.fun"
         val appNamePaint = TextPaint().apply {
             color = secondaryTxtColor
             textSize = cardSize * 0.030f
@@ -197,30 +183,15 @@ object ComposeToImage {
             letterSpacing = 0.01f
         }
 
-        val circleRadius = logoSize * 0.55f
-        val logoX = padding + circleRadius - logoSize / 2f
-        val logoY = cardSize - padding - circleRadius - logoSize / 2f
-        val circleX = padding + circleRadius
-        val circleY = cardSize - padding - circleRadius
-        val textX = padding + circleRadius * 2 + 12f
-        val textY = circleY + appNamePaint.textSize * 0.3f
-
-        val circlePaint = Paint().apply {
-            color = secondaryTxtColor
-            isAntiAlias = true
-            style = Paint.Style.FILL
-        }
-        canvas.drawCircle(circleX, circleY, circleRadius, circlePaint)
-
-        logo?.let {
-            canvas.drawBitmap(it, logoX, logoY, null)
-        }
+        val textX = padding
+        // Align roughly where the center of the logo used to be vertically
+        val textY = cardSize - padding - (appNamePaint.textSize * 0.2f)
 
         canvas.drawText(appName, textX, textY, appNamePaint)
     }
 
-    fun saveBitmapAsFile(context: Context, bitmap: Bitmap, fileName: String): Uri {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    suspend fun saveBitmapAsFile(context: Context, bitmap: Bitmap, fileName: String): Uri = withContext(Dispatchers.IO) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
