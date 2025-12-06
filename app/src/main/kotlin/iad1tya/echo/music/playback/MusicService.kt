@@ -206,7 +206,7 @@ class MusicService :
             database.format(mediaMetadata?.id)
         }
 
-    val playerVolume = MutableStateFlow(dataStore.get(PlayerVolumeKey, 1f).coerceIn(0f, 1f))
+    val playerVolume = MutableStateFlow(1f)
 
     lateinit var sleepTimer: SleepTimer
 
@@ -239,7 +239,35 @@ class MusicService :
 
     private var consecutivePlaybackErr = 0
 
+    // Fix for ForegroundServiceStartNotAllowedException (Issue 3)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        try {
+            return super.onStartCommand(intent, flags, startId)
+        } catch (e: Exception) {
+            // Check if it's the specific foreground service exception (available in API 31+)
+            if (Build.VERSION.SDK_INT >= 31 && e.javaClass.name.contains("ForegroundServiceStartNotAllowedException")) {
+                Log.e("MusicService", "ForegroundServiceStartNotAllowedException caught", e)
+                // Stop the service to prevent ANR/Crash loop if possible, though system might have already killed it
+                stopSelf()
+                return START_NOT_STICKY
+            }
+            throw e
+        }
+    }
+
     override fun onCreate() {
+        // Fix for NPE: Initialize connectivityManager early (Issue 6, 7)
+        connectivityManager = getSystemService() ?: run {
+             Log.e("MusicService", "ConnectivityManager not available")
+             stopSelf()
+             return
+        }
+        connectivityObserver = NetworkConnectivityObserver(this)
+
+        scope.launch {
+            playerVolume.value = dataStore.get(PlayerVolumeKey, 1f).coerceIn(0f, 1f)
+        }
+
         super.onCreate()
         try {
         setMediaNotificationProvider(
@@ -394,13 +422,8 @@ class MusicService :
         val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
         controllerFuture.addListener({ controllerFuture.get() }, MoreExecutors.directExecutor())
 
-        connectivityManager = getSystemService() ?: run {
-            Log.e("MusicService", "ConnectivityManager not available")
-            // Create a dummy ConnectivityManager reference won't be used
-            stopSelf()
-            return
-        }
-        connectivityObserver = NetworkConnectivityObserver(this)
+        // connectivityManager initialized at start of onCreate
+        // connectivityObserver initialized at start of onCreate
 
         scope.launch {
             connectivityObserver.networkStatus.collect { isConnected ->
@@ -1392,6 +1415,36 @@ class MusicService :
         Log.e("MusicService", "Playback error: ${error.message}", error)
         
         try {
+        // Attempt to recover from cache corruption by clearing cache and retrying
+        val mediaId = player.currentMediaItem?.mediaId
+        if (mediaId != null && !isNetworkConnected.value.not()) { // Only try if we have network to refetch
+             val isCached = try {
+                 playerCache.isCached(mediaId, 0, 1) || downloadCache.isCached(mediaId, 0, 1)
+             } catch (e: Exception) { false }
+
+             if (isCached && consecutivePlaybackErr < 5) { // Limit retries to avoid loops
+                 scope.launch(Dispatchers.IO) {
+                     try {
+                         Log.w("MusicService", "Potential cache corruption for $mediaId, clearing cache...")
+                         playerCache.removeResource(mediaId)
+                     } catch (e: Exception) {
+                         Log.e("MusicService", "Failed to clear cache for $mediaId", e)
+                     }
+                     withContext(Dispatchers.Main) {
+                         // Retry playback
+                         val currentIndex = player.currentMediaItemIndex
+                         val currentPosition = player.currentPosition
+                         if (currentIndex >= 0 && currentIndex < player.mediaItemCount) {
+                            player.seekTo(currentIndex, currentPosition)
+                            player.prepare()
+                            player.play()
+                         }
+                     }
+                 }
+                 return
+             }
+        }
+
         val isConnectionError = (error.cause?.cause is PlaybackException) &&
                 (error.cause?.cause as PlaybackException).errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
         
@@ -1462,6 +1515,7 @@ class MusicService :
                 CacheDataSource
                     .Factory()
                     .setCache(playerCache)
+                    .setFlags(FLAG_IGNORE_CACHE_ON_ERROR)
                     .setUpstreamDataSourceFactory(
                         DefaultDataSource.Factory(
                             this,
@@ -1701,6 +1755,23 @@ class MusicService :
             }
         }.onFailure {
             reportException(it)
+        }
+    }
+
+    override fun startForegroundService(service: Intent?): ComponentName? {
+        return try {
+            super.startForegroundService(service)
+        } catch (e: Exception) {
+            // Check if it's the specific foreground service exception (available in API 31+)
+            if (Build.VERSION.SDK_INT >= 31 && e.javaClass.name.contains("ForegroundServiceStartNotAllowedException")) {
+                Log.e("MusicService", "ForegroundServiceStartNotAllowedException caught in startForegroundService", e)
+                null
+            } else if (e is IllegalStateException) {
+                 Log.e("MusicService", "IllegalStateException caught in startForegroundService", e)
+                 null
+            } else {
+                throw e
+            }
         }
     }
 

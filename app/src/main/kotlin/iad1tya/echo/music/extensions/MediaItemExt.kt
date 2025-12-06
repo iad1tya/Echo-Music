@@ -29,7 +29,9 @@ fun Song.toMediaItem() =
                 .setAlbumTitle(song.albumName)
                 .setMediaType(MEDIA_TYPE_MUSIC)
                 .build(),
-        ).build()
+        )
+        .setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG)
+        .build()
 
 fun SongItem.toMediaItem() =
     MediaItem
@@ -48,7 +50,9 @@ fun SongItem.toMediaItem() =
                 .setAlbumTitle(album?.name)
                 .setMediaType(MEDIA_TYPE_MUSIC)
                 .build(),
-        ).build()
+        )
+        .setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG)
+        .build()
 
 fun MediaMetadata.toMediaItem() =
     MediaItem
@@ -67,4 +71,6 @@ fun MediaMetadata.toMediaItem() =
                 .setAlbumTitle(album?.title)
                 .setMediaType(MEDIA_TYPE_MUSIC)
                 .build(),
-        ).build()
+        )
+        .setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG)
+        .build()

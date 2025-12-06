@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
@@ -267,6 +268,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+    private var isServiceBound = false
+
     override fun onStart() {
         super.onStart()
         // Request notification permission on Android 13+
@@ -275,16 +278,35 @@ class MainActivity : ComponentActivity() {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1000)
             }
         }
-        startService(Intent(this, MusicService::class.java))
+        try {
+            startService(Intent(this, MusicService::class.java))
+        } catch (e: Exception) {
+             if (Build.VERSION.SDK_INT >= 31 && e.javaClass.name.contains("BackgroundServiceStartNotAllowedException")) {
+                Log.e("MainActivity", "BackgroundServiceStartNotAllowedException caught", e)
+             } else if (e is IllegalStateException) {
+                 Log.e("MainActivity", "IllegalStateException caught in startService", e)
+             } else {
+                 throw e
+             }
+        }
         bindService(
             Intent(this, MusicService::class.java),
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
+        isServiceBound = true
     }
 
     override fun onStop() {
-        unbindService(serviceConnection)
+        if (isServiceBound) {
+            try {
+                unbindService(serviceConnection)
+            } catch (e: IllegalArgumentException) {
+                // Service might interpret as not registered
+                e.printStackTrace()
+            }
+            isServiceBound = false
+        }
         super.onStop()
     }
 
@@ -296,7 +318,14 @@ class MainActivity : ComponentActivity() {
             ) && playerConnection?.isPlaying?.value == true && isFinishing
         ) {
             stopService(Intent(this, MusicService::class.java))
-            unbindService(serviceConnection)
+            if (isServiceBound) {
+                 try {
+                    unbindService(serviceConnection)
+                } catch (e: IllegalArgumentException) {
+                     e.printStackTrace()
+                }
+                isServiceBound = false
+            }
             playerConnection = null
         }
     }

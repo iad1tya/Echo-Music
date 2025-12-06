@@ -926,17 +926,25 @@ interface DatabaseDao {
         songIds: List<String>,
     ): List<String>
 
+    @Query("SELECT id FROM song WHERE id IN (:ids)")
+    fun filterExistingSongs(ids: List<String>): List<String>
+
     @Transaction
     fun addSongToPlaylist(playlist: Playlist, songIds: List<String>) {
+        val validSongIds = filterExistingSongs(songIds)
         var position = playlist.songCount
-        songIds.forEach { id ->
-            insert(
-                PlaylistSongMap(
-                    songId = id,
-                    playlistId = playlist.id,
-                    position = position++
+        validSongIds.forEach { id ->
+            try {
+                insert(
+                    PlaylistSongMap(
+                        songId = id,
+                        playlistId = playlist.id,
+                        position = position++
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
