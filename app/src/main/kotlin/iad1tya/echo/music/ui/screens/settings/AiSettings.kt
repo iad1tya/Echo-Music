@@ -92,40 +92,6 @@ fun AiSettings(
                 .verticalScroll(rememberScrollState())
                 .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Bottom))
         ) {
-            EditTextPreference(
-                title = { Text("OpenRouter API Key") },
-                value = openRouterApiKey,
-                onValueChange = { openRouterApiKey = it },
-                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.key), null) }
-            )
-
-            EditTextPreference(
-                title = { Text("OpenRouter Model") },
-                value = openRouterModel,
-                onValueChange = { openRouterModel = it },
-                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.discover_tune), null) }
-            )
-
-            SwitchPreference(
-                title = { Text("Auto translate all songs") },
-                checked = autoTranslateLyrics,
-                onCheckedChange = { autoTranslateLyrics = it },
-                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
-            )
-
-            ListPreference(
-                title = { Text("Target Language") },
-                selectedValue = translateLanguage,
-                values = LanguageCodeToName.keys.sortedBy { LanguageCodeToName[it] },
-                valueText = { LanguageCodeToName[it] ?: it },
-                onValueSelected = { translateLanguage = it },
-                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             androidx.compose.material3.Card(
                 colors = androidx.compose.material3.CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -180,6 +146,40 @@ fun AiSettings(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            EditTextPreference(
+                title = { Text("OpenRouter API Key") },
+                value = openRouterApiKey,
+                onValueChange = { openRouterApiKey = it },
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.key), null) }
+            )
+
+            EditTextPreference(
+                title = { Text("OpenRouter Model") },
+                value = openRouterModel,
+                onValueChange = { openRouterModel = it },
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.discover_tune), null) }
+            )
+
+            SwitchPreference(
+                title = { Text("Auto translate all songs") },
+                checked = autoTranslateLyrics,
+                onCheckedChange = { autoTranslateLyrics = it },
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
+            )
+
+            ListPreference(
+                title = { Text("Target Language") },
+                selectedValue = translateLanguage,
+                values = LanguageCodeToName.keys.sortedBy { LanguageCodeToName[it] },
+                valueText = { LanguageCodeToName[it] ?: it },
+                onValueSelected = { translateLanguage = it },
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
+            )
+
+
         }
     }
 }
