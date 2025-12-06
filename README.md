@@ -53,6 +53,7 @@
 ### Advanced Features
 
 * **Synced Lyrics:** Real-time lyric display with translation support.
+* **AI Lyrics Translation:** Translate lyrics with the help of AI, powered by OpenRouter.
 * **Playlist Management:** Create, edit, sync, and organize playlists with intuitive long-press actions.
 * **Sleep Timer:** Automatically stop playback after a set duration.
 * **Widgets:** Quick access from your home screen.
