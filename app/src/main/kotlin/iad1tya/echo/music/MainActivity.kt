@@ -135,6 +135,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.navigation.NavGraph
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -1289,12 +1290,18 @@ class MainActivity : ComponentActivity() {
                                                                 searchBarScrollBehavior.state.resetHeightOffset()
                                                             }
                                                         } else {
-                                                            navController.navigate(screen.route) {
-                                                                popUpTo(navController.graph.startDestinationId) {
-                                                                    saveState = true
+                                                            if (screen.route == Screens.Home.route) {
+                                                                navController.navigate(screen.route) {
+                                                                    popUpTo(navController.graph.id)
                                                                 }
-                                                                launchSingleTop = true
-                                                                restoreState = true
+                                                            } else {
+                                                                navController.navigate(screen.route) {
+                                                                    popUpTo(navController.graph.startDestinationId) {
+                                                                        saveState = true
+                                                                    }
+                                                                    launchSingleTop = true
+                                                                    restoreState = true
+                                                                }
                                                             }
                                                         }
                                                     },
@@ -1353,12 +1360,18 @@ class MainActivity : ComponentActivity() {
                                                             searchBarScrollBehavior.state.resetHeightOffset()
                                                         }
                                                     } else {
-                                                        navController.navigate(screen.route) {
-                                                            popUpTo(navController.graph.startDestinationId) {
-                                                                inclusive = false
+                                                        if (screen.route == Screens.Home.route) {
+                                                            navController.navigate(screen.route) {
+                                                                popUpTo(navController.graph.id)
                                                             }
-                                                            launchSingleTop = true
-                                                            restoreState = false
+                                                        } else {
+                                                            navController.navigate(screen.route) {
+                                                                popUpTo(navController.graph.startDestinationId) {
+                                                                    inclusive = false
+                                                                }
+                                                                launchSingleTop = true
+                                                                restoreState = false
+                                                            }
                                                         }
                                                     }
                                                 },
