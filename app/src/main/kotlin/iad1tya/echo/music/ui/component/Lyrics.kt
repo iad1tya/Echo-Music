@@ -96,6 +96,10 @@ import androidx.palette.graphics.Palette
 import coil3.ImageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import coil3.toBitmap
 import iad1tya.echo.music.LocalPlayerConnection
 import iad1tya.echo.music.R
@@ -919,22 +923,32 @@ fun Lyrics(
                             }
                         }
                         
-                         // Translated Lyrics
+                        // Translated Lyrics
                         val translatedText by item.translatedTextFlow.collectAsState()
-                        translatedText?.let { translation ->
-                            val isError = translation.startsWith("Error:")
-                            Text(
-                                text = translation,
-                                fontSize = 20.sp,
-                                color = if (isError) Color.Red else Color.Yellow,
-                                textAlign = when (lyricsTextPosition) {
-                                    LyricsPosition.LEFT -> TextAlign.Left
-                                    LyricsPosition.CENTER -> TextAlign.Center
-                                    LyricsPosition.RIGHT -> TextAlign.Right
-                                },
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(top = 4.dp).alpha(0.9f)
-                            )
+                        AnimatedVisibility(
+                            visible = translatedText != null,
+                            enter = expandVertically() + fadeIn() + slideInVertically(initialOffsetY = { -10 })
+                        ) {
+                            translatedText?.let { translation ->
+                                val isError = translation.startsWith("Error:")
+                                val displayText = if (isError) translation else "($translation)"
+                                val displayColor = if (isError) Color.Red else Color.White
+                                
+                                Text(
+                                    text = displayText,
+                                    fontSize = 20.sp,
+                                    color = displayColor,
+                                    textAlign = when (lyricsTextPosition) {
+                                        LyricsPosition.LEFT -> TextAlign.Left
+                                        LyricsPosition.CENTER -> TextAlign.Center
+                                        LyricsPosition.RIGHT -> TextAlign.Right
+                                    },
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier
+                                        .padding(top = 4.dp)
+                                        .alpha(if (isError) 1f else 0.9f) // Shiny/Magical effect: High alpha
+                                )
+                            }
                         }
                     }
                 }
