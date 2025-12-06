@@ -139,7 +139,7 @@ fun LyricsScreen(
 
     LaunchedEffect(mediaMetadata.id, currentLyrics) {
         if (currentLyrics == null) {
-            delay(500)
+
             coroutineScope.launch(Dispatchers.IO) {
                 try {
                     val entryPoint = EntryPointAccessors.fromApplication(
