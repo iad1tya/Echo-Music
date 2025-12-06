@@ -310,7 +310,7 @@ fun SettingsScreen(
             items = listOf(
                 Material3SettingsItem(
                     icon = painterResource(R.drawable.discover_tune),
-                    title = { Text("AI") },
+                    title = { Text("AI for Lyrics Translation") },
                     onClick = { navController.navigate("settings/ai") }
                 )
             )
