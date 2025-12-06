@@ -17,13 +17,16 @@ object LyricsTranslationHelper {
     private val _status = MutableStateFlow<TranslationStatus>(TranslationStatus.Idle)
     val status: StateFlow<TranslationStatus> = _status.asStateFlow()
 
-    private val _manualTrigger = MutableSharedFlow<Unit>()
+    private val _manualTrigger = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+    )
     val manualTrigger: SharedFlow<Unit> = _manualTrigger.asSharedFlow()
     
     private var translationJob: Job? = null
 
-    suspend fun triggerManualTranslation() {
-        _manualTrigger.emit(Unit)
+    fun triggerManualTranslation() {
+        _manualTrigger.tryEmit(Unit)
     }
     
     fun resetStatus() {
@@ -39,6 +42,9 @@ object LyricsTranslationHelper {
     ) {
         translationJob?.cancel()
         _status.value = TranslationStatus.Translating
+        
+        // Clear existing translations to indicate re-translation
+        lyrics.forEach { it.translatedTextFlow.value = null }
         
         translationJob = scope.launch(Dispatchers.IO) {
             val fullText = lyrics.joinToString("\n") { it.text }

@@ -397,23 +397,7 @@ fun LyricsMenu(
             )
         }
 
-        item {
-            ListItem(
-                headlineContent = { Text(text = stringResource(R.string.translate_lyrics)) },
-                leadingContent = {
-                    Icon(
-                        painter = painterResource(R.drawable.language),
-                        contentDescription = null,
-                    )
-                },
-                modifier = Modifier.clickable {
-                    onDismiss()
-                    scope.launch {
-                        LyricsTranslationHelper.triggerManualTranslation()
-                    }
-                }
-            )
-        }
+
 
         item {
             ListItem(
