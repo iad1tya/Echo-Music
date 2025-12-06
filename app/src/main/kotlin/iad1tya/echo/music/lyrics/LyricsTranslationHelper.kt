@@ -54,9 +54,7 @@ object LyricsTranslationHelper {
                 model = model
             )
             
-            result.onSuccess { translatedFullText ->
-                val translatedLines = translatedFullText.lines()
-                
+            result.onSuccess { translatedLines ->
                 if (translatedLines.size == lyrics.size) {
                      lyrics.forEachIndexed { index, entry ->
                          entry.translatedTextFlow.value = translatedLines[index]

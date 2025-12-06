@@ -24,75 +24,99 @@ object OpenRouterService {
         targetLanguage: String,
         apiKey: String,
         model: String,
+        maxRetries: Int = 3,
         sourceLanguage: String? = null
-    ): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val prompt = "Translate the following lyrics to $targetLanguage. Return ONLY the translated text, preserving the line breaks and structure. Do not add any introduction or explanation.\n\n$text"
-            
-            val messages = JSONArray().apply {
-                put(JSONObject().apply {
-                    put("role", "system")
-                    put("content", "You are a helpful assistant that translates lyrics accurately while preserving meaning and structure.")
-                })
-                put(JSONObject().apply {
-                    put("role", "user")
-                    put("content", prompt)
-                })
-            }
-
-            val jsonBody = JSONObject().apply {
-                put("model", model.ifBlank { "google/gemini-flash-1.5" })
-                put("messages", messages)
-            }
-
-            val request = Request.Builder()
-                .url("https://openrouter.ai/api/v1/chat/completions")
-                .addHeader("Authorization", "Bearer ${apiKey.trim()}")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("HTTP-Referer", "https://github.com/iad1tya/Echo-Music") // Required by OpenRouter
-                .addHeader("X-Title", "Echo Music") // Required by OpenRouter
-                .post(jsonBody.toString().toRequestBody(JSON))
-                .build()
-
-            val response = client.newCall(request).execute()
-            val responseBody = response.body?.string()
-
-            if (!response.isSuccessful) {
-                var errorMsg = try {
-                    JSONObject(responseBody ?: "").optJSONObject("error")?.optString("message") 
-                        ?: "HTTP ${response.code}: ${response.message}"
-                } catch (e: Exception) {
-                    "HTTP ${response.code}: ${response.message}"
+    ): Result<List<String>> = withContext(Dispatchers.IO) {
+        var currentAttempt = 0
+        
+        while (currentAttempt < maxRetries) {
+            try {
+                // Request JSON array explicitly
+                val prompt = "Translate the following lyrics to $targetLanguage. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines and structure exactly. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
+                
+                val messages = JSONArray().apply {
+                    put(JSONObject().apply {
+                        put("role", "system")
+                        put("content", "You are a helpful assistant that translates lyrics accurately. You must output valid JSON.")
+                    })
+                    put(JSONObject().apply {
+                        put("role", "user")
+                        put("content", prompt)
+                    })
                 }
 
-                if (errorMsg.contains("data policy", ignoreCase = true) || errorMsg.contains("retention", ignoreCase = true)) {
-                    errorMsg = "Policy Error: Models may not match your 'Zero Retention' setting. Disable it in OpenRouter or try a different model."
-                } else if (errorMsg.contains("provider", ignoreCase = true)) {
-                    errorMsg = "$errorMsg. Try a different model"
+                val jsonBody = JSONObject().apply {
+                    put("model", model.ifBlank { "google/gemini-flash-1.5" })
+                    put("messages", messages)
+                    // Removed response_format to ensure compatibility with all models
                 }
 
-                return@withContext Result.failure(Exception("Translation failed: $errorMsg"))
-            }
+                val request = Request.Builder()
+                    .url("https://openrouter.ai/api/v1/chat/completions")
+                    .addHeader("Authorization", "Bearer ${apiKey.trim()}")
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("HTTP-Referer", "https://github.com/iad1tya/Echo-Music")
+                    .addHeader("X-Title", "Echo Music")
+                    .post(jsonBody.toString().toRequestBody(JSON))
+                    .build()
 
-            if (responseBody == null) {
-                return@withContext Result.failure(Exception("Empty response body"))
-            }
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
 
-            val jsonResponse = JSONObject(responseBody)
-            val choices = jsonResponse.optJSONArray("choices")
-            if (choices != null && choices.length() > 0) {
-                val message = choices.getJSONObject(0).optJSONObject("message")
-                val content = message?.optString("content")?.trim()
-                if (content.isNullOrBlank()) {
-                     return@withContext Result.failure(Exception("Empty translation content"))
+                if (!response.isSuccessful) {
+                    // Retry on server errors (5xx)
+                    if (response.code >= 500) {
+                        currentAttempt++
+                        kotlinx.coroutines.delay(1000L * currentAttempt)
+                        continue
+                    }
+                    
+                    var errorMsg = try {
+                        JSONObject(responseBody ?: "").optJSONObject("error")?.optString("message") 
+                            ?: "HTTP ${response.code}: ${response.message}"
+                    } catch (e: Exception) {
+                        "HTTP ${response.code}: ${response.message}"
+                    }
+                    // For client errors (4xx), we fail immediately as retrying won't help
+                    return@withContext Result.failure(Exception("Translation failed: $errorMsg"))
                 }
-                return@withContext Result.success(content)
+
+                if (responseBody == null) {
+                    currentAttempt++
+                    continue
+                }
+
+                val jsonResponse = JSONObject(responseBody)
+                val choices = jsonResponse.optJSONArray("choices")
+                if (choices != null && choices.length() > 0) {
+                    val message = choices.getJSONObject(0).optJSONObject("message")
+                    val content = message?.optString("content")?.trim()
+                    
+                    if (!content.isNullOrBlank()) {
+                        // Extract JSON array from content
+                        val jsonString = content.substringAfter("[").substringBeforeLast("]")
+                        val finalJson = "[$jsonString]"
+                        
+                        try {
+                            val jsonArray = JSONArray(finalJson)
+                            val translatedLines = mutableListOf<String>()
+                            for (i in 0 until jsonArray.length()) {
+                                translatedLines.add(jsonArray.optString(i))
+                            }
+                            return@withContext Result.success(translatedLines)
+                        } catch (e: Exception) {
+                             if (currentAttempt == maxRetries - 1) throw e
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                if (currentAttempt == maxRetries - 1) {
+                    return@withContext Result.failure(e)
+                }
             }
-            
-            return@withContext Result.failure(Exception("No choices in response"))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return@withContext Result.failure(e)
+            currentAttempt++
+            kotlinx.coroutines.delay(1000L * currentAttempt)
         }
+        return@withContext Result.failure(Exception("Max retries exceeded"))
     }
 }
