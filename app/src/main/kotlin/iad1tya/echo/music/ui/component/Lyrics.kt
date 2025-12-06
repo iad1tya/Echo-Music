@@ -62,6 +62,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.CircularProgressIndicator
+import iad1tya.echo.music.lyrics.LyricsTranslationHelper
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -146,7 +150,6 @@ import iad1tya.echo.music.constants.OpenRouterApiKey
 import iad1tya.echo.music.constants.OpenRouterModelKey
 import iad1tya.echo.music.constants.AutoTranslateLyricsKey
 import iad1tya.echo.music.constants.TranslateLanguageKey
-import iad1tya.echo.music.lyrics.LyricsTranslationHelper
 
 @RequiresApi(Build.VERSION_CODES.M)
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -349,6 +352,26 @@ fun Lyrics(
         }
     }
     
+    // State for translation status
+    val translationStatus by LyricsTranslationHelper.status.collectAsState()
+    
+    // Listen for manual trigger
+    LaunchedEffect(Unit) {
+        LyricsTranslationHelper.manualTrigger.collect {
+             if (lines.isNotEmpty() && openRouterApiKey.isNotBlank()) {
+                 LyricsTranslationHelper.translateLyrics(
+                     lyrics = lines,
+                     targetLanguage = translateLanguage,
+                     apiKey = openRouterApiKey,
+                     model = openRouterModel,
+                     scope = scope
+                 )
+             } else if (openRouterApiKey.isBlank()) {
+                 Toast.makeText(context, "API Key Required", Toast.LENGTH_SHORT).show()
+             }
+        }
+    }
+
     LaunchedEffect(lines, autoTranslateLyrics, openRouterApiKey, isVisible) {
         if (isVisible && autoTranslateLyrics && openRouterApiKey.isNotBlank() && lines.isNotEmpty()) {
             val needsTranslation = lines.any { it.translatedTextFlow.value == null }
@@ -361,6 +384,99 @@ fun Lyrics(
                     scope = scope
                 )
             }
+        }
+    }
+    
+    // Status UI
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .zIndex(1f)
+            .padding(top = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        when (val status = translationStatus) {
+            is LyricsTranslationHelper.TranslationStatus.Translating -> {
+                Card(
+                     colors = CardDefaults.cardColors(
+                         containerColor = MaterialTheme.colorScheme.primaryContainer
+                     ),
+                     shape = RoundedCornerShape(16.dp),
+                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "Translating lyrics...",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+            is LyricsTranslationHelper.TranslationStatus.Error -> {
+                Card(
+                     colors = CardDefaults.cardColors(
+                         containerColor = MaterialTheme.colorScheme.errorContainer
+                     ),
+                     shape = RoundedCornerShape(16.dp),
+                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.error),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = status.message,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+            is LyricsTranslationHelper.TranslationStatus.Success -> {
+                 Card(
+                     colors = CardDefaults.cardColors(
+                         containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                     ),
+                     shape = RoundedCornerShape(16.dp),
+                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.check),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "Translated",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
+            }
+            else -> {}
         }
     }
 

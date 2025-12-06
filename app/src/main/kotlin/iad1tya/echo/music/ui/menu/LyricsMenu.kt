@@ -66,6 +66,9 @@ import iad1tya.echo.music.ui.component.NewAction
 import iad1tya.echo.music.ui.component.NewActionGrid
 import iad1tya.echo.music.ui.component.TextFieldDialog
 import iad1tya.echo.music.viewmodels.LyricsMenuViewModel
+import iad1tya.echo.music.lyrics.LyricsTranslationHelper
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +81,7 @@ fun LyricsMenu(
 ) {
     val context = LocalContext.current
     val database = LocalDatabase.current
+    val scope = rememberCoroutineScope()
 
     var showEditDialog by rememberSaveable {
         mutableStateOf(false)
@@ -390,6 +394,24 @@ fun LyricsMenu(
                     )
                 ),
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 16.dp)
+            )
+        }
+
+        item {
+            ListItem(
+                headlineContent = { Text(text = stringResource(R.string.translate_lyrics)) },
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(R.drawable.language),
+                        contentDescription = null,
+                    )
+                },
+                modifier = Modifier.clickable {
+                    onDismiss()
+                    scope.launch {
+                        LyricsTranslationHelper.triggerManualTranslation()
+                    }
+                }
             )
         }
 

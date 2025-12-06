@@ -4,10 +4,31 @@ import iad1tya.echo.music.api.OpenRouterService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 object LyricsTranslationHelper {
+    private val _status = MutableStateFlow<TranslationStatus>(TranslationStatus.Idle)
+    val status: StateFlow<TranslationStatus> = _status.asStateFlow()
+
+    private val _manualTrigger = MutableSharedFlow<Unit>()
+    val manualTrigger: SharedFlow<Unit> = _manualTrigger.asSharedFlow()
+    
     private var translationJob: Job? = null
+
+    suspend fun triggerManualTranslation() {
+        _manualTrigger.emit(Unit)
+    }
+    
+    fun resetStatus() {
+        _status.value = TranslationStatus.Idle
+    }
 
     fun translateLyrics(
         lyrics: List<LyricsEntry>,
@@ -17,15 +38,14 @@ object LyricsTranslationHelper {
         scope: CoroutineScope
     ) {
         translationJob?.cancel()
+        _status.value = TranslationStatus.Translating
+        
         translationJob = scope.launch(Dispatchers.IO) {
-            // Group lyrics into chunks to reduce API calls if needed, 
-            // but for now let's just translate the whole block or line by line.
-            // Since we want to display it line by line, passing the whole text and asking 
-            // the LLM to preserve structure is risky but cheaper.
-            // Let's try to translate manageable chunks or the entire text if it's not too long.
-
             val fullText = lyrics.joinToString("\n") { it.text }
-            if (fullText.isBlank()) return@launch
+            if (fullText.isBlank()) {
+                _status.value = TranslationStatus.Idle
+                return@launch
+            }
 
             val result = OpenRouterService.translate(
                 text = fullText,
@@ -47,12 +67,22 @@ object LyricsTranslationHelper {
                         lyrics[i].translatedTextFlow.value = translatedLines[i]
                     }
                 }
+                _status.value = TranslationStatus.Success
+                delay(3000) // Show success for 3 seconds
+                _status.value = TranslationStatus.Idle
             }.onFailure { error ->
                 if (lyrics.isNotEmpty()) {
                     lyrics[0].translatedTextFlow.value = "Error: ${error.message}"
                 }
+                _status.value = TranslationStatus.Error(error.message ?: "Unknown error")
             }
         }
     }
 
+    sealed class TranslationStatus {
+        data object Idle : TranslationStatus()
+        data object Translating : TranslationStatus()
+        data object Success : TranslationStatus()
+        data class Error(val message: String) : TranslationStatus()
+    }
 }

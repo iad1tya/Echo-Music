@@ -9,8 +9,14 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 
+import java.util.concurrent.TimeUnit
+
 object OpenRouterService {
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(90, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
     private val JSON = "application/json; charset=utf-8".toMediaType()
 
     suspend fun translate(
@@ -62,7 +68,7 @@ object OpenRouterService {
                 if (errorMsg.contains("data policy", ignoreCase = true) || errorMsg.contains("retention", ignoreCase = true)) {
                     errorMsg = "Policy Error: Models may not match your 'Zero Retention' setting. Disable it in OpenRouter or try a different model."
                 } else if (errorMsg.contains("provider", ignoreCase = true)) {
-                    errorMsg = "$errorMsg. Try a different model (e.g., openai/gpt-3.5-turbo)."
+                    errorMsg = "$errorMsg. Try a different model"
                 }
 
                 return@withContext Result.failure(Exception("Translation failed: $errorMsg"))
