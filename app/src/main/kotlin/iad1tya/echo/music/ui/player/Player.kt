@@ -1917,7 +1917,8 @@ fun BottomSheetPlayer(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 4.dp, vertical = 8.dp)
+                                .padding(horizontal = 4.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                         
                         // WiFi Audio devices - Google Cast integration
