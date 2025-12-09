@@ -239,8 +239,15 @@ class MusicService :
 
     private var consecutivePlaybackErr = 0
 
-    // Fix for ForegroundServiceStartNotAllowedException (Issue 3)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.action?.let { action ->
+            when (action) {
+                ACTION_PLAY_PAUSE -> if (player.isPlaying) player.pause() else player.play()
+                ACTION_NEXT -> if (player.hasNextMediaItem()) player.seekToNext()
+                ACTION_PREVIOUS -> if (player.hasPreviousMediaItem()) player.seekToPrevious()
+            }
+        }
+
         try {
             return super.onStartCommand(intent, flags, startId)
         } catch (e: Exception) {
@@ -1877,7 +1884,11 @@ class MusicService :
         const val SEARCH = "search"
 
         const val CHANNEL_ID = "music_channel_01"
-        const val NOTIFICATION_ID = 888
+        const val NOTIFICATION_ID = 1
+
+        const val ACTION_PLAY_PAUSE = "iad1tya.echo.music.playback.ACTION_PLAY_PAUSE"
+        const val ACTION_NEXT = "iad1tya.echo.music.playback.ACTION_NEXT"
+        const val ACTION_PREVIOUS = "iad1tya.echo.music.playback.ACTION_PREVIOUS"
         const val ERROR_CODE_NO_STREAM = 1000001
         const val CHUNK_LENGTH = 512 * 1024L
         const val PERSISTENT_QUEUE_FILE = "persistent_queue.data"

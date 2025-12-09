@@ -99,36 +99,6 @@ class MusicWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
         
         when (intent.action) {
-            ACTION_PLAY_PAUSE -> {
-                val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON).apply {
-                    setPackage(context.packageName)
-                    putExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent(
-                        android.view.KeyEvent.ACTION_DOWN,
-                        android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
-                    ))
-                }
-                context.sendBroadcast(mediaButtonIntent)
-            }
-            ACTION_PREVIOUS -> {
-                val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON).apply {
-                    setPackage(context.packageName)
-                    putExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent(
-                        android.view.KeyEvent.ACTION_DOWN,
-                        android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS
-                    ))
-                }
-                context.sendBroadcast(mediaButtonIntent)
-            }
-            ACTION_NEXT -> {
-                val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON).apply {
-                    setPackage(context.packageName)
-                    putExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent(
-                        android.view.KeyEvent.ACTION_DOWN,
-                        android.view.KeyEvent.KEYCODE_MEDIA_NEXT
-                    ))
-                }
-                context.sendBroadcast(mediaButtonIntent)
-            }
             ACTION_UPDATE_WIDGET -> {
                 val songTitle = intent.getStringExtra("songTitle")
                 val artistName = intent.getStringExtra("artistName")
@@ -183,15 +153,24 @@ class MusicWidgetProvider : AppWidgetProvider() {
             )
             
             // Set up play/pause button click
-            val playPauseIntent = Intent(context, MusicWidgetProvider::class.java).apply {
-                action = ACTION_PLAY_PAUSE
+            val playPauseIntent = Intent(context, MusicService::class.java).apply {
+                action = MusicService.ACTION_PLAY_PAUSE
             }
-            val playPausePendingIntent = PendingIntent.getBroadcast(
-                context,
-                2,
-                playPauseIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+            val playPausePendingIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                PendingIntent.getForegroundService(
+                    context,
+                    2,
+                    playPauseIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getService(
+                    context,
+                    2,
+                    playPauseIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
             views.setOnClickPendingIntent(R.id.widget_play_pause, playPausePendingIntent)
             
             // Set up widget click to open app
@@ -203,6 +182,48 @@ class MusicWidgetProvider : AppWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_song_info, openAppPendingIntent)
+
+            // Set up previous button click
+            val previousIntent = Intent(context, MusicService::class.java).apply {
+                action = MusicService.ACTION_PREVIOUS
+            }
+            val previousPendingIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                PendingIntent.getForegroundService(
+                    context,
+                    3,
+                    previousIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getService(
+                    context,
+                    3,
+                    previousIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
+            views.setOnClickPendingIntent(R.id.widget_previous, previousPendingIntent)
+
+            // Set up next button click
+            val nextIntent = Intent(context, MusicService::class.java).apply {
+                action = MusicService.ACTION_NEXT
+            }
+            val nextPendingIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                PendingIntent.getForegroundService(
+                    context,
+                    5,
+                    nextIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getService(
+                    context,
+                    5,
+                    nextIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
+            views.setOnClickPendingIntent(R.id.widget_next, nextPendingIntent)
             
             // First update widget with default logo
             views.setImageViewResource(R.id.widget_album_art, R.drawable.echo_logo)
