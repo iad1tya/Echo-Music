@@ -440,7 +440,7 @@ class MusicService :
         }
 
         playerVolume.collectLatest(scope) {
-            player.volume = it
+            mediaSession.player.volume = it
         }
 
         playerVolume.debounce(1000).collect(scope) { volume ->
@@ -699,17 +699,54 @@ class MusicService :
         val currentPlayer = player
         val playWhenReady = currentPlayer.playWhenReady
         val currentPosition = currentPlayer.currentPosition
-        val currentMediaItemIndex = currentPlayer.currentMediaItemIndex
-        val currentMediaItems = currentPlayer.mediaItems.toList()
+        val currentMediaItem = currentPlayer.currentMediaItem ?: return
         
         castPlayer?.let { cast ->
-            // Transfer state to cast player
-            cast.setMediaItems(currentMediaItems, currentMediaItemIndex, currentPosition)
-            cast.playWhenReady = playWhenReady
-            cast.prepare()
-            
-            // Pause local player to avoid concurrent playback
+            // Update mode to avoid conflicts
             player.pause()
+
+            // Update MediaSession and sync volume
+            mediaSession.player = cast
+            val currentVolume = playerVolume.value
+            cast.volume = currentVolume
+            
+            // Resolve the actual URL for the current song asynchronously
+            // The Cast Receiver requires a direct URL, it cannot use our local ResolvingDataSource
+            scope.launch(Dispatchers.IO) {
+                try {
+                    val mediaId = currentMediaItem.mediaId
+                    // Resolve the playback URL using YTPlayerUtils
+                    val playbackData = YTPlayerUtils.playerResponseForPlayback(
+                        videoId = mediaId,
+                        audioQuality = audioQuality,
+                        connectivityManager = connectivityManager
+                    ).getOrThrow()
+                    
+                    val streamUrl = playbackData.streamUrl
+                    
+                    // Create a new MediaItem with the resolved URI
+                    val resolvedMediaItem = currentMediaItem.buildUpon()
+                        .setUri(streamUrl)
+                        .build()
+                        
+                    withContext(Dispatchers.Main) {
+                        // Set the resolved item on the Cast Player
+                        cast.setMediaItem(resolvedMediaItem, currentPosition)
+                        cast.playWhenReady = playWhenReady
+                        cast.prepare()
+                        Log.d("MusicService", "Cast playback started with resolved URL for $mediaId")
+                    }
+                } catch (e: Exception) {
+                    Log.e("MusicService", "Failed to resolve URL for Cast", e)
+                    reportException(e)
+                    withContext(Dispatchers.Main) {
+                         // Fallback: try setting item as is (unlikely to work without custom receiver)
+                        cast.setMediaItem(currentMediaItem, currentPosition)
+                        cast.playWhenReady = playWhenReady
+                        cast.prepare()
+                    }
+                }
+            }
             
             Log.d("MusicService", "Transferred playback to Cast player")
         }
@@ -727,18 +764,21 @@ class MusicService :
         try {
             val playWhenReady = cast.playWhenReady
             val currentPosition = cast.currentPosition
-            val currentMediaItemIndex = cast.currentMediaItemIndex
-            val currentMediaItems = cast.mediaItems.toList()
             
-            // Transfer state back to local player
-            if (currentMediaItems.isNotEmpty()) {
-                player.setMediaItems(currentMediaItems, currentMediaItemIndex, currentPosition)
-                player.playWhenReady = playWhenReady
-                player.prepare()
-            }
+            // Note: We can't transfer the queue back easily if we only played one song
+            // Ideally we would sync the state. For now, we resume the local player where it left off
+            // or at the cast position if valid.
             
+            // Update MediaSession to use local Player
+            mediaSession.player = player
+
             // Stop cast player
             cast.stop()
+            
+            // Resume local player
+            if (playWhenReady) {
+                player.play()
+            }
             
             Log.d("MusicService", "Transferred playback to local player")
         } catch (e: Exception) {
