@@ -1,3 +1,6 @@
+> [!CAUTION]
+> Support has been ended - but still I will be fixing some of the bugs if found, to keep this app alive.
+
 <div align="center">
   <img src="assets/Echo_github.png" alt="Echo Music Logo" width="150"/>
 </div>
