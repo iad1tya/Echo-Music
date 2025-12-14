@@ -1591,7 +1591,7 @@ class MusicService :
             val mediaId = dataSpec.key ?: run {
                 Log.e("MusicService", "DataSpec has no media id key")
                 throw PlaybackException(
-                    getString(R.string.error_unknown),
+                    "No media ID available for playback",
                     null,
                     PlaybackException.ERROR_CODE_REMOTE_ERROR
                 )
@@ -1642,7 +1642,7 @@ class MusicService :
                     }
 
                     else -> throw PlaybackException(
-                        getString(R.string.error_unknown),
+                        throwable.message ?: throwable.javaClass.simpleName,
                         throwable,
                         PlaybackException.ERROR_CODE_REMOTE_ERROR
                     )
@@ -1650,7 +1650,7 @@ class MusicService :
             }
 
             val nonNullPlayback = requireNotNull(playbackData) {
-                getString(R.string.error_unknown)
+                "No playback data available for media ID: $mediaId"
             }
             run {
                 val format = nonNullPlayback.format
