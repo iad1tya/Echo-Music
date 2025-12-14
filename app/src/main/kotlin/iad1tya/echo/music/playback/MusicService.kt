@@ -89,6 +89,7 @@ import iad1tya.echo.music.constants.RepeatModeKey
 import iad1tya.echo.music.constants.ShowLyricsKey
 import iad1tya.echo.music.constants.SimilarContent
 import iad1tya.echo.music.constants.SkipSilenceKey
+import iad1tya.echo.music.constants.StopMusicOnTaskClearKey
 import iad1tya.echo.music.db.MusicDatabase
 import iad1tya.echo.music.db.entities.Event
 import iad1tya.echo.music.db.entities.FormatEntity
@@ -1855,6 +1856,12 @@ class MusicService :
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        
+        // Check if user wants to stop music when task is cleared
+        if (dataStore.get(StopMusicOnTaskClearKey, false)) {
+            player.pause()
+            stopSelf()
+        }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
