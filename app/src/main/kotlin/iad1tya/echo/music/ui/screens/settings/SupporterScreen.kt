@@ -301,6 +301,19 @@ fun SupporterScreen(
                 )
                 
                 SupportOptionItem(
+                    icon = painterResource(R.drawable.favorite),
+                    title = "Patreon",
+                    subtitle = "Monthly support",
+                    onClick = { uriHandler.openUri("https://patreon.com/iad1tya") },
+                    isLast = false
+                )
+                
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+                
+                SupportOptionItem(
                     icon = painterResource(R.drawable.upi),
                     title = "UPI Payment",
                     subtitle = "Direct payment (India only)",

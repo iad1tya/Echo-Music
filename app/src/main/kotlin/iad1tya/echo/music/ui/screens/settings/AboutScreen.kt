@@ -308,10 +308,23 @@ fun AboutScreen(
                 )
                 
                 SocialLinkItem(
+                    icon = painterResource(R.drawable.patreon),
+                    title = "Patreon",
+                    subtitle = "Monthly support",
+                    iconSize = 24.dp,
+                    onClick = { uriHandler.openUri("https://patreon.com/iad1tya") }
+                )
+                
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+                
+                SocialLinkItem(
                     icon = painterResource(R.drawable.upi),
                     title = "UPI Payment",
                     subtitle = "Support via UPI (India)",
-                    iconSize = 27.dp,
+                    iconSize = 30.dp,
                     onClick = { uriHandler.openUri("https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=iad1tya@upi&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support") }
                 )
                 
@@ -482,9 +495,10 @@ private fun BuyMeCoffeeItem(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.bmac),
+                    painter = painterResource(R.drawable.buymeacoffee),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
+                    colorFilter = ColorFilter.tint(Color.White)
                 )
             }
         }
