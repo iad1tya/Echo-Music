@@ -6,6 +6,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,132 +54,97 @@ fun CryptoSelectionDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(28.dp),
+                .padding(24.dp)
+                .border(1.dp, Color.White, RoundedCornerShape(24.dp)),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(
-                modifier = Modifier.padding(28.dp)
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header
+                // Minimal centered header
                 Text(
-                    text = "Select a cryptocurrency",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
+                    text = "Choose Cryptocurrency",
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(24.dp))
 
-                // Crypto options as cards
-                CryptoType.values().forEachIndexed { index, crypto ->
+                // Grid-style minimal cards
+                CryptoType.values().forEach { crypto ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onCryptoSelected(crypto) },
-                        shape = RoundedCornerShape(18.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f)
                         ),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 0.dp,
-                            pressedElevation = 2.dp
-                        )
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .background(
-                                        when (crypto) {
-                                            CryptoType.BITCOIN -> Color(0xFFF7931A).copy(alpha = 0.15f)
-                                            CryptoType.ETHEREUM -> Color(0xFF627EEA).copy(alpha = 0.15f)
-                                            CryptoType.SOLANA -> Color(0xFF14F195).copy(alpha = 0.15f)
-                                        },
-                                        RoundedCornerShape(16.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (crypto == CryptoType.BITCOIN) {
-                                    Image(
-                                        painter = painterResource(crypto.icon),
-                                        contentDescription = crypto.displayName,
-                                        modifier = Modifier.size(32.dp),
-                                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
-                                            Color(0xFFF7931A)
-                                        )
+                            // Icon - all white
+                            if (crypto == CryptoType.BITCOIN) {
+                                Image(
+                                    painter = painterResource(crypto.icon),
+                                    contentDescription = crypto.displayName,
+                                    modifier = Modifier.size(24.dp),
+                                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
+                                        Color.White
                                     )
-                                } else {
-                                    Icon(
-                                        painter = painterResource(crypto.icon),
-                                        contentDescription = crypto.displayName,
-                                        modifier = Modifier.size(32.dp),
-                                        tint = when (crypto) {
-                                            CryptoType.ETHEREUM -> Color(0xFF627EEA)
-                                            CryptoType.SOLANA -> Color(0xFF14F195)
-                                            else -> MaterialTheme.colorScheme.primary
-                                        }
-                                    )
-                                }
-                            }
-
-                            Spacer(Modifier.width(18.dp))
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = crypto.displayName,
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface
                                 )
-                                Text(
-                                    text = when (crypto) {
-                                        CryptoType.BITCOIN -> "BTC Network"
-                                        CryptoType.ETHEREUM -> "ETH Network"
-                                        CryptoType.SOLANA -> "SOL Network"
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                            } else {
+                                Icon(
+                                    painter = painterResource(crypto.icon),
+                                    contentDescription = crypto.displayName,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = Color.White
                                 )
                             }
 
-                            Icon(
-                                painter = painterResource(R.drawable.arrow_forward),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            // Name
+                            Text(
+                                text = crypto.displayName,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            // Symbol
+                            Text(
+                                text = when (crypto) {
+                                    CryptoType.BITCOIN -> "BTC"
+                                    CryptoType.ETHEREUM -> "ETH"
+                                    CryptoType.SOLANA -> "SOL"
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
 
-                    if (index < CryptoType.values().size - 1) {
-                        Spacer(Modifier.height(12.dp))
-                    }
+                    Spacer(Modifier.height(8.dp))
                 }
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(8.dp))
 
-                // Cancel button
-                androidx.compose.material3.FilledTonalButton(
+                // Minimal cancel
+                androidx.compose.material3.TextButton(
                     onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        "Cancel",
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(vertical = 6.dp)
-                    )
+                    Text("Cancel")
                 }
             }
         }
