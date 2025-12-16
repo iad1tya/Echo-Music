@@ -88,7 +88,7 @@ fun <E> ChipsRow(
                 ),
                 onClick = { onValueUpdate(value) },
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, if (useDarkTheme) Color.White else Color.Black)
+                border = BorderStroke(1.dp, Color.White)
             )
 
             Spacer(Modifier.width(8.dp))
@@ -213,7 +213,7 @@ fun <Int> ChoiceChipsRow(
                         ),
                         onClick = { onValueUpdate(value) },
                         shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, if (useDarkTheme) Color.White else Color.Black)
+                        border = BorderStroke(1.dp, Color.White)
                     )
                 }
             }
