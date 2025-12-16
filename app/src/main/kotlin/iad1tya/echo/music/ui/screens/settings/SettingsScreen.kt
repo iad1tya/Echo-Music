@@ -447,18 +447,6 @@ fun SettingsScreen(
             )
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Supporter - Separate
-        Material3SettingsGroup(
-            items = listOf(
-                Material3SettingsItem(
-                    icon = painterResource(R.drawable.favorite),
-                    title = { Text("Supporter") },
-                    onClick = { navController.navigate("settings/supporter") }
-                )
-            )
-        )
         
         Spacer(modifier = Modifier.height(16.dp))
     }
