@@ -31,26 +31,28 @@ class MusicWidgetProvider : AppWidgetProvider() {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Main + job)
 
-    private fun getRoundedBitmap(context: Context, bitmap: Bitmap): Bitmap {
-        val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+    private fun getCircularBitmap(bitmap: Bitmap): Bitmap {
+        val size = minOf(bitmap.width, bitmap.height)
+        val output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(output)
         
         val color = 0xff424242.toInt()
         val paint = Paint()
-        val rect = Rect(0, 0, bitmap.width, bitmap.height)
+        val rect = Rect(0, 0, size, size)
         val rectF = RectF(rect)
-        
-        // Convert 12dp to pixels
-        val density = context.resources.displayMetrics.density
-        val roundPx = 12f * density
         
         paint.isAntiAlias = true
         canvas.drawARGB(0, 0, 0, 0)
         paint.color = color
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint)
+        canvas.drawOval(rectF, paint)
         
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawBitmap(bitmap, rect, rect, paint)
+        
+        val left = (bitmap.width - size) / 2
+        val top = (bitmap.height - size) / 2
+        val srcRect = Rect(left, top, left + size, top + size)
+        
+        canvas.drawBitmap(bitmap, srcRect, rect, paint)
         
         return output
     }
@@ -254,10 +256,10 @@ class MusicWidgetProvider : AppWidgetProvider() {
                                 bitmap
                             }
                             
-                            val roundedBitmap = getRoundedBitmap(context, scaledBitmap)
+                            val circularBitmap = getCircularBitmap(scaledBitmap)
                             
                             withContext(Dispatchers.Main) {
-                                views.setImageViewBitmap(R.id.widget_album_art, roundedBitmap)
+                                views.setImageViewBitmap(R.id.widget_album_art, circularBitmap)
                                 appWidgetManager.updateAppWidget(appWidgetId, views)
                                 android.util.Log.d("MusicWidget", "Widget updated with album art")
                             }
