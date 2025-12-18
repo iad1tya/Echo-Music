@@ -1205,115 +1205,139 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             bottomBar = {
-                                if (!isAmbientMode && !isFindScreen) {
-                                    if (!showRail) {
-                                    Box {
+                                if (!isAmbientMode) {
+                                    if (isFindScreen) {
                                         BottomSheetPlayer(
                                             state = playerBottomSheetState,
                                             navController = navController,
                                             pureBlack = pureBlack
                                         )
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.BottomCenter)
-                                                .height(bottomInset + getNavPadding())
-                                                .fillMaxWidth()
-                                                .offset {
-                                                    if (navigationBarHeight == 0.dp) {
-                                                        IntOffset(
-                                                            x = 0,
-                                                            y = (bottomInset + NavigationBarHeight).roundToPx(),
-                                                        )
-                                                    } else {
-                                                        val slideOffset =
-                                                            (bottomInset + NavigationBarHeight) *
-                                                                    playerBottomSheetState.progress.coerceIn(
-                                                                        0f,
-                                                                        1f,
+                                    } else if (!showRail) {
+                                        Box {
+                                            BottomSheetPlayer(
+                                                state = playerBottomSheetState,
+                                                navController = navController,
+                                                pureBlack = pureBlack
+                                            )
+                                            Box(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomCenter)
+                                                    .height(bottomInset + getNavPadding())
+                                                    .fillMaxWidth()
+                                                    .offset {
+                                                        if (navigationBarHeight == 0.dp) {
+                                                            IntOffset(
+                                                                x = 0,
+                                                                y = (bottomInset + NavigationBarHeight).roundToPx(),
+                                                            )
+                                                        } else {
+                                                            val slideOffset =
+                                                                (bottomInset + NavigationBarHeight) *
+                                                                        playerBottomSheetState.progress.coerceIn(
+                                                                            0f,
+                                                                            1f,
+                                                                        )
+                                                            val hideOffset =
+                                                                (bottomInset + NavigationBarHeight) * (1 - navigationBarHeight / NavigationBarHeight)
+                                                            IntOffset(
+                                                                x = 0,
+                                                                y = (slideOffset + hideOffset).roundToPx(),
+                                                            )
+                                                        }
+                                                    }
+                                                    .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer)
+                                            ) {
+                                                NavigationBar(
+                                                    modifier = Modifier
+                                                        .align(Alignment.BottomCenter)
+                                                        .height(bottomInset + getNavPadding()),
+                                                    containerColor = Color.Transparent,
+                                                    contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                                ) {
+                                                    navigationItems.fastForEach { screen ->
+                                                        val isSelected =
+                                                            navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+
+                                                        NavigationBarItem(
+                                                            selected = isSelected,
+                                                            icon = {
+                                                                if (screen.route == Screens.Settings.route) {
+                                                                    BadgedBox(badge = {
+                                                                        if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                                                            Badge()
+                                                                        }
+                                                                    }) {
+                                                                        Icon(
+                                                                            painter = painterResource(
+                                                                                id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                                                                            ),
+                                                                            contentDescription = null,
+                                                                        )
+                                                                    }
+                                                                } else {
+                                                                    Icon(
+                                                                        painter = painterResource(
+                                                                            id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                                                                        ),
+                                                                        contentDescription = null,
                                                                     )
-                                                        val hideOffset =
-                                                            (bottomInset + NavigationBarHeight) * (1 - navigationBarHeight / NavigationBarHeight)
-                                                        IntOffset(
-                                                            x = 0,
-                                                            y = (slideOffset + hideOffset).roundToPx(),
+                                                                }
+                                                            },
+                                                            label = {
+                                                                if (!slimNav) {
+                                                                    Text(
+                                                                        text = stringResource(screen.titleId),
+                                                                        maxLines = 1,
+                                                                        overflow = TextOverflow.Ellipsis
+                                                                    )
+                                                                }
+                                                            },
+                                                            onClick = {
+                                                                if (screen.route == Screens.Search.route) {
+                                                                    onActiveChange(true)
+                                                                } else if (isSelected) {
+                                                                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                                                                        "scrollToTop",
+                                                                        true
+                                                                    )
+                                                                    coroutineScope.launch {
+                                                                        searchBarScrollBehavior.state.resetHeightOffset()
+                                                                    }
+                                                                } else {
+                                                                    if (screen.route == Screens.Home.route) {
+                                                                        navController.navigate(screen.route) {
+                                                                            popUpTo(navController.graph.id)
+                                                                        }
+                                                                    } else {
+                                                                        navController.navigate(screen.route) {
+                                                                            popUpTo(navController.graph.startDestinationId) {
+                                                                                saveState = true
+                                                                            }
+                                                                            launchSingleTop = true
+                                                                            restoreState = true
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
                                                         )
                                                     }
                                                 }
-                                                .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer)
-                                        ) {
-                                        NavigationBar(
-                                            modifier = Modifier
-                                                .align(Alignment.BottomCenter)
-                                                .height(bottomInset + getNavPadding()),
-                                            containerColor = Color.Transparent,
-                                            contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-                                        ) {
-                                            navigationItems.fastForEach { screen ->
-                                                val isSelected =
-                                                    navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
-
-                                                NavigationBarItem(
-                                                    selected = isSelected,
-                                                    icon = {
-                                                        if (screen.route == Screens.Settings.route) {
-                                                            BadgedBox(badge = {
-                                                                if (latestVersionName != BuildConfig.VERSION_NAME) {
-                                                                    Badge()
-                                                                }
-                                                            }) {
-                                                                Icon(
-                                                                    painter = painterResource(
-                                                                        id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
-                                                                    ),
-                                                                    contentDescription = null,
-                                                                )
-                                                            }
-                                                        } else {
-                                                            Icon(
-                                                                painter = painterResource(
-                                                                    id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
-                                                                ),
-                                                                contentDescription = null,
-                                                            )
-                                                        }
-                                                    },
-                                                    label = {
-                                                        if (!slimNav) {
-                                                            Text(
-                                                                text = stringResource(screen.titleId),
-                                                                maxLines = 1,
-                                                                overflow = TextOverflow.Ellipsis
-                                                            )
-                                                        }
-                                                    },
-                                                    onClick = {
-                                                        if (screen.route == Screens.Search.route) {
-                                                            onActiveChange(true)
-                                                        } else if (isSelected) {
-                                                            navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
-                                                            coroutineScope.launch {
-                                                                searchBarScrollBehavior.state.resetHeightOffset()
-                                                            }
-                                                        } else {
-                                                            if (screen.route == Screens.Home.route) {
-                                                                navController.navigate(screen.route) {
-                                                                    popUpTo(navController.graph.id)
-                                                                }
-                                                            } else {
-                                                                navController.navigate(screen.route) {
-                                                                    popUpTo(navController.graph.startDestinationId) {
-                                                                        saveState = true
-                                                                    }
-                                                                    launchSingleTop = true
-                                                                    restoreState = true
-                                                                }
-                                                            }
-                                                        }
-                                                    },
-                                                )
                                             }
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(insetBg)
+                                                    .fillMaxWidth()
+                                                    .align(Alignment.BottomCenter)
+                                                    .height(bottomInsetDp)
+                                            )
                                         }
-                                        }
+                                    } else {
+                                        BottomSheetPlayer(
+                                            state = playerBottomSheetState,
+                                            navController = navController,
+                                            pureBlack = pureBlack
+                                        )
 
                                         Box(
                                             modifier = Modifier
@@ -1323,23 +1347,9 @@ class MainActivity : ComponentActivity() {
                                                 .height(bottomInsetDp)
                                         )
                                     }
-                                } else {
-                                    BottomSheetPlayer(
-                                        state = playerBottomSheetState,
-                                        navController = navController,
-                                        pureBlack = pureBlack
-                                    )
-
-                                    Box(
-                                        modifier = Modifier
-                                            .background(insetBg)
-                                            .fillMaxWidth()
-                                            .align(Alignment.BottomCenter)
-                                            .height(bottomInsetDp)
-                                    )
                                 }
-                            }
                             },
+
                             modifier = Modifier
                                 .fillMaxSize()
                                 .nestedScroll(searchBarScrollBehavior.nestedScrollConnection)
