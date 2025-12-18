@@ -60,6 +60,14 @@ import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.constants.PlayerBackgroundStyleKey
 import iad1tya.echo.music.constants.PlayerBackgroundStyle
 import iad1tya.echo.music.constants.AmbientModeDullBackgroundKey
+import iad1tya.echo.music.constants.AmbientModeSongAccentKey
+import iad1tya.echo.music.ui.theme.extractThemeColor
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.toBitmap
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import iad1tya.echo.music.db.entities.LyricsEntity
 import iad1tya.echo.music.di.LyricsHelperEntryPoint
 import iad1tya.echo.music.LocalDatabase
@@ -88,6 +96,34 @@ fun AmbientModeScreen(
     var areControlsVisible by remember { mutableStateOf(false) }
 
     val (isDullBackground, onDullBackgroundChange) = rememberPreference(AmbientModeDullBackgroundKey, false)
+    val (isSongAccent, onSongAccentChange) = rememberPreference(AmbientModeSongAccentKey, false)
+    
+    // Extract song accent color
+    var accentColor by remember { mutableStateOf(Color.Black) }
+    val animatedAccentColor by animateColorAsState(
+        targetValue = accentColor,
+        animationSpec = tween(durationMillis = 1000),
+        label = "accentColor"
+    )
+    
+    LaunchedEffect(mediaMetadata?.thumbnailUrl, isSongAccent) {
+        if (isSongAccent && mediaMetadata?.thumbnailUrl != null) {
+            try {
+                val request = ImageRequest.Builder(context)
+                    .data(mediaMetadata?.thumbnailUrl)
+                    .allowHardware(false)
+                    .build()
+                val result = context.imageLoader.execute(request)
+                result.image?.toBitmap()?.let { bitmap ->
+                    accentColor = bitmap.extractThemeColor().copy(alpha = 0.3f)
+                }
+            } catch (e: Exception) {
+                accentColor = Color.Black
+            }
+        } else {
+            accentColor = Color.Black
+        }
+    }
 
     // Auto-fetch lyrics if missing (mirrors LyricsScreen logic)
     LaunchedEffect(mediaMetadata?.id, currentLyrics) {
@@ -156,9 +192,7 @@ fun AmbientModeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
-            .background(Color.Black)
-            .background(Color.Black)
+            .background(if (isSongAccent) animatedAccentColor else Color.Black)
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onDragEnd = { totalDrag = 0f },
@@ -285,6 +319,20 @@ fun AmbientModeScreen(
                             painter = painterResource(if (isDullBackground) R.drawable.contrast else R.drawable.contrast),
                             contentDescription = null,
                             tint = if (isDullBackground) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Song Accent") },
+                    onClick = { 
+                        onSongAccentChange(!isSongAccent)
+                        areControlsVisible = false 
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.palette),
+                            contentDescription = null,
+                            tint = if (isSongAccent) MaterialTheme.colorScheme.primary else LocalContentColor.current
                         )
                     }
                 )

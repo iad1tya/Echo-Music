@@ -135,7 +135,7 @@ Only analytics data is collected to help improve your experience. Crash reports 
 
 ## Community
 <div align="center">
-  <a href="https://discord.com/invite/eNFNHaWN97">
+  <a href="https://discord.gg/2FGz83M3r6">
     <img src="assets/discord.png" alt="Discord" width="150"/>
   </a>
   <a href="https://t.me/EchoMusicApp">
