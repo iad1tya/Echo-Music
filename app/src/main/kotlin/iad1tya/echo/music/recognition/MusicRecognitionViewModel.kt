@@ -11,7 +11,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.echo.innertube.YouTube
+import com.echo.innertube.models.SongItem
+import com.echo.innertube.models.WatchEndpoint
+import iad1tya.echo.music.playback.queues.YouTubeQueue
+import iad1tya.echo.music.models.toMediaMetadata
+import iad1tya.echo.music.playback.PlayerConnection
 
 @HiltViewModel
 class MusicRecognitionViewModel @Inject constructor(
@@ -46,6 +53,31 @@ class MusicRecognitionViewModel @Inject constructor(
         audioRecorder.stop()
         if (_state.value is RecognitionState.Listening) {
             _state.value = RecognitionState.Idle
+        }
+    }
+
+    fun playSong(track: Track, playerConnection: PlayerConnection) {
+        val query = "${track.title} ${track.subtitle}"
+        viewModelScope.launch {
+            YouTube.searchSummary(query).onSuccess { page ->
+                val song = page.summaries.flatMap { it.items }
+                    .filterIsInstance<SongItem>()
+                    .firstOrNull()
+                
+                if (song != null) {
+                    playerConnection.playQueue(
+                        YouTubeQueue(
+                            WatchEndpoint(videoId = song.id),
+                            song.toMediaMetadata()
+                        )
+                    )
+                } else {
+                    // Fallback to error or just log
+                    _state.value = RecognitionState.Error("Song not found on YouTube Music")
+                }
+            }.onFailure {
+                _state.value = RecognitionState.Error("Failed to play: ${it.message}")
+            }
         }
     }
 

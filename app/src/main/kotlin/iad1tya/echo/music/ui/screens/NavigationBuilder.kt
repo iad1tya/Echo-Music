@@ -84,12 +84,13 @@ fun NavGraphBuilder.navigationBuilder(
     navController: NavHostController,
     scrollBehavior: TopAppBarScrollBehavior,
     latestVersionName: String,
+    onOpenPlayer: () -> Unit,
 ) {
     composable(Screens.Home.route) {
         HomeScreen(navController)
     }
     composable(Screens.Find.route) {
-        FindSongScreen(navController)
+        FindSongScreen(navController, onOpenPlayer = onOpenPlayer)
     }
     composable(
         Screens.Library.route,

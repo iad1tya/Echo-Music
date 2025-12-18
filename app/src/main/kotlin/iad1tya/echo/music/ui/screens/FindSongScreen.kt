@@ -44,14 +44,17 @@ import iad1tya.echo.music.recognition.MusicRecognitionViewModel
 import iad1tya.echo.music.recognition.RecognitionState
 import iad1tya.echo.music.ui.theme.extractThemeColor
 import kotlinx.coroutines.delay
+import iad1tya.echo.music.LocalPlayerConnection
 
 @Composable
 fun FindSongScreen(
     navController: NavController,
-    viewModel: MusicRecognitionViewModel = hiltViewModel()
+    viewModel: MusicRecognitionViewModel = hiltViewModel(),
+    onOpenPlayer: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val playerConnection = LocalPlayerConnection.current ?: return
     var hasStartedListening by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -95,7 +98,11 @@ fun FindSongScreen(
                 is RecognitionState.Success -> {
                     SuccessView(
                         track = currentState.track,
-                        navController = navController
+                        navController = navController,
+                        onPlay = {
+                            viewModel.playSong(currentState.track, playerConnection)
+                            onOpenPlayer()
+                        }
                     )
                 }
                 is RecognitionState.Error -> {
@@ -202,7 +209,8 @@ private fun ListeningView(isListening: Boolean) {
 @Composable
 private fun SuccessView(
     track: iad1tya.echo.music.recognition.Track,
-    navController: NavController
+    navController: NavController,
+    onPlay: () -> Unit
 ) {
     val context = LocalContext.current
     var backgroundColor by remember { mutableStateOf(Color.Black) }
@@ -324,9 +332,7 @@ private fun SuccessView(
                 }
                 
                 Button(
-                    onClick = {
-                        navController.navigate("search/${encodedQuery}?autoplay=true")
-                    },
+                    onClick = onPlay,
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp),

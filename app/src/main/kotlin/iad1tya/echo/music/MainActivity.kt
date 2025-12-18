@@ -1520,7 +1520,12 @@ class MainActivity : ComponentActivity() {
                                         navigationBuilder(
                                             navController,
                                             topAppBarScrollBehavior,
-                                            latestVersionName
+                                            latestVersionName,
+                                            onOpenPlayer = {
+                                                coroutineScope.launch {
+                                                    playerBottomSheetState.expandSoft()
+                                                }
+                                            }
                                         )
                                     }
                                 }
