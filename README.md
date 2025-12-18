@@ -157,14 +157,31 @@ Only analytics data is collected to help improve your experience. Crash reports 
 
 ### Cryptocurrency
 <div align="center">
-  <img src="assets/Bitcoin.jpeg" alt="Bitcoin QR" width="150"/>
-  <p><strong>Bitcoin:</strong> <code>bc1qcvyr7eekha8uytmffcvgzf4h7xy7shqzke35fy</code></p>
-  <br>
-  <img src="assets/Ethereum.jpeg" alt="Ethereum QR" width="150"/>
-  <p><strong>Ethereum:</strong> <code>0x51bc91022E2dCef9974D5db2A0e22d57B360e700</code></p>
-  <br>
-  <img src="assets/Solana.jpeg" alt="Solana QR" width="150"/>
-  <p><strong>Solana:</strong> <code>9wjca3EQnEiqzqgy7N5iqS1JGXJiknMQv6zHgL96t94S</code></p>
+  <table>
+    <tr>
+      <td align="center">
+        <img src="assets/Bitcoin.jpeg" alt="Bitcoin QR" width="150"/>
+        <br>
+        <strong>Bitcoin</strong>
+        <br>
+        <code>bc1qcvyr7eekha8uytmffcvgzf4h7xy7shqzke35fy</code>
+      </td>
+      <td align="center">
+        <img src="assets/Ethereum.jpeg" alt="Ethereum QR" width="150"/>
+        <br>
+        <strong>Ethereum</strong>
+        <br>
+        <code>0x51bc91022E2dCef9974D5db2A0e22d57B360e700</code>
+      </td>
+      <td align="center">
+        <img src="assets/Solana.jpeg" alt="Solana QR" width="150"/>
+        <br>
+        <strong>Solana</strong>
+        <br>
+        <code>9wjca3EQnEiqzqgy7N5iqS1JGXJiknMQv6zHgL96t94S</code>
+      </td>
+    </tr>
+  </table>
 </div>
 
 ---
