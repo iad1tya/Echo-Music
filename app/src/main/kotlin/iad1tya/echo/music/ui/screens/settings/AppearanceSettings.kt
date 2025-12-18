@@ -520,6 +520,7 @@ fun AppearanceSettings(
                     NavigationTab.HOME -> stringResource(R.string.home)
                     NavigationTab.SEARCH -> stringResource(R.string.search)
                     NavigationTab.LIBRARY -> stringResource(R.string.filter_library)
+                    NavigationTab.FIND -> stringResource(R.string.find_song)
                 }
             },
         )
@@ -650,6 +651,7 @@ enum class NavigationTab {
     HOME,
     SEARCH,
     LIBRARY,
+    FIND,
 }
 
 enum class LyricsPosition {

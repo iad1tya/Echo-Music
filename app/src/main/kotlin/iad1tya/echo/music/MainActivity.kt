@@ -565,6 +565,7 @@ class MainActivity : ComponentActivity() {
                         when (intent?.action) {
                             ACTION_LIBRARY -> NavigationTab.LIBRARY
                             ACTION_SEARCH -> NavigationTab.SEARCH
+                            ACTION_FIND -> NavigationTab.FIND
                             else -> null
                         }
                     }
@@ -1411,6 +1412,7 @@ class MainActivity : ComponentActivity() {
                                         startDestination = when (tabOpenedFromShortcut ?: defaultOpenTab) {
                                             NavigationTab.HOME -> Screens.Home
                                             NavigationTab.LIBRARY -> Screens.Library
+                                            NavigationTab.FIND -> Screens.Find
                                             else -> Screens.Home
                                         }.route,
                                         // Enter Transition - smoother with easing
@@ -1606,6 +1608,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleDeepLinkIntent(intent: Intent, navController: NavHostController) {
+        if (intent.action == ACTION_FIND) {
+            navController.navigate(Screens.Find.route)
+            return
+        }
         // Handle both VIEW and SEND actions
         val uri = when (intent.action) {
             Intent.ACTION_SEND -> {
@@ -1695,6 +1701,7 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val ACTION_SEARCH = "iad1tya.echo.music.action.SEARCH"
         const val ACTION_LIBRARY = "iad1tya.echo.music.action.LIBRARY"
+        const val ACTION_FIND = "iad1tya.echo.music.action.FIND"
     }
 }
 
