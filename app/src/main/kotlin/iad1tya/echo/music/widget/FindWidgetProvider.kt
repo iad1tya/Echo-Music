@@ -27,7 +27,7 @@ class FindWidgetProvider : AppWidgetProvider() {
     ) {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = MainActivity.ACTION_FIND
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         
         val pendingIntent = PendingIntent.getActivity(
