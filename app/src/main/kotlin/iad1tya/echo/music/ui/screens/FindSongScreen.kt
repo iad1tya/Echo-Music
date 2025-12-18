@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -33,11 +35,14 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.imageLoader
 import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import coil3.request.crossfade
+import coil3.toBitmap
 import iad1tya.echo.music.recognition.MusicRecognitionViewModel
 import iad1tya.echo.music.recognition.RecognitionState
-import iad1tya.echo.music.ui.component.NavigationTitle
+import iad1tya.echo.music.ui.theme.extractThemeColor
 import kotlinx.coroutines.delay
 
 @Composable
@@ -199,94 +204,142 @@ private fun SuccessView(
     track: iad1tya.echo.music.recognition.Track,
     navController: NavController
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp)
-    ) {
-        // Album Art
-        Card(
-            modifier = Modifier
-                .size(280.dp)
-                .padding(8.dp),
-            shape = RoundedCornerShape(32.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(track.images?.coverarthq ?: track.images?.coverart)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Cover Art",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Title & Artist
-        Text(
-            text = track.title ?: "Unknown Title",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Text(
-            text = track.subtitle ?: "Unknown Artist",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        // Actions
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            val query = "${track.title} ${track.subtitle}"
-            val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+    val context = LocalContext.current
+    var backgroundColor by remember { mutableStateOf(Color.Black) }
+    
+    // Animate background color
+    val animatedBackgroundColor by animateColorAsState(
+        targetValue = backgroundColor,
+        animationSpec = tween(durationMillis = 1000),
+        label = "backgroundColor"
+    )
 
-            OutlinedButton(
-                onClick = {
-                    navController.navigate("search/${encodedQuery}?autoplay=false")
-                },
+    // Load image and extract color
+    LaunchedEffect(track) {
+        val imageUrl = track.images?.coverarthq ?: track.images?.coverart
+        if (imageUrl != null) {
+            val request = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .allowHardware(false) // Required for palette
+                .build()
+            
+            val result = coil3.ImageLoader(context).execute(request)
+            result.image?.toBitmap()?.let { bitmap ->
+                 // Use a darker shade of the extracted color for the background
+                val extractedColor = bitmap.extractThemeColor()
+                backgroundColor = extractedColor.copy(alpha = 0.6f)
+            }
+        }
+    }
+
+    // Main Container with Animated Background
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        animatedBackgroundColor,
+                        Color.Black
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+        ) {
+            // Album Art
+            Card(
                 modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp),
-                shape = RoundedCornerShape(50) // Pill shape
+                    .size(280.dp)
+                    .padding(8.dp),
+                shape = RoundedCornerShape(32.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
             ) {
-                Icon(Icons.Rounded.Search, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Search")
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(track.images?.coverarthq ?: track.images?.coverart)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Cover Art",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             
-            Button(
-                onClick = {
-                    navController.navigate("search/${encodedQuery}?autoplay=true")
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp),
-                shape = RoundedCornerShape(50), // Pill shape
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Title & Artist
+            Text(
+                text = track.title ?: "Unknown Title",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = Color.White
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = track.subtitle ?: "Unknown Artist",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            
+            Spacer(modifier = Modifier.height(48.dp))
+            
+            // Actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Icon(Icons.Rounded.PlayArrow, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Play")
+                val query = "${track.title} ${track.subtitle}"
+                val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+
+                OutlinedButton(
+                    onClick = {
+                        navController.navigate("search/${encodedQuery}?autoplay=false")
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(50),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(Icons.Rounded.Search, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Search")
+                }
+                
+                Button(
+                    onClick = {
+                        navController.navigate("search/${encodedQuery}?autoplay=true")
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    shape = RoundedCornerShape(50), 
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Icon(Icons.Rounded.PlayArrow, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Play")
+                }
             }
         }
     }
