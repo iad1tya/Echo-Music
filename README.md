@@ -155,7 +155,9 @@ Only analytics data is collected to help improve your experience. Crash reports 
   </a>
 </div>
 
-### Cryptocurrency
+---
+
+## Cryptocurrency
 <div align="center">
   <table>
     <tr>
