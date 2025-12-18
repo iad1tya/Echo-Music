@@ -1,0 +1,1 @@
+<p><i>Audire</i> identifies the music playing near you and shows you the details. The app also saves a history of songs it identified for you in the past, so you can look up all songs later at your convenience as well.</p><p>For identification, <i>Audire</i> currently uses the APIs of Shazam.</p>

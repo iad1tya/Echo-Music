@@ -183,7 +183,9 @@ dependencies {
     implementation(libs.compose.ui.util)
     implementation(libs.compose.ui.tooling)
     implementation(libs.compose.animation)
+    implementation(libs.compose.animation)
     implementation(libs.compose.reorderable)
+    implementation("androidx.compose.material:material-icons-extended:1.7.6")
 
     implementation(libs.viewmodel)
     implementation(libs.viewmodel.compose)
@@ -242,4 +244,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
+    
+    // Music Recognition
+    implementation("com.github.f4b6a3:uuid-creator:6.1.1")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }

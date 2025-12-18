@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_nav_graph"
+    app:startDestination="@id/identifyFragment">
+
+    <fragment
+        android:id="@+id/identifyFragment"
+        android:name="com.alexmercerind.audire.ui.IdentifyFragment"
+        android:label="fragment_identify"
+        tools:layout="@layout/fragment_identify" >
+        <action
+            android:id="@+id/action_identifyFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+        <action
+            android:id="@+id/action_identifyFragment_to_likedFragment"
+            app:destination="@id/likedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.alexmercerind.audire.ui.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/action_historyFragment_to_identifyFragment"
+            app:destination="@id/identifyFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_likedFragment"
+            app:destination="@id/likedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/likedFragment"
+        android:name="com.alexmercerind.audire.ui.LikedFragment"
+        android:label="fragment_liked"
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/action_likedFragment_to_identifyFragment"
+            app:destination="@id/identifyFragment" />
+        <action
+            android:id="@+id/action_likedFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+    </fragment>
+</navigation>

@@ -13,6 +13,7 @@
     <string name="artists">Artists</string>
     <string name="albums">Albums</string>
     <string name="playlists">Playlists</string>
+    <string name="find_song">Find</string>
 
     <!-- Top bar -->
     <plurals name="n_selected">

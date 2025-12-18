@@ -1,0 +1,19 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.Audire" parent="Theme.Material3Expressive.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/TextAppearance.Material3.HeadlineSmall</item>
+        <item name="colorAboutTileBg">?attr/colorPrimaryInverse</item>
+        <item name="colorAboutTileFg0">?attr/colorOnSurface</item>
+        <item name="colorAboutTileFg1">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <style name="Base.Theme.Audire.MaterialAlertDialog" parent="ThemeOverlay.Material3Expressive.MaterialAlertDialog.Centered">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/TextAppearance.Material3.HeadlineSmall</item>
+    </style>
+
+    <style name="Theme.Audire" parent="Base.Theme.Audire" />
+</resources>

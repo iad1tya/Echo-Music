@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.Audire" parent="Theme.Material3Expressive.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:navigationBarColor">@color/transparent</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorAboutTileBg">?attr/colorPrimary</item>
+        <item name="colorAboutTileFg0">?attr/colorOnPrimary</item>
+        <item name="colorAboutTileFg1">?attr/colorPrimaryContainer</item>
+    </style>
+
+    <style name="Theme.Audire" parent="Base.Theme.Audire" />
+</resources>

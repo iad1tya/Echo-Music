@@ -40,7 +40,14 @@ sealed class Screens(
         route = "settings"
     )
 
+    object Find : Screens(
+        titleId = R.string.find_song,
+        iconIdInactive = R.drawable.mic,
+        iconIdActive = R.drawable.mic,
+        route = "find"
+    )
+
     companion object {
-        val MainScreens = listOf(Home, Search, Library)
+        val MainScreens = listOf(Home, Search, Find, Library)
     }
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- https://stackoverflow.com/questions/26780046/menuitem-tinting-on-appcompat-toolbar#comment101591006_54961263 -->
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/baseline_search_24"
+        android:title="@string/search"
+        app:iconTint="?attr/colorOnSurfaceVariant"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="@string/settings"
+        app:iconTint="?attr/colorOnSurfaceVariant"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/about"
+        android:icon="@drawable/baseline_info_24"
+        android:title="@string/about"
+        app:iconTint="?attr/colorOnSurfaceVariant"
+        app:showAsAction="never" />
+</menu>
