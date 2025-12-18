@@ -133,17 +133,6 @@ Only analytics data is collected to help improve your experience. Crash reports 
 
 ---
 
-## Supporter
-<div align="center">
-  <p><strong>Thank you to the supporters who contributed a small amount and believed in this project — your support keeps Echo Music going.</strong></p>
-  <img src="assets/Supporter/EM.png" alt="Emagik" width="90"/>
-  <img src="assets/Supporter/AdamPoy.png" alt="AdamPoy" width="90"/>
-  <br>
-  <p><strong>Emagik</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>AdamPoy</strong></p>
-</div>
-
----
-
 ## Community
 <div align="center">
   <a href="https://discord.com/invite/eNFNHaWN97">
