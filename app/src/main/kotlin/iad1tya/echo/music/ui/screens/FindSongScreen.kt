@@ -45,6 +45,7 @@ import iad1tya.echo.music.recognition.RecognitionState
 import iad1tya.echo.music.ui.theme.extractThemeColor
 import kotlinx.coroutines.delay
 import iad1tya.echo.music.LocalPlayerConnection
+import iad1tya.echo.music.utils.rememberPreference
 
 @Composable
 fun FindSongScreen(
@@ -56,7 +57,7 @@ fun FindSongScreen(
     val context = LocalContext.current
     val playerConnection = LocalPlayerConnection.current ?: return
     var hasStartedListening by remember { mutableStateOf(false) }
-
+    
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
