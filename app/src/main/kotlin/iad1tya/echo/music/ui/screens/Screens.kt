@@ -42,8 +42,8 @@ sealed class Screens(
 
     object Find : Screens(
         titleId = R.string.find_song,
-        iconIdInactive = R.drawable.mic,
-        iconIdActive = R.drawable.mic,
+        iconIdInactive = R.drawable.graphic_eq,
+        iconIdActive = R.drawable.graphic_eq,
         route = "find"
     )
 
