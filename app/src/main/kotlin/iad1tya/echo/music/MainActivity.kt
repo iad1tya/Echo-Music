@@ -656,20 +656,25 @@ class MainActivity : ComponentActivity() {
                         navBackStackEntry?.destination?.route == "ambient_mode"
                     }
 
-                    val shouldShowSearchBar = remember(active, navBackStackEntry) {
-                        active ||
-                                navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } ||
-                                inSearchScreen
+                    val isFindScreen = remember(navBackStackEntry) {
+                        navBackStackEntry?.destination?.route == Screens.Find.route
                     }
 
-                    val shouldShowNavigationBar = remember(navBackStackEntry, active, isAmbientMode) {
-                        !isAmbientMode
+                    val shouldShowSearchBar = remember(active, navBackStackEntry, isFindScreen) {
+                        active ||
+                                navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } ||
+                                inSearchScreen ||
+                                (active && !isFindScreen) 
+                    }
+
+                    val shouldShowNavigationBar = remember(navBackStackEntry, active, isAmbientMode, isFindScreen) {
+                        !isAmbientMode && !isFindScreen
                     }
 
                     val isLandscape = remember(configuration) {
                         configuration.screenWidthDp > configuration.screenHeightDp
                     }
-                    val showRail = isLandscape && !inSearchScreen && !isAmbientMode
+                    val showRail = isLandscape && !inSearchScreen && !isAmbientMode && !isFindScreen
 
                     val getNavPadding: () -> Dp = remember {
                         {
@@ -707,7 +712,7 @@ class MainActivity : ComponentActivity() {
                         if (shouldShowNavigationBar && !showRail) {
                             bottom += NavigationBarHeight
                         }
-                        if (!playerBottomSheetState.isDismissed) bottom += MiniPlayerHeight
+                        if (!playerBottomSheetState.isDismissed && !isFindScreen) bottom += MiniPlayerHeight
                         windowsInsets
                             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                             .add(WindowInsets(top = AppBarHeight, bottom = bottom))
@@ -1200,7 +1205,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             bottomBar = {
-                                if (!isAmbientMode) {
+                                if (!isAmbientMode && !isFindScreen) {
                                     if (!showRail) {
                                     Box {
                                         BottomSheetPlayer(
@@ -1410,7 +1415,9 @@ class MainActivity : ComponentActivity() {
                                                     it.route == initialState.destination.route
                                                 }
 
-                                                if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex)
+                                                if (targetState.destination.route == Screens.Find.route) {
+                                                    fadeIn(animationSpec = tween(300))
+                                                } else if (currentRouteIndex == -1 || currentRouteIndex > previousRouteIndex)
                                                     slideInHorizontally(
                                                         initialOffsetX = { it / 4 },
                                                         animationSpec = tween(250, easing = FastOutSlowInEasing)
@@ -1434,7 +1441,9 @@ class MainActivity : ComponentActivity() {
                                                     it.route == targetState.destination.route
                                                 }
 
-                                                if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex)
+                                                if (initialState.destination.route == Screens.Find.route) {
+                                                    fadeOut(animationSpec = tween(300))
+                                                } else if (targetRouteIndex == -1 || targetRouteIndex > currentRouteIndex)
                                                     slideOutHorizontally(
                                                         targetOffsetX = { -it / 4 },
                                                         animationSpec = tween(200, easing = FastOutLinearInEasing)
@@ -1458,7 +1467,9 @@ class MainActivity : ComponentActivity() {
                                                     it.route == initialState.destination.route
                                                 }
 
-                                                if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex)
+                                                if (targetState.destination.route == Screens.Find.route) {
+                                                    fadeIn(animationSpec = tween(300))
+                                                } else if (previousRouteIndex != -1 && previousRouteIndex < currentRouteIndex)
                                                     slideInHorizontally(
                                                         initialOffsetX = { it / 4 },
                                                         animationSpec = tween(250, easing = FastOutSlowInEasing)
@@ -1482,7 +1493,9 @@ class MainActivity : ComponentActivity() {
                                                     it.route == targetState.destination.route
                                                 }
 
-                                                if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex)
+                                                if (initialState.destination.route == Screens.Find.route) {
+                                                    fadeOut(animationSpec = tween(300))
+                                                } else if (currentRouteIndex != -1 && currentRouteIndex < targetRouteIndex)
                                                     slideOutHorizontally(
                                                         targetOffsetX = { -it / 4 },
                                                         animationSpec = tween(200, easing = FastOutLinearInEasing)

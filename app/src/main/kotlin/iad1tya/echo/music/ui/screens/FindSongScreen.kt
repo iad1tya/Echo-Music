@@ -4,48 +4,41 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Mic
-import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import iad1tya.echo.music.recognition.MusicRecognitionViewModel
 import iad1tya.echo.music.recognition.RecognitionState
+import iad1tya.echo.music.ui.component.NavigationTitle
+import kotlinx.coroutines.delay
 
 @Composable
 fun FindSongScreen(
@@ -54,125 +47,288 @@ fun FindSongScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    var hasPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
+    var hasStartedListening by remember { mutableStateOf(false) }
 
-    val launcher = rememberLauncherForActivityResult(
+    val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        hasPermission = isGranted
-        if (isGranted) {
+    ) { isGranted ->
+        if (isGranted && !hasStartedListening) {
             viewModel.startListening()
+            hasStartedListening = true
         }
     }
 
     LaunchedEffect(Unit) {
-        if (!hasPermission) {
-            launcher.launch(Manifest.permission.RECORD_AUDIO)
-        } else {
-            viewModel.startListening()
-        }
-    }
-    
-    LaunchedEffect(state) {
-        if (state is RecognitionState.Success) {
-            val track = (state as RecognitionState.Success).track
-            val query = "${track.title} ${track.subtitle}"
-            val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
-            // Navigate to Search with correct route format
-            navController.navigate("search/${encodedQuery}") {
-                 popUpTo(Screens.Find.route) { inclusive = true }
+        if (!hasStartedListening) {
+            delay(300) // Wait for transition animation to finish
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                viewModel.startListening()
+                hasStartedListening = true
+            } else {
+                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .windowInsetsPadding(
+                    iad1tya.echo.music.LocalPlayerAwareWindowInsets.current
+                        .only(androidx.compose.foundation.layout.WindowInsetsSides.Bottom)
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            ListeningAnimation(isListening = state is RecognitionState.Listening)
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            Text(
-                text = when (state) {
-                    is RecognitionState.Idle -> "Tap to listen"
-                    is RecognitionState.Listening -> "Listening..."
-                    is RecognitionState.Success -> "Song Found!"
-                    is RecognitionState.Error -> (state as RecognitionState.Error).message
-                },
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            
-            if (state is RecognitionState.Error) {
-                 Spacer(modifier = Modifier.height(16.dp))
-                 IconButton(onClick = { viewModel.startListening() }) {
-                     Icon(Icons.Rounded.Mic, contentDescription = "Retry")
-                 }
+            when (val currentState = state) {
+                is RecognitionState.Idle, is RecognitionState.Listening -> {
+                    ListeningView(isListening = currentState is RecognitionState.Listening)
+                }
+                is RecognitionState.Success -> {
+                    SuccessView(
+                        track = currentState.track,
+                        navController = navController
+                    )
+                }
+                is RecognitionState.Error -> {
+                    ErrorView(
+                        message = currentState.message,
+                        onRetry = { viewModel.startListening() }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun ListeningAnimation(isListening: Boolean) {
-    val infiniteTransition = rememberInfiniteTransition(label = "ripple")
+private fun ListeningView(isListening: Boolean) {
+    // Pulse Animation
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = if (isListening) 2f else 1f,
+        targetValue = 1.3f,
         animationSpec = infiniteRepeatable(
             animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Reverse
         ),
         label = "scale"
     )
-    
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.5f,
-        targetValue = if (isListening) 0f else 0.5f,
+        targetValue = 0.1f,
         animationSpec = infiniteRepeatable(
             animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Reverse
         ),
         label = "alpha"
     )
 
-    Box(contentAlignment = Alignment.Center) {
-        if (isListening) {
-             Box(
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(32.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (isListening) {
+                // Outer Pulse
+                Box(
+                    modifier = Modifier
+                        .size(160.dp)
+                        .scale(scale)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
+                )
+                // Inner Pulse
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .scale(scale * 0.9f)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha * 1.5f))
+                )
+            }
+            
+            // Icon Background
+            Box(
                 modifier = Modifier
                     .size(100.dp)
-                    .scale(scale)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        )
+                    )
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (isListening) Icons.Rounded.GraphicEq else Icons.Rounded.Mic,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(48.dp))
+        
+        Text(
+            text = if (isListening) "Listening..." else "Tap to start",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Make sure your device can hear the music",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
+}
+
+@Composable
+private fun SuccessView(
+    track: iad1tya.echo.music.recognition.Track,
+    navController: NavController
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp)
+    ) {
+        // Album Art
+        Card(
+            modifier = Modifier
+                .size(280.dp)
+                .padding(8.dp),
+            shape = RoundedCornerShape(32.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(track.images?.coverarthq ?: track.images?.coverart)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Cover Art",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
         }
         
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        // Title & Artist
+        Text(
+            text = track.title ?: "Unknown Title",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = track.subtitle ?: "Unknown Artist",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        
+        Spacer(modifier = Modifier.height(48.dp))
+        
+        // Actions
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Rounded.MusicNote,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            val query = "${track.title} ${track.subtitle}"
+            val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+
+            OutlinedButton(
+                onClick = {
+                    navController.navigate("search/${encodedQuery}?autoplay=false")
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                shape = RoundedCornerShape(50) // Pill shape
+            ) {
+                Icon(Icons.Rounded.Search, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Search")
+            }
+            
+            Button(
+                onClick = {
+                    navController.navigate("search/${encodedQuery}?autoplay=true")
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                shape = RoundedCornerShape(50), // Pill shape
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(Icons.Rounded.PlayArrow, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Play")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorView(
+    message: String,
+    onRetry: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(32.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.ErrorOutline,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Could not identify song",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onRetry,
+            shape = RoundedCornerShape(50),
+            modifier = Modifier.height(48.dp)
+        ) {
+            Text("Try Again")
         }
     }
 }

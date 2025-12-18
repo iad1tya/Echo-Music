@@ -30,6 +30,7 @@ constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     val query = savedStateHandle.get<String>("query")!!
+    var autoplay by mutableStateOf(savedStateHandle.get<Boolean>("autoplay") ?: false)
     val filter = MutableStateFlow<YouTube.SearchFilter?>(null)
     var summaryPage by mutableStateOf<SearchSummaryPage?>(null)
     val viewStateMap = mutableStateMapOf<String, ItemsPage?>()

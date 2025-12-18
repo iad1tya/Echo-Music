@@ -104,6 +104,29 @@ fun OnlineSearchResult(
         }
     }
 
+    LaunchedEffect(searchSummary, viewModel.autoplay) {
+        if (viewModel.autoplay && searchSummary != null) {
+            val item = searchSummary!!.summaries.flatMap { it.items }
+                .firstOrNull { it is SongItem } // Prioritize SongItem
+                ?: searchSummary!!.summaries.flatMap { it.items }.firstOrNull() // Fallback to any
+
+            if (item != null) {
+                if (item is SongItem) {
+                     if (item.id != mediaMetadata?.id) {
+                         playerConnection.playQueue(
+                             YouTubeQueue(
+                                 WatchEndpoint(videoId = item.id),
+                                 item.toMediaMetadata()
+                             )
+                         )
+                     }
+                }
+                // Mark consumed
+                viewModel.autoplay = false
+            }
+        }
+    }
+
     val ytItemContent: @Composable LazyItemScope.(YTItem) -> Unit = { item: YTItem ->
         val longClick = {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)

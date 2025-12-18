@@ -129,11 +129,15 @@ fun NavGraphBuilder.navigationBuilder(
         )
     }
     composable(
-        route = "search/{query}",
+        route = "search/{query}?autoplay={autoplay}",
         arguments =
         listOf(
             navArgument("query") {
                 type = NavType.StringType
+            },
+            navArgument("autoplay") {
+                type = NavType.BoolType
+                defaultValue = false
             },
         ),
         enterTransition = {
