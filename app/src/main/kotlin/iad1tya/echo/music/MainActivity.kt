@@ -22,6 +22,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.datastore.preferences.core.edit
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateDpAsState
@@ -154,6 +155,9 @@ import com.echo.innertube.models.WatchEndpoint
 import iad1tya.echo.music.constants.AppBarHeight
 import iad1tya.echo.music.constants.AppLanguageKey
 import iad1tya.echo.music.constants.CheckForUpdatesKey
+import iad1tya.echo.music.constants.LastImportantNoticeVersionKey
+import iad1tya.echo.music.constants.LastLibSongSyncKey
+import iad1tya.echo.music.constants.LastLikeSongSyncKey
 import iad1tya.echo.music.constants.DarkModeKey
 import iad1tya.echo.music.constants.DefaultOpenTabKey
 import iad1tya.echo.music.constants.DisableScreenshotKey
@@ -185,6 +189,7 @@ import iad1tya.echo.music.ui.component.AccountSettingsDialog
 import iad1tya.echo.music.ui.component.BottomSheetMenu
 import iad1tya.echo.music.ui.component.BottomSheetPage
 import iad1tya.echo.music.ui.component.IconButton
+import iad1tya.echo.music.ui.component.ImportantNoticeDialog
 import iad1tya.echo.music.ui.component.LocalBottomSheetPageState
 import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.TopSearch
@@ -1591,6 +1596,28 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
+                    }
+
+                    val lastNoticeVersion by rememberPreference(LastImportantNoticeVersionKey, defaultValue = "")
+                    var showNoticeDialog by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(Unit) {
+                        if (lastNoticeVersion != BuildConfig.VERSION_NAME) {
+                            showNoticeDialog = true
+                        }
+                    }
+
+                    if (showNoticeDialog) {
+                        ImportantNoticeDialog(
+                            onDismiss = {
+                                showNoticeDialog = false
+                                lifecycleScope.launch(Dispatchers.IO) {
+                                    dataStore.edit {
+                                        it[LastImportantNoticeVersionKey] = BuildConfig.VERSION_NAME
+                                    }
+                                }
+                            }
+                        )
                     }
 
                     LaunchedEffect(Unit) {

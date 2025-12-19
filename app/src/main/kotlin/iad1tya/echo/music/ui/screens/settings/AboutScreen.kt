@@ -259,7 +259,7 @@ fun AboutScreen(
                     icon = painterResource(R.drawable.discord),
                     title = "Discord",
                     subtitle = "Join our community",
-                    onClick = { uriHandler.openUri("https://discord.gg/2FGz83M3r6") }
+                    onClick = { uriHandler.openUri("https://discord.gg/EcfV3AxH5c") }
                 )
                 
                 HorizontalDivider(
