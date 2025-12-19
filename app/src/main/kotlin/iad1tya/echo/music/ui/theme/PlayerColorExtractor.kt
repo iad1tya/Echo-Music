@@ -67,6 +67,48 @@ object PlayerColorExtractor {
     }
 
     /**
+     * Extracts a rich palette of 4 colors for the animated gradient background
+     */
+    suspend fun extractRichGradientColors(
+        palette: Palette,
+        fallbackColor: Int
+    ): List<Color> = withContext(Dispatchers.Default) {
+        
+        // Extract all available colors
+        val dominant = palette.dominantSwatch?.let { Color(it.rgb) }
+        val vibrant = palette.vibrantSwatch?.let { Color(it.rgb) }
+        val darkVibrant = palette.darkVibrantSwatch?.let { Color(it.rgb) }
+        val lightVibrant = palette.lightVibrantSwatch?.let { Color(it.rgb) }
+        val muted = palette.mutedSwatch?.let { Color(it.rgb) }
+        val darkMuted = palette.darkMutedSwatch?.let { Color(it.rgb) }
+        
+        val fallback = Color(fallbackColor)
+        val defaultColor = dominant ?: fallback
+
+        // Helper to get a valid color or fallback, possibly enhancing it
+        fun getColor(color: Color?, enhance: Boolean = true): Color {
+            return if (color != null) {
+                if (enhance) enhanceColorVividness(color, 1.2f) else color
+            } else {
+                enhanceColorVividness(defaultColor, 1.1f)
+            }
+        }
+
+        // We want a rich mix of colors. 
+        // 1. Primary base (Dominant or Vibrant)
+        // 2. Secondary accent (Vibrant or Light Vibrant)
+        // 3. Tertiary depth (Dark Vibrant or Dark Muted)
+        // 4. Quaternary highlight (Light Vibrant or Muted)
+        
+        val c1 = if (vibrant != null) getColor(vibrant) else getColor(dominant)
+        val c2 = if (darkVibrant != null) getColor(darkVibrant) else getColor(muted).copy(alpha = 0.8f)
+        val c3 = if (lightVibrant != null) getColor(lightVibrant) else getColor(dominant).copy(alpha = 0.6f)
+        val c4 = if (dominant != null && dominant != c1) getColor(dominant) else c1.copy(red = c1.red * 0.8f)
+
+        listOf(c1, c2, c3, c4)
+    }
+
+    /**
      * Determines if a color is vibrant enough for use in player UI
      * 
      * @param color The color to analyze

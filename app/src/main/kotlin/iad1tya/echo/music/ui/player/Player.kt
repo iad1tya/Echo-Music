@@ -141,6 +141,7 @@ import iad1tya.echo.music.extensions.toggleRepeatMode
 import iad1tya.echo.music.models.MediaMetadata
 import iad1tya.echo.music.ui.component.BottomSheet
 import iad1tya.echo.music.ui.component.BottomSheetState
+import iad1tya.echo.music.ui.component.AnimatedGradientBackground
 import iad1tya.echo.music.ui.component.LocalBottomSheetPageState
 import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.PlayerSliderTrack
@@ -278,7 +279,7 @@ fun BottomSheetPlayer(
                                     .resizeBitmapArea(100 * 100)
                                     .generate()
                             }
-                            val extractedColors = PlayerColorExtractor.extractGradientColors(
+                            val extractedColors = PlayerColorExtractor.extractRichGradientColors(
                                 palette = palette,
                                 fallbackColor = fallbackColor
                             )
@@ -467,26 +468,11 @@ fun BottomSheetPlayer(
                             label = "gradientBackground"
                         ) { colors ->
                             if (colors.isNotEmpty()) {
-                                val gradientColorStops = if (colors.size >= 2) {
-                                    arrayOf(
-                                        0.0f to colors[0],
-                                        1.0f to colors[1]
-                                    )
-                                } else {
-                                    arrayOf(
-                                        0.0f to colors[0],
-                                        1.0f to colors[0].copy(
-                                            red = (colors[0].red * 0.7f).coerceAtLeast(0f),
-                                            green = (colors[0].green * 0.7f).coerceAtLeast(0f),
-                                            blue = (colors[0].blue * 0.7f).coerceAtLeast(0f)
-                                        )
-                                    )
-                                }
-                                Box(
-                                    Modifier
+                                AnimatedGradientBackground(
+                                    colors = colors,
+                                    modifier = Modifier
                                         .fillMaxSize()
                                         .alpha(backgroundAlpha)
-                                        .background(Brush.verticalGradient(colorStops = gradientColorStops))
                                 )
                             }
                         }
