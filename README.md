@@ -92,7 +92,7 @@ If you find this project useful, consider supporting its development.
 <div align="center">
   <a href="https://buymeacoffee.com/iad1tya"><img src="assets/bmac.png" width="140"/></a>
   <a href="https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=iad1tya@upi&pn=Aditya%20Yadav&am=&tn=Thank%20You"><img src="assets/upi.svg" width="100"/></a>
-  <a href="https://www.patreon.com/cw/iad1tya"><img src="assets/patreon2.png" width="100"/></a>
+  <a href="https://www.patreon.com/cw/iad1tya"><img src="assets/patreon3.png" width="100"/></a>
 </div>
 
 ### Cryptocurrency Addresses
