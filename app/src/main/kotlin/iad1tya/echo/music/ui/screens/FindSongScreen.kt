@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +46,8 @@ import iad1tya.echo.music.recognition.RecognitionState
 import iad1tya.echo.music.ui.theme.extractThemeColor
 import kotlinx.coroutines.delay
 import iad1tya.echo.music.LocalPlayerConnection
+import iad1tya.echo.music.ui.component.AnimatedGradientBackground
+import iad1tya.echo.music.ui.theme.PlayerColorExtractor
 import iad1tya.echo.music.utils.rememberPreference
 
 @Composable
@@ -214,14 +217,7 @@ private fun SuccessView(
     onPlay: () -> Unit
 ) {
     val context = LocalContext.current
-    var backgroundColor by remember { mutableStateOf(Color.Black) }
-    
-    // Animate background color
-    val animatedBackgroundColor by animateColorAsState(
-        targetValue = backgroundColor,
-        animationSpec = tween(durationMillis = 1000),
-        label = "backgroundColor"
-    )
+    var paletteColorList by remember { mutableStateOf(emptyList<Color>()) }
 
     // Load image and extract color
     LaunchedEffect(track) {
@@ -234,9 +230,12 @@ private fun SuccessView(
             
             val result = coil3.ImageLoader(context).execute(request)
             result.image?.toBitmap()?.let { bitmap ->
-                 // Use a darker shade of the extracted color for the background
-                val extractedColor = bitmap.extractThemeColor()
-                backgroundColor = extractedColor.copy(alpha = 0.6f)
+                 // Use PlayerColorExtractor to get rich colors
+                 val palette = androidx.palette.graphics.Palette.from(bitmap).generate()
+                 paletteColorList = PlayerColorExtractor.extractRichGradientColors(
+                     palette = palette,
+                     fallbackColor = Color.Black.toArgb()
+                 )
             }
         }
     }
@@ -244,17 +243,13 @@ private fun SuccessView(
     // Main Container with Animated Background
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        animatedBackgroundColor,
-                        Color.Black
-                    )
-                )
-            ),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
+        AnimatedGradientBackground(
+            colors = paletteColorList,
+            modifier = Modifier.fillMaxSize()
+        )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
