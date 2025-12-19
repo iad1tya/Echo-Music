@@ -68,6 +68,9 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import iad1tya.echo.music.ui.component.AnimatedGradientBackground
+import iad1tya.echo.music.ui.theme.PlayerColorExtractor
+import androidx.compose.ui.graphics.toArgb
 import iad1tya.echo.music.db.entities.LyricsEntity
 import iad1tya.echo.music.di.LyricsHelperEntryPoint
 import iad1tya.echo.music.LocalDatabase
@@ -98,13 +101,8 @@ fun AmbientModeScreen(
     val (isDullBackground, onDullBackgroundChange) = rememberPreference(AmbientModeDullBackgroundKey, false)
     val (isSongAccent, onSongAccentChange) = rememberPreference(AmbientModeSongAccentKey, false)
     
-    // Extract song accent color
-    var accentColor by remember { mutableStateOf(Color.Black) }
-    val animatedAccentColor by animateColorAsState(
-        targetValue = accentColor,
-        animationSpec = tween(durationMillis = 1000),
-        label = "accentColor"
-    )
+    // Extract song accent colors
+    var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
     
     LaunchedEffect(mediaMetadata?.thumbnailUrl, isSongAccent) {
         if (isSongAccent && mediaMetadata?.thumbnailUrl != null) {
@@ -115,13 +113,20 @@ fun AmbientModeScreen(
                     .build()
                 val result = context.imageLoader.execute(request)
                 result.image?.toBitmap()?.let { bitmap ->
-                    accentColor = bitmap.extractThemeColor().copy(alpha = 0.3f)
+                    val palette = androidx.palette.graphics.Palette.from(bitmap)
+                        .maximumColorCount(32)
+                        .generate()
+                    
+                    gradientColors = PlayerColorExtractor.extractRichGradientColors(
+                        palette = palette,
+                        fallbackColor = Color.Black.toArgb()
+                    )
                 }
             } catch (e: Exception) {
-                accentColor = Color.Black
+                gradientColors = emptyList()
             }
         } else {
-            accentColor = Color.Black
+            gradientColors = emptyList()
         }
     }
 
@@ -192,7 +197,7 @@ fun AmbientModeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(if (isSongAccent) animatedAccentColor else Color.Black)
+            .background(Color.Black)
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onDragEnd = { totalDrag = 0f },
@@ -216,6 +221,14 @@ fun AmbientModeScreen(
                 }
             }
     ) {
+        if (isSongAccent && gradientColors.isNotEmpty()) {
+            AnimatedGradientBackground(
+                colors = gradientColors,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.6f) // Slightly dimmed for ambient mode
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxSize()
