@@ -173,7 +173,7 @@ fun Queue(
         }
     }
 
-    var locked by rememberPreference(QueueEditLockKey, defaultValue = true)
+    var locked by rememberPreference(QueueEditLockKey, defaultValue = false)
 
     val (useNewPlayerDesign, onUseNewPlayerDesignChange) = rememberPreference(
         UseNewPlayerDesignKey,
