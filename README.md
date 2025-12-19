@@ -1,27 +1,19 @@
 <div align="center">
-  <img src="assets/Echo_github.png" alt="Echo Music Logo" width="150"/>
-</div>
-
-<div align="center">
+  <img src="assets/Echo_github.png" alt="Echo Music Logo" width="140"/>
   <h1>Echo Music</h1>
-  <p><strong>A modern music streaming app with adfree experience, synced lyrics, and offline playback.</strong></p>
-</div>
+  <p><strong>A robust, open-source music streaming client offering an ad-free experience, offline capabilities, and advanced music discovery.</strong></p>
 
-<div align="center">
-  <a href="https://echomusic.fun/download">
-    <img src="assets/download.png" alt="Direct Download" width="220"/>
-  </a>
+  <a href="https://echomusic.fun/download"><img src="assets/download.png" alt="Download" width="200"/></a>
   <br>
-    <a href="https://github.com/iad1tya/Echo-Music/releases" style="text-decoration: none;">
-    <img src="assets/github.png" alt="Github Releases" width="170"/>
-  </a>
-    <br>
-  <a href="https://echomusic.fun/obtainium">
-    <img src="assets/obtainium.png" alt="Add to Obtainium" width="215"/>
-  </a>
+  <a href="https://github.com/iad1tya/Echo-Music/releases"><img src="assets/github.png" alt="Releases" width="160"/></a>
+  <a href="https://echomusic.fun/obtainium"><img src="assets/obtainium.png" alt="Obtainium" width="200"/></a>
 </div>
 
 ---
+
+## Overview
+
+Echo Music is designed to provide a seamless and premium music listening experience. It leverages the vast library of YouTube Music while eliminating advertisements and adding powerful features such as offline downloads, real-time lyrics, and environment-aware music recognition.
 
 ## Screenshots
 
@@ -32,163 +24,91 @@
   <img src="assets/Screenshots/sc_4.png" alt="Settings" width="200"/>
 </div>
 
----
+## Features
 
-## Key Features
+### Streaming and Playback
+*   **Ad-Free Experience:** Stream music without interruptions from advertisements.
+*   **seamless Playback:** Switch effortlessly between audio-only and video modes.
+*   **Background Playback:** Continue listening while using other applications or when the screen is off.
+*   **Offline Mode:** Download tracks, albums, and playlists for offline listening with a dedicated download manager.
 
-### Music Streaming
+### Discovery and Echo Find
+*   **Echo Find:** Identify songs playing in your surroundings instantly using advanced audio recognition.
+*   **Smart Recommendations:** Receive personalized song suggestions based on your listening history and preferences.
+*   **Comprehensive Browsing:** Explore Charts, Podcasts, Moods, and Genres to discover new music.
 
-* **YouTube Music Integration:** Stream music seamlessly from YouTube Music.
-* **Video/Audio Playback:** Switch effortlessly between video and audio modes.
-* **Background Playback:** Continue listening while using other apps.
-* **Offline Playback:** Download songs for offline listening.
-
-### Discovery and Search
-
-* **Smart Search:** Powerful search across YouTube Music.
-* **Best Recommendations:** Personalized song suggestions based on your listening habits.
-* **Browsing:** Explore curated categories such as Home, Charts, Podcasts, Moods, and Genres.
-* **Recently Played:** Access your recent tracks instantly.
-
-### Advanced Features
-
-* **Synced Lyrics:** Real-time lyric display with translation support.
-* **AI Lyrics Translation:** Translate lyrics with the help of AI, powered by OpenRouter.
-* **Playlist Management:** Create, edit, sync, and organize playlists with intuitive long-press actions.
-* **Sleep Timer:** Automatically stop playback after a set duration.
-* **Widgets:** Quick access from your home screen.
-* **DLNA/UPnP Support:** Stream music to compatible network devices (Smart TVs, speakers, etc.). [Learn more](DLNA_SETUP.md)
-* **Chromecast:** Cast to Chromecast-enabled devices.
+### Advanced Capabilities
+*   **Synchronized Lyrics:** View real-time synced lyrics. Includes AI-powered translation for multilingual support.
+*   **Sleep Timer:** Configure automatic playback cessation after a specified duration.
+*   **Cross-Device Support:** Cast content to Chromecast-enabled devices or stream via DLNA/UPnP to compatible network speakers and TVs.
+*   **Data Import:** Import playlists and library data from other services.
 
 ---
 
 ## Installation
 
-### Option 1: Download Pre-Built APK
-
-1. Visit the [Releases Page](https://github.com/iad1tya/Echo-Music/releases/latest).
-2. Download the latest APK file.
-3. Install it on your Android device.
+### Option 1: Direct Download (APK)
+Download the latest Android Package Kit (APK) from the [Releases Page](https://github.com/iad1tya/Echo-Music/releases/latest).
 
 ### Option 2: Build from Source
+To build the application locally, follow these steps:
 
-1. **Clone the Repository**
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/iad1tya/Echo-Music.git
+    cd Echo-Music
+    ```
 
-   ```bash
-   git clone https://github.com/iad1tya/Echo-Music.git
-   cd Echo-Music
-   ```
+2.  **Configure Android SDK**
+    Create a `local.properties` file and define your SDK path:
+    ```bash
+    echo "sdk.dir=/path/to/your/android/sdk" > local.properties
+    ```
 
-2. **Configure Android SDK**
+3.  **Firebase Configuration**
+    Firebase setup is required for analytics and reliable imports. Please refer to [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed instructions on adding your `google-services.json`.
 
-   ```bash
-   cp local.properties.example local.properties
-   ```
-
-   Update `local.properties` with your Android SDK path:
-
-   ```properties
-   sdk.dir=/path/to/your/android/sdk
-   ```
-
-3. **Configure Firebase (Required)**
-
-   Firebase Analytics and Crashlytics are required for building the app.
-   
-   ```bash
-   cp app/google-services.json.template app/google-services.json
-   ```
-
-   Edit `app/google-services.json` and replace placeholders with your Firebase project credentials.
-   
-   📖 **Detailed instructions:** See [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
-
-4. **Build the Project**
-
-   ```bash
-   ./gradlew assembleFossDebug
-   ```
+4.  **Build**
+    Execute the Gradle build command:
+    ```bash
+    ./gradlew assembleFossDebug
+    ```
 
 ---
 
-## License
+## Community and Support
 
-This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
-See the [LICENSE](LICENSE) file for details.
+Join our community for updates, support, and discussions.
 
----
-
-## Privacy
-
-Echo Music is designed with user privacy in mind:
-Only analytics data is collected to help improve your experience. Crash reports may also be gathered for the same purpose. No personal information is collected.
-
----
-
-## Documentation
-
-* **Report Issues or Request Features:** [GitHub Issues](https://github.com/iad1tya/Echo-Music/issues)
-* **Additional Documentation:**
-  [CONTRIBUTING.md](CONTRIBUTING.md) | [PRIVACY_POLICY.md](PRIVACY_POLICY.md) | [SECURITY.md](SECURITY.md)
-
----
-
-## Community
 <div align="center">
-  <a href="https://discord.gg/EcfV3AxH5c">
-    <img src="assets/discord.png" alt="Discord" width="150"/>
-  </a>
-  <a href="https://t.me/EchoMusicApp">
-    <img src="assets/telegram.png" alt="UPI" width="140"/>
-  </a>
+  <a href="https://discord.gg/EcfV3AxH5c"><img src="assets/discord.png" width="140"/></a>
+  <a href="https://t.me/EchoMusicApp"><img src="assets/telegram.png" width="130"/></a>
 </div>
 
----
+### Support the Project
 
-## Support the Project
+If you find this project useful, consider supporting its development.
+
 <div align="center">
-  <a href="https://buymeacoffee.com/iad1tya">
-    <img src="assets/bmac.png" alt="Buy Me a Coffee" width="150"/>
-  </a>
-  <a href="https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=iad1tya@upi&pn=Aditya%20Yadav&am=&tn=Thank%20You%20so%20much%20for%20this%20support">
-    <img src="assets/upi.svg" alt="UPI" width="110"/>
-  </a>
+  <a href="https://buymeacoffee.com/iad1tya"><img src="assets/bmac.png" width="140"/></a>
+  <a href="https://intradeus.github.io/http-protocol-redirector/?r=upi://pay?pa=iad1tya@upi&pn=Aditya%20Yadav&am=&tn=Thank%20You"><img src="assets/upi.svg" width="100"/></a>
+  <a href="https://www.patreon.com/cw/iad1tya"><img src="assets/patreon2.png" width="100"/></a>
 </div>
 
----
-
-## Cryptocurrency
+### Cryptocurrency Addresses
 <div align="center">
   <table>
     <tr>
-      <td align="center">
-        <img src="assets/Bitcoin.jpeg" alt="Bitcoin QR" width="150"/>
-        <br>
-        <strong>Bitcoin</strong>
-        <br>
-        <code>bc1qcvyr7eekha8uytmffcvgzf4h7xy7shqzke35fy</code>
-      </td>
-      <td align="center">
-        <img src="assets/Ethereum.jpeg" alt="Ethereum QR" width="150"/>
-        <br>
-        <strong>Ethereum</strong>
-        <br>
-        <code>0x51bc91022E2dCef9974D5db2A0e22d57B360e700</code>
-      </td>
-      <td align="center">
-        <img src="assets/Solana.jpeg" alt="Solana QR" width="150"/>
-        <br>
-        <strong>Solana</strong>
-        <br>
-        <code>9wjca3EQnEiqzqgy7N5iqS1JGXJiknMQv6zHgL96t94S</code>
-      </td>
+      <td align="center"><strong>Bitcoin</strong><br><code>bc1qcvyr7eekha8uytmffcvgzf4h7xy7shqzke35fy</code></td>
+      <td align="center"><strong>Ethereum</strong><br><code>0x51bc91022E2dCef9974D5db2A0e22d57B360e700</code></td>
+      <td align="center"><strong>Solana</strong><br><code>9wjca3EQnEiqzqgy7N5iqS1JGXJiknMQv6zHgL96t94S</code></td>
     </tr>
   </table>
 </div>
 
+
 ---
 
 <div align="center">
-    <img src="assets/LMEB.gif"/>
-  </a>
+    Licensed under <a href="LICENSE">GPL-3.0</a>
 </div>
