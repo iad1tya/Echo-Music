@@ -240,6 +240,8 @@ class MusicService :
 
     private var consecutivePlaybackErr = 0
 
+    private val songUrlCache = java.util.concurrent.ConcurrentHashMap<String, Pair<String, Long>>()
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.action?.let { action ->
             when (action) {
@@ -1474,7 +1476,9 @@ class MusicService :
                  scope.launch(Dispatchers.IO) {
                      try {
                          Log.w("MusicService", "Potential cache corruption for $mediaId, clearing cache...")
+                         songUrlCache.remove(mediaId)
                          playerCache.removeResource(mediaId)
+                         downloadCache.removeResource(mediaId)
                      } catch (e: Exception) {
                          Log.e("MusicService", "Failed to clear cache for $mediaId", e)
                      }
@@ -1509,6 +1513,11 @@ class MusicService :
         
         // If URL expired, try to refresh and continue playback automatically
         if (isUrlExpiredError) {
+            // Clear the cached URL so ResolvingDataSource fetches a new one
+            if (mediaId != null) {
+                songUrlCache.remove(mediaId)
+            }
+
             val currentPosition = player.currentPosition
             val currentIndex = player.currentMediaItemIndex
             
@@ -1586,7 +1595,6 @@ class MusicService :
             .setFlags(FLAG_IGNORE_CACHE_ON_ERROR)
 
     private fun createDataSourceFactory(): DataSource.Factory {
-        val songUrlCache = HashMap<String, Pair<String, Long>>()
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             val mediaId = dataSpec.key ?: run {
                 Log.e("MusicService", "DataSpec has no media id key")
