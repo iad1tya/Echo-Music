@@ -22,6 +22,8 @@ Echo Music is designed to provide a seamless and premium music listening experie
   <img src="assets/Screenshots/sc_2.png" alt="Music Player" width="200"/>
   <img src="assets/Screenshots/sc_3.png" alt="Playlist Management" width="200"/>
   <img src="assets/Screenshots/sc_4.png" alt="Settings" width="200"/>
+  <img src="assets/Screenshots/sc_5.png" alt="Settings" width="200"/>
+  <img src="assets/Screenshots/sc_6.png" alt="Settings" width="200"/>
 </div>
 
 ## Features
