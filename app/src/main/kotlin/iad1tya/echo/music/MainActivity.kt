@@ -565,7 +565,6 @@ class MainActivity : ComponentActivity() {
                         when (intent?.action) {
                             ACTION_LIBRARY -> NavigationTab.LIBRARY
                             ACTION_SEARCH -> NavigationTab.SEARCH
-                            ACTION_FIND -> NavigationTab.FIND
                             else -> null
                         }
                     }
@@ -1591,6 +1590,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    LaunchedEffect(Unit) {
+                        if (intent?.action == ACTION_FIND) {
+                            navController.navigate(Screens.Find.route)
                         }
                     }
 
