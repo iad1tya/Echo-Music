@@ -82,6 +82,18 @@ fun FindSongScreen(
         }
     }
 
+    DisposableEffect(Unit) {
+        val wasPlaying = playerConnection.isPlaying.value
+        if (wasPlaying) {
+            playerConnection.player.pause()
+        }
+        onDispose {
+            if (wasPlaying) {
+                playerConnection.player.play()
+            }
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
