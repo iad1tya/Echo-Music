@@ -64,6 +64,7 @@ import androidx.media3.cast.CastPlayer
 import androidx.media3.cast.SessionAvailabilityListener
 import com.google.android.gms.cast.framework.CastContext
 import com.google.common.util.concurrent.MoreExecutors
+import java.util.concurrent.TimeUnit
 import com.echo.innertube.YouTube
 import com.echo.innertube.models.SongItem
 import com.echo.innertube.models.WatchEndpoint
@@ -1523,7 +1524,7 @@ class MusicService :
             
             scope.launch {
                 try {
-                    delay(300) // Brief delay before retry
+                    delay(100) // Brief delay before retry
                     
                     // Re-prepare the player which will force URL refresh
                     if (currentIndex >= 0 && currentIndex < player.mediaItemCount) {
@@ -1580,6 +1581,9 @@ class MusicService :
                                 OkHttpClient
                                     .Builder()
                                     .proxy(YouTube.proxy)
+                                    .connectTimeout(5, TimeUnit.SECONDS)
+                                    .readTimeout(8, TimeUnit.SECONDS)
+                                    .callTimeout(10, TimeUnit.SECONDS)
                                     .proxyAuthenticator { _, response ->
                                         YouTube.proxyAuth?.let { auth ->
                                             response.request.newBuilder()
