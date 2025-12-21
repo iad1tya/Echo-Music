@@ -93,7 +93,7 @@ fun AdvancedDownloadDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Advanced Download",
+                text = "Advance Download (Beta)",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
