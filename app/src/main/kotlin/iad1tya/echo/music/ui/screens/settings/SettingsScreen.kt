@@ -305,19 +305,6 @@ fun SettingsScreen(
         
         Spacer(modifier = Modifier.height(8.dp))
 
-        // AI - Separate
-        Material3SettingsGroup(
-            items = listOf(
-                Material3SettingsItem(
-                    icon = painterResource(R.drawable.ai_icon),
-                    title = { Text("AI for Lyrics Translation") },
-                    onClick = { navController.navigate("settings/ai") }
-                )
-            )
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
         // Content - Separate
         Material3SettingsGroup(
             items = listOf(
@@ -325,6 +312,19 @@ fun SettingsScreen(
                     icon = painterResource(R.drawable.language),
                     title = { Text(stringResource(R.string.content)) },
                     onClick = { navController.navigate("settings/content") }
+                )
+            )
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // AI - Separate
+        Material3SettingsGroup(
+            items = listOf(
+                Material3SettingsItem(
+                    icon = painterResource(R.drawable.ai_icon),
+                    title = { Text("AI for Lyrics Translation") },
+                    onClick = { navController.navigate("settings/ai") }
                 )
             )
         )
