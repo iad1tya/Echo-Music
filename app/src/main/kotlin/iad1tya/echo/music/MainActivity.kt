@@ -1620,11 +1620,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    LaunchedEffect(Unit) {
-                        if (intent?.action == ACTION_FIND) {
-                            navController.navigate(Screens.Find.route)
-                        }
-                    }
+
 
                     LaunchedEffect(shouldShowSearchBar, openSearchImmediately) {
                         if (shouldShowSearchBar && openSearchImmediately) {

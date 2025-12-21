@@ -38,7 +38,7 @@ class FindWidgetProvider : AppWidgetProvider() {
         )
 
         val views = RemoteViews(context.packageName, R.layout.widget_find)
-        views.setOnClickPendingIntent(R.id.widget_find_icon, pendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_pill_container, pendingIntent)
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
