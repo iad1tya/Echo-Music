@@ -23,6 +23,7 @@ object OpenRouterService {
         text: String,
         targetLanguage: String,
         apiKey: String,
+        baseUrl: String,
         model: String,
         maxRetries: Int = 3,
         sourceLanguage: String? = null
@@ -52,7 +53,7 @@ object OpenRouterService {
                 }
 
                 val request = Request.Builder()
-                    .url("https://openrouter.ai/api/v1/chat/completions")
+                    .url(baseUrl.ifBlank { "https://openrouter.ai/api/v1/chat/completions" })
                     .addHeader("Authorization", "Bearer ${apiKey.trim()}")
                     .addHeader("Content-Type", "application/json")
                     .addHeader("HTTP-Referer", "https://github.com/iad1tya/Echo-Music")

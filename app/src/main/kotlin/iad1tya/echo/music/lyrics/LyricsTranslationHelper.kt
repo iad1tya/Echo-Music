@@ -37,6 +37,7 @@ object LyricsTranslationHelper {
         lyrics: List<LyricsEntry>,
         targetLanguage: String,
         apiKey: String,
+        baseUrl: String,
         model: String,
         scope: CoroutineScope
     ) {
@@ -57,6 +58,7 @@ object LyricsTranslationHelper {
                 text = fullText,
                 targetLanguage = targetLanguage,
                 apiKey = apiKey,
+                baseUrl = baseUrl,
                 model = model
             )
             

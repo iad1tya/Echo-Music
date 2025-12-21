@@ -90,6 +90,26 @@ Open the project in Android Studio or build from the command line:
 ./gradlew assembleRelease
 ```
 
+### 6. Configure AI Translation (Optional)
+
+Echo Music supports AI-powered lyrics translation. You can configure this in **Settings -> AI Settings**.
+
+#### Option A: Using OpenRouter (Default)
+This is the recommended setup for most users.
+
+1.  Get an API Key from [OpenRouter](https://openrouter.ai/).
+2.  In the app, go to **Settings -> AI Settings**.
+3.  Ensure **Provider** is set to **OpenRouter**.
+4.  Enter your **API Key**.
+
+#### Option B: Using Custom Provider
+Use this for other services like OpenAI, Anthropic, or local LLMs.
+
+1.  In the app, go to **Settings -> AI Settings**.
+2.  Select your **Provider** (e.g., ChatGPT, Gemini, or Custom).
+3.  If using **Custom**, enter your provider's **Base URL**.
+4.  Enter your **API Key**.
+
 ## Important Files
 
 ### Confidential Files (Never commit these)

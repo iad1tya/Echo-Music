@@ -151,6 +151,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
 import iad1tya.echo.music.constants.OpenRouterApiKey
+import iad1tya.echo.music.constants.OpenRouterBaseUrlKey
 import iad1tya.echo.music.constants.OpenRouterModelKey
 import iad1tya.echo.music.constants.AutoTranslateLyricsKey
 import iad1tya.echo.music.constants.TranslateLanguageKey
@@ -188,6 +189,7 @@ fun Lyrics(
     val romanizeCyrillicByLine by rememberPreference(LyricsRomanizeCyrillicByLineKey, false)
     
     val openRouterApiKey by rememberPreference(OpenRouterApiKey, "")
+    val openRouterBaseUrl by rememberPreference(OpenRouterBaseUrlKey, "https://openrouter.ai/api/v1/chat/completions")
     val openRouterModel by rememberPreference(OpenRouterModelKey, "mistralai/mistral-small-3.1-24b-instruct:free")
     val autoTranslateLyrics by rememberPreference(AutoTranslateLyricsKey, false)
     val translateLanguage by rememberPreference(TranslateLanguageKey, "en")
@@ -367,6 +369,7 @@ fun Lyrics(
                      lyrics = lines,
                      targetLanguage = translateLanguage,
                      apiKey = openRouterApiKey,
+                     baseUrl = openRouterBaseUrl,
                      model = openRouterModel,
                      scope = scope
                  )
@@ -384,6 +387,7 @@ fun Lyrics(
                     lyrics = lines,
                     targetLanguage = translateLanguage,
                     apiKey = openRouterApiKey,
+                    baseUrl = openRouterBaseUrl,
                     model = openRouterModel,
                     scope = scope
                 )

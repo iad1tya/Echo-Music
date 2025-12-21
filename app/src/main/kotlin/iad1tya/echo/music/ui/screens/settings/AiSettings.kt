@@ -33,9 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import iad1tya.echo.music.LocalPlayerAwareWindowInsets
 import iad1tya.echo.music.R
+import iad1tya.echo.music.constants.AiProviderKey
 import iad1tya.echo.music.constants.AutoTranslateLyricsKey
 import iad1tya.echo.music.constants.LanguageCodeToName
 import iad1tya.echo.music.constants.OpenRouterApiKey
+import iad1tya.echo.music.constants.OpenRouterBaseUrlKey
 import iad1tya.echo.music.constants.OpenRouterModelKey
 import iad1tya.echo.music.constants.TranslateLanguageKey
 import iad1tya.echo.music.ui.component.EditTextPreference
@@ -52,10 +54,22 @@ fun AiSettings(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
+    var aiProvider by rememberPreference(AiProviderKey, "OpenRouter")
     var openRouterApiKey by rememberPreference(OpenRouterApiKey, "")
+    var openRouterBaseUrl by rememberPreference(OpenRouterBaseUrlKey, "https://openrouter.ai/api/v1/chat/completions")
     var openRouterModel by rememberPreference(OpenRouterModelKey, "mistralai/mistral-small-3.1-24b-instruct:free")
     var autoTranslateLyrics by rememberPreference(AutoTranslateLyricsKey, false)
     var translateLanguage by rememberPreference(TranslateLanguageKey, "en")
+
+    val aiProviders = mapOf(
+        "OpenRouter" to "https://openrouter.ai/api/v1/chat/completions",
+        "ChatGPT" to "https://api.openai.com/v1/chat/completions",
+        "Perplexity" to "https://api.perplexity.ai/chat/completions",
+        "Claude" to "https://api.anthropic.com/v1/messages",
+        "Gemini" to "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "Grok" to "https://api.x.ai/v1/chat/completions",
+        "Custom" to ""
+    )
 
     val models = listOf(
         "google/gemini-flash-1.5",
@@ -109,27 +123,17 @@ fun AiSettings(
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
-                        append("To use this feature, you need an API key from OpenRouter.ai.\n\n")
+                        append("1. Select your Provider (e.g., OpenRouter, ChatGPT) or 'Custom'.\n")
+                        append("2. Enter your API Key.\n")
+                        append("3. If 'Custom', enter the Base URL provided by your service.\n\n")
                         
-                        append("1. Go to ")
+                        append("Need an API Key? Try ")
                         pushStringAnnotation(tag = "URL", annotation = "https://openrouter.ai")
                         withStyle(style = androidx.compose.ui.text.SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)) {
                             append("OpenRouter.ai")
                         }
                         pop()
-                        append(" and sign up.\n")
-                        
-                        append("2. Generate a new API Key and paste it above.\n")
-                        
-                        append("3. OpenRouter offers free models (like 'mistralai/mistral-small-3.1-24b-instruct:free') which have generous rate limits for personal use.\n\n")
-                        
-                        append("Check their ")
-                        pushStringAnnotation(tag = "URL", annotation = "https://openrouter.ai/docs#pricing")
-                        withStyle(style = androidx.compose.ui.text.SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)) {
-                            append("pricing and limits")
-                        }
-                        pop()
-                        append(" for more details.")
+                        append(" for access to many models.")
                     }
                     
                     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
@@ -149,15 +153,38 @@ fun AiSettings(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            ListPreference(
+                title = { Text("Provider") },
+                selectedValue = aiProvider,
+                values = aiProviders.keys.toList(),
+                valueText = { it },
+                onValueSelected = { 
+                    aiProvider = it
+                    if (it != "Custom") {
+                        openRouterBaseUrl = aiProviders[it] ?: ""
+                    }
+                },
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.explore_outlined), null) }
+            )
+
+            if (aiProvider == "Custom") {
+                EditTextPreference(
+                    title = { Text("Base URL") },
+                    value = openRouterBaseUrl,
+                    onValueChange = { openRouterBaseUrl = it },
+                    icon = { androidx.compose.material3.Icon(painterResource(R.drawable.link), null) }
+                )
+            }
+
             EditTextPreference(
-                title = { Text("OpenRouter API Key") },
+                title = { Text("API Key") },
                 value = openRouterApiKey,
                 onValueChange = { openRouterApiKey = it },
                 icon = { androidx.compose.material3.Icon(painterResource(R.drawable.key), null) }
             )
 
             EditTextPreference(
-                title = { Text("OpenRouter Model") },
+                title = { Text("Model") },
                 value = openRouterModel,
                 onValueChange = { openRouterModel = it },
                 icon = { androidx.compose.material3.Icon(painterResource(R.drawable.discover_tune), null) }
