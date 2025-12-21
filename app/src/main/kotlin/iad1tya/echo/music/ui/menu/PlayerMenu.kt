@@ -81,6 +81,7 @@ import iad1tya.echo.music.playback.queues.YouTubeQueue
 import iad1tya.echo.music.ui.component.BigSeekBar
 import iad1tya.echo.music.ui.component.BottomSheetState
 import iad1tya.echo.music.ui.component.ListDialog
+import iad1tya.echo.music.ui.component.AdvancedDownloadDialog
 import iad1tya.echo.music.ui.component.NewAction
 import iad1tya.echo.music.ui.component.NewActionGrid
 import kotlinx.coroutines.Dispatchers
@@ -209,6 +210,17 @@ fun PlayerMenu(
     if (showPitchTempoDialog) {
         TempoPitchDialog(
             onDismiss = { showPitchTempoDialog = false },
+        )
+    }
+
+    var showAdvancedDownloadDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    if (showAdvancedDownloadDialog) {
+        AdvancedDownloadDialog(
+            mediaMetadata = mediaMetadata,
+            onDismiss = { showAdvancedDownloadDialog = false }
         )
     }
 
@@ -508,6 +520,41 @@ fun PlayerMenu(
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
                         text = stringResource(R.string.details),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        }
+        item {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                shape = RoundedCornerShape(50),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showAdvancedDownloadDialog = true
+                        }
+                        .padding(horizontal = 20.dp, vertical = 14.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.download),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Advance Download (Beta)",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
