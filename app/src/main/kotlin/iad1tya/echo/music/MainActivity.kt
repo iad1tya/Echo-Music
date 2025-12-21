@@ -681,7 +681,7 @@ class MainActivity : ComponentActivity() {
                     }
                     val showRail = isLandscape && !inSearchScreen && !isAmbientMode && !isFindScreen
 
-                    val getNavPadding: () -> Dp = remember {
+                    val getNavPadding: () -> Dp = remember(shouldShowNavigationBar, showRail, slimNav) {
                         {
                             if (shouldShowNavigationBar && !showRail) {
                                 if (slimNav) SlimNavBarHeight else NavigationBarHeight
@@ -691,8 +691,10 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    val targetNavBarHeight = if (slimNav) SlimNavBarHeight else NavigationBarHeight
+
                     val navigationBarHeight by animateDpAsState(
-                        targetValue = if (shouldShowNavigationBar && !showRail) NavigationBarHeight else 0.dp,
+                        targetValue = if (shouldShowNavigationBar && !showRail) targetNavBarHeight else 0.dp,
                         animationSpec = NavigationBarAnimationSpec,
                         label = "",
                     )
@@ -1233,17 +1235,17 @@ class MainActivity : ComponentActivity() {
                                                         if (navigationBarHeight == 0.dp) {
                                                             IntOffset(
                                                                 x = 0,
-                                                                y = (bottomInset + NavigationBarHeight).roundToPx(),
+                                                                y = (bottomInset + targetNavBarHeight).roundToPx(),
                                                             )
                                                         } else {
                                                             val slideOffset =
-                                                                (bottomInset + NavigationBarHeight) *
+                                                                (bottomInset + targetNavBarHeight) *
                                                                         playerBottomSheetState.progress.coerceIn(
                                                                             0f,
                                                                             1f,
                                                                         )
                                                             val hideOffset =
-                                                                (bottomInset + NavigationBarHeight) * (1 - navigationBarHeight / NavigationBarHeight)
+                                                                (bottomInset + targetNavBarHeight) * (1 - navigationBarHeight / targetNavBarHeight)
                                                             IntOffset(
                                                                 x = 0,
                                                                 y = (slideOffset + hideOffset).roundToPx(),
