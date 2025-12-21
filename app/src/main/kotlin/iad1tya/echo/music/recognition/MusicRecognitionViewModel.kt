@@ -81,6 +81,19 @@ class MusicRecognitionViewModel @Inject constructor(
         }
     }
 
+    suspend fun findSongOnYouTube(track: Track): String? {
+        val query = "${track.title} ${track.subtitle}"
+        return try {
+            val result = YouTube.searchSummary(query).getOrNull()
+            val song = result?.summaries?.flatMap { it.items }
+                ?.filterIsInstance<SongItem>()
+                ?.firstOrNull()
+            song?.id?.let { "https://music.youtube.com/watch?v=$it" }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     private suspend fun process(data: Pair<Int, ByteArray>) {
         if (_state.value !is RecognitionState.Listening) return
 

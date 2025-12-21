@@ -3,6 +3,7 @@ package iad1tya.echo.music.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
+import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
@@ -17,7 +18,9 @@ import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +54,7 @@ import iad1tya.echo.music.recognition.MusicRecognitionViewModel
 import iad1tya.echo.music.recognition.RecognitionState
 import iad1tya.echo.music.ui.theme.extractThemeColor
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import iad1tya.echo.music.LocalPlayerConnection
 import iad1tya.echo.music.ui.component.AnimatedGradientBackground
 import iad1tya.echo.music.ui.theme.PlayerColorExtractor
@@ -121,6 +126,34 @@ fun FindSongScreen(
                             contentDescription = "Back",
                             tint = MaterialTheme.colorScheme.primary
                         )
+                    }
+                },
+                actions = {
+                    val currentState = state
+                    if (currentState is RecognitionState.Success) {
+                        val scope = rememberCoroutineScope()
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    val url = viewModel.findSongOnYouTube(currentState.track)
+                                    if (url != null) {
+                                        val sendIntent = Intent().apply {
+                                            action = Intent.ACTION_SEND
+                                            putExtra(Intent.EXTRA_TEXT, url)
+                                            type = "text/plain"
+                                        }
+                                        val shareIntent = Intent.createChooser(sendIntent, null)
+                                        context.startActivity(shareIntent)
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.share),
+                                contentDescription = "Share",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
