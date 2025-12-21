@@ -310,6 +310,33 @@ private fun SuccessView(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Additional Metadata
+            val songSection = track.sections?.find { it.type == "SONG" }
+            val label = songSection?.metadata?.find { it.title == "Label" }?.text
+            val released = songSection?.metadata?.find { it.title == "Released" }?.text
+            val genre = track.genres?.primary
+
+            if (!genre.isNullOrEmpty() || !released.isNullOrEmpty()) {
+                Text(
+                    text = listOfNotNull(genre, released).joinToString(" • "),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.White.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            if (!label.isNullOrEmpty()) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center
+                )
+            }
             
             Spacer(modifier = Modifier.height(48.dp))
             
