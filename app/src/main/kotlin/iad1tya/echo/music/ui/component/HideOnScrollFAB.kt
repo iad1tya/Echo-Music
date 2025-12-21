@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -40,6 +41,7 @@ fun BoxScope.HideOnScrollFAB(
     visible: Boolean = true,
     lazyListState: LazyListState,
     @DrawableRes icon: Int,
+    text: String = "Random",
     onClick: () -> Unit,
 ) {
     AnimatedVisibility(
@@ -70,29 +72,23 @@ fun BoxScope.HideOnScrollFAB(
                     contentDescription = null,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Random")
+                Text(text = text)
             }
         }
     }
 }
-
-@Composable
+    @Composable
 fun BoxScope.HideOnScrollFAB(
     visible: Boolean = true,
     lazyListState: LazyGridState,
     @DrawableRes icon: Int,
+    text: String = "Random",
     onClick: () -> Unit,
 ) {
     AnimatedVisibility(
         visible = visible && lazyListState.isScrollingUp(),
-        enter = slideInVertically(
-            initialOffsetY = { it },
-            animationSpec = tween(250, easing = FastOutSlowInEasing)
-        ),
-        exit = slideOutVertically(
-            targetOffsetY = { it },
-            animationSpec = tween(200, easing = FastOutSlowInEasing)
-        ),
+        enter = slideInVertically { it },
+        exit = slideOutVertically { it },
         modifier =
         Modifier
             .align(Alignment.BottomEnd)
@@ -117,11 +113,14 @@ fun BoxScope.HideOnScrollFAB(
                     contentDescription = null,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Random")
+                Text(text = text)
             }
         }
     }
 }
+
+
+
 
 @Composable
 fun BoxScope.HideOnScrollFAB(

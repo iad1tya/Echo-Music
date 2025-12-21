@@ -404,6 +404,7 @@ fun LibraryPlaylistsScreen(
                 HideOnScrollFAB(
                     lazyListState = lazyListState,
                     icon = R.drawable.add,
+                    text = stringResource(R.string.create_playlist),
                     onClick = {
                         showCreatePlaylistDialog = true
                     },
@@ -568,6 +569,7 @@ fun LibraryPlaylistsScreen(
                 HideOnScrollFAB(
                     lazyListState = lazyGridState,
                     icon = R.drawable.add,
+                    text = stringResource(R.string.create_playlist),
                     onClick = {
                         showCreatePlaylistDialog = true
                     },

@@ -331,6 +331,7 @@ fun LibrarySongsScreen(
             visible = songs.isNotEmpty() == true,
             lazyListState = lazyListState,
             icon = R.drawable.shuffle,
+            text = "Random",
             onClick = {
                 playerConnection.playQueue(
                     ListQueue(
