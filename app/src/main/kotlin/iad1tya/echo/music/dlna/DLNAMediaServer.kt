@@ -47,9 +47,38 @@ class DLNAMediaServer(
                     }
                 }
                 
-                // For HTTP URLs, redirect or proxy
-                return newFixedLengthResponse(Response.Status.REDIRECT, MIME_PLAINTEXT, "").apply {
-                    addHeader("Location", url)
+                // For HTTP URLs, proxy the content
+                val client = okhttp3.OkHttpClient()
+                val requestBuilder = okhttp3.Request.Builder().url(url)
+                
+                // Forward range header if present
+                val range = session.headers["range"]
+                if (range != null) {
+                    requestBuilder.header("Range", range)
+                }
+                
+                val response = client.newCall(requestBuilder.build()).execute()
+                val inputStream = response.body?.byteStream()
+                
+                if (inputStream != null) {
+                    val mimeType = response.header("Content-Type", "audio/mpeg") ?: "audio/mpeg"
+                    val status = if (response.code == 206) Response.Status.PARTIAL_CONTENT else Response.Status.OK
+                    
+                    val nanoResponse = newChunkedResponse(status, mimeType, inputStream)
+                    
+                    // Forward content length if available
+                    val contentLength = response.header("Content-Length")
+                    if (contentLength != null) {
+                         nanoResponse.addHeader("Content-Length", contentLength)
+                    }
+                    
+                    // Forward content range if available
+                    val contentRange = response.header("Content-Range")
+                    if (contentRange != null) {
+                        nanoResponse.addHeader("Content-Range", contentRange)
+                    }
+                    
+                    return nanoResponse
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error serving media", e)

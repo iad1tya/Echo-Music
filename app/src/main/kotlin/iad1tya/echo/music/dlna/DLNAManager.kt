@@ -66,6 +66,18 @@ class DLNAManager @Inject constructor(
         currentPlayer = null
     }
     
+    fun ensureStarted() {
+        if (!_isEnabled.value) {
+            start()
+        }
+    }
+
+    fun prepareProxy(url: String): String {
+        ensureStarted()
+        mediaServer.setMediaUrl(url)
+        return "${mediaServer.getServerUrl()}/media"
+    }
+
     fun startDiscovery() {
         if (!_isEnabled.value) return
         
@@ -93,12 +105,11 @@ class DLNAManager @Inject constructor(
             // Set media URL on server
             mediaServer.setMediaUrl(mediaUrl)
             
-            // Use server URL for local streaming or direct URL for remote
-            val streamUrl = if (mediaUrl.startsWith("http")) {
-                mediaUrl
-            } else {
-                "${mediaServer.getServerUrl()}/media"
-            }
+            // Always use server URL to proxy content to DLNA/Cast devices
+            // This is required because:
+            // 1. YouTube URLs are often IP-bound
+            // 2. Some devices don't support HTTPS
+            val streamUrl = "${mediaServer.getServerUrl()}/media"
             
             val metadata = buildMetadata(title, artist)
             

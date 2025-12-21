@@ -735,9 +735,13 @@ class MusicService :
                     
                     val streamUrl = playbackData.streamUrl
                     
+                    // Use local proxy for Cast to avoid IP restriction issues
+                    val proxyUrl = dlnaManager.prepareProxy(streamUrl)
+                    
                     // Create a new MediaItem with the resolved URI
                     val resolvedMediaItem = currentMediaItem.buildUpon()
-                        .setUri(streamUrl)
+                        .setUri(proxyUrl)
+                        .setMimeType("audio/mpeg") // Explicitly set mime type for Cast
                         .build()
                         
                     withContext(Dispatchers.Main) {
