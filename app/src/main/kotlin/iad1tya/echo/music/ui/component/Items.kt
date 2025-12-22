@@ -668,7 +668,7 @@ fun PlaylistListItem(
                     modifier = Modifier.size(ListThumbnailSize / 2)
                 )
             },
-            shape = RoundedCornerShape(50)
+            shape = RoundedCornerShape(ThumbnailCornerRadius)
         )
     },
     trailingContent = trailingContent,
@@ -746,7 +746,7 @@ fun PlaylistGridItem(
                     )
                 }
             },
-            shape = RoundedCornerShape(50)
+            shape = RoundedCornerShape(ThumbnailCornerRadius)
         )
     },
     fillMaxWidth = fillMaxWidth,
