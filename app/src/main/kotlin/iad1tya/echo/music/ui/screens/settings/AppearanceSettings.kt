@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -128,6 +129,10 @@ fun AppearanceSettings(
             defaultValue = PlayerBackgroundStyle.DEFAULT,
         )
     // Pure black removed - handled by theme
+    // Pure black removed - handled by theme
+    
+    val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
+
     val (defaultOpenTab, onDefaultOpenTabChange) = rememberEnumPreference(
         DefaultOpenTabKey,
         defaultValue = NavigationTab.HOME
@@ -345,6 +350,8 @@ fun AppearanceSettings(
 
     Column(
         Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
             .verticalScroll(rememberScrollState()),
     ) {
@@ -360,12 +367,35 @@ fun AppearanceSettings(
             title = stringResource(R.string.theme),
         )
 
+        EnumListPreference(
+            title = { Text(stringResource(R.string.dark_mode)) },
+            icon = { Icon(painterResource(R.drawable.dark_mode), null) },
+            selectedValue = darkMode,
+            onValueSelected = onDarkModeChange,
+            valueText = {
+                when (it) {
+                    DarkMode.ON -> stringResource(R.string.dark_mode_on)
+                    DarkMode.OFF -> stringResource(R.string.dark_mode_off)
+                    DarkMode.AUTO -> stringResource(R.string.dark_mode_auto)
+                }
+            },
+        )
+
         SwitchPreference(
             title = { Text(stringResource(R.string.material_you)) },
             icon = { Icon(painterResource(R.drawable.palette), null) },
             checked = materialYou,
             onCheckedChange = onMaterialYouChange,
         )
+
+        AnimatedVisibility(visible = materialYou) {
+            SwitchPreference(
+                title = { Text(stringResource(R.string.pure_black)) },
+                icon = { Icon(painterResource(R.drawable.contrast), null) },
+                checked = pureBlack,
+                onCheckedChange = onPureBlackChange,
+            )
+        }
 
         PreferenceGroupTitle(
             title = stringResource(R.string.player),

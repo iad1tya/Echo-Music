@@ -117,7 +117,7 @@ fun EchoTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colorScheme.pureBlack(pureBlack),
         typography = AppTypography,
         content = content
     )
