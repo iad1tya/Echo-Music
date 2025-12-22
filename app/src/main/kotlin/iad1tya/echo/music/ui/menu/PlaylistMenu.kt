@@ -60,6 +60,18 @@ import iad1tya.echo.music.ui.component.NewAction
 import iad1tya.echo.music.ui.component.NewActionGrid
 import iad1tya.echo.music.ui.component.PlaylistListItem
 import iad1tya.echo.music.ui.component.TextFieldDialog
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -126,6 +138,18 @@ fun PlaylistMenu(
     }
 
     if (showEditDialog) {
+        var selectedImageUri by remember {
+            mutableStateOf<android.net.Uri?>(playlist.playlist.thumbnailUrl?.let { android.net.Uri.parse(it) })
+        }
+
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent()
+        ) { uri ->
+            if (uri != null) {
+                selectedImageUri = uri
+            }
+        }
+
         TextFieldDialog(
             icon = { Icon(painter = painterResource(R.drawable.edit), contentDescription = null) },
             title = { Text(text = stringResource(R.string.edit_playlist)) },
@@ -137,10 +161,23 @@ fun PlaylistMenu(
             ),
             onDone = { name ->
                 onDismiss()
+                // Try to take persistent permission for the URI
+                selectedImageUri?.let { uri ->
+                    try {
+                        context.contentResolver.takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        )
+                    } catch (e: Exception) {
+                        // Ignore if not possible
+                    }
+                }
+
                 database.query {
                     update(
                         playlist.playlist.copy(
                             name = name,
+                            thumbnailUrl = selectedImageUri?.toString(),
                             lastUpdateTime = LocalDateTime.now()
                         )
                     )
@@ -149,6 +186,37 @@ fun PlaylistMenu(
                     playlist.playlist.browseId?.let { YouTube.renamePlaylist(it, name) }
                 }
             },
+            extraContent = {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val painter = if (selectedImageUri != null) {
+                        rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current)
+                                .data(selectedImageUri)
+                                .crossfade(true)
+                                .build()
+                        )
+                    } else {
+                        painterResource(R.drawable.insert_photo)
+                    }
+
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                launcher.launch("image/*")
+                            }
+                    )
+                }
+            }
         )
     }
 
