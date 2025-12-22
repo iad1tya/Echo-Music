@@ -267,3 +267,8 @@
 -keep class org.json.** { *; }
 -keepclassmembers class org.json.** { *; }
 -dontwarn org.json.**
+
+## Innertube Rules
+-keep class com.echo.innertube.** { *; }
+-keep interface com.echo.innertube.** { *; }
+-dontwarn com.echo.innertube.**
