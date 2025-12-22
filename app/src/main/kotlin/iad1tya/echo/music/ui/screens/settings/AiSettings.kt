@@ -162,6 +162,13 @@ fun AiSettings(
                     aiProvider = it
                     if (it != "Custom") {
                         openRouterBaseUrl = aiProviders[it] ?: ""
+                    } else {
+                        openRouterBaseUrl = ""
+                    }
+                    if (it == "OpenRouter") {
+                        openRouterModel = "mistralai/mistral-small-3.1-24b-instruct:free"
+                    } else {
+                        openRouterModel = ""
                     }
                 },
                 icon = { androidx.compose.material3.Icon(painterResource(R.drawable.explore_outlined), null) }
