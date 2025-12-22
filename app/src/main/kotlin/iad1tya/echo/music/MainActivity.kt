@@ -162,6 +162,7 @@ import iad1tya.echo.music.constants.DarkModeKey
 import iad1tya.echo.music.constants.DefaultOpenTabKey
 import iad1tya.echo.music.constants.DisableScreenshotKey
 import iad1tya.echo.music.constants.DynamicThemeKey
+import iad1tya.echo.music.constants.MaterialYouKey
 import iad1tya.echo.music.constants.MiniPlayerHeight
 import iad1tya.echo.music.constants.MiniPlayerBottomSpacing
 import iad1tya.echo.music.constants.UpdateNotificationsEnabledKey
@@ -463,6 +464,7 @@ class MainActivity : ComponentActivity() {
             var showSplash by remember { mutableStateOf(true) }
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
+            val enableMaterialYou by rememberPreference(MaterialYouKey, defaultValue = false)
             
             // Read dark mode preference
             val darkModePreference by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.ON)
@@ -523,6 +525,7 @@ class MainActivity : ComponentActivity() {
                 darkTheme = useDarkTheme,
                 pureBlack = pureBlack,
                 themeColor = themeColor,
+                isDynamicColor = enableMaterialYou,
             ) {
                 androidx.compose.animation.AnimatedVisibility(
                     visible = showSplash,

@@ -243,6 +243,7 @@
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
     <string name="enable_dynamic_theme">Enable dynamic theme</string>
+    <string name="material_you">Material You</string>
     <string name="dark_mode">Dark mode</string>
     <string name="dark_theme">Dark theme</string>
     <string name="dark_mode_on">On</string>

@@ -1,10 +1,14 @@
 package iad1tya.echo.music.ui.theme
 
 import android.graphics.Bitmap
+
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
@@ -12,6 +16,7 @@ import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.palette.graphics.Palette
 import com.materialkolor.score.Score
 
@@ -100,10 +105,16 @@ fun EchoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     pureBlack: Boolean = false,
     themeColor: Color = DefaultThemeColor,
+    isDynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    // Use static color schemes - no dynamic theming
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val context = LocalContext.current
+    val colorScheme = when {
+        isDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        else -> if (darkTheme) DarkColorScheme else LightColorScheme
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,

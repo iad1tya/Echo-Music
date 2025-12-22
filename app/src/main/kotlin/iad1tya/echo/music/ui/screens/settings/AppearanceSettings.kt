@@ -61,6 +61,7 @@ import iad1tya.echo.music.constants.ChipSortTypeKey
 import iad1tya.echo.music.constants.DarkModeKey
 import iad1tya.echo.music.constants.DefaultOpenTabKey
 import iad1tya.echo.music.constants.DynamicThemeKey
+import iad1tya.echo.music.constants.MaterialYouKey
 import iad1tya.echo.music.constants.GridItemSize
 import iad1tya.echo.music.constants.GridItemsSizeKey
 import iad1tya.echo.music.constants.LibraryFilter
@@ -110,6 +111,11 @@ fun AppearanceSettings(
     val (darkMode, onDarkModeChange) = rememberEnumPreference(
         DarkModeKey,
         defaultValue = DarkMode.ON
+    )
+    
+    val (materialYou, onMaterialYouChange) = rememberPreference(
+        MaterialYouKey,
+        defaultValue = false
     )
     
     // Dynamic theme removed - always disabled
@@ -348,6 +354,17 @@ fun AppearanceSettings(
                     WindowInsetsSides.Top
                 )
             )
+        )
+
+        PreferenceGroupTitle(
+            title = stringResource(R.string.theme),
+        )
+
+        SwitchPreference(
+            title = { Text(stringResource(R.string.material_you)) },
+            icon = { Icon(painterResource(R.drawable.palette), null) },
+            checked = materialYou,
+            onCheckedChange = onMaterialYouChange,
         )
 
         PreferenceGroupTitle(
