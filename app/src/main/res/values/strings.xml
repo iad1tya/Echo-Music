@@ -170,6 +170,8 @@
     <string name="add_anyway">Add anyway</string>
     <string name="duplicates_description_single">The song is already in your playlist</string>
     <string name="duplicates_description_multiple">%d songs are already in your playlist</string>
+    <string name="change_cover">Change cover</string>
+    <string name="rename_playlist">Rename playlist</string>
 
     <!-- Noun -->
     <plurals name="n_song">
@@ -351,15 +353,15 @@
     <string name="options">Options</string>
     <string name="preview">Preview</string>
     <string name="enable_discord_rpc">Enable Rich Presence</string>
-
+    
     <string name="about">About</string>
     <string name="app_version">App version</string>
-
+    
     <string name="new_version_available">New version available</string>
     <string name="download_update">Download Update</string>
     <string name="translation_models">Translation Models</string>
     <string name="clear_translation_models">Clear translation models</string>
-    
+
     <!-- Widget -->
     <string name="widget_description">Music player widget</string>
 </resources>

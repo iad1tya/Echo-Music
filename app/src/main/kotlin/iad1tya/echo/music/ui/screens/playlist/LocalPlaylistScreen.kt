@@ -147,6 +147,7 @@ import iad1tya.echo.music.ui.component.SongListItem
 import iad1tya.echo.music.ui.component.SortHeader
 import iad1tya.echo.music.ui.component.TextFieldDialog
 import iad1tya.echo.music.ui.menu.CustomThumbnailMenu
+import iad1tya.echo.music.ui.menu.PlaylistEditOptionMenu
 import iad1tya.echo.music.ui.menu.SelectionSongMenu
 import iad1tya.echo.music.ui.menu.SongMenu
 import iad1tya.echo.music.ui.screens.settings.DarkMode
@@ -1148,53 +1149,7 @@ fun LocalPlaylistHeader(
                                 .clip(RoundedCornerShape(ThumbnailCornerRadius))
                         )
                         if (editable) {
-                            OverlayEditButton(
-                                visible = true,
-                                onClick = {
-                                    if (isCustomThumbnail) {
-                                        menuState.show(
-                                            {
-                                                CustomThumbnailMenu(
-                                                    onEdit = {
-                                                        pickLauncher.launch(
-                                                            PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                                        )
-                                                    },
-                                                    onRemove = {
-                                                        when {
-                                                            playlist.playlist.browseId == null -> {
-                                                                overrideThumbnail.value = null
-
-                                                                // Update the database to remove the custom thumbnail
-                                                                database.query {
-                                                                    update(playlist.playlist.copy(thumbnailUrl = null))
-                                                                }
-                                                            }
-                                                            else -> {
-                                                                scope.launch(Dispatchers.IO) {
-                                                                    YouTube.removeThumbnailPlaylist(playlist.playlist.browseId).onSuccess { newThumbnailUrl -> newThumbnailUrl
-                                                                        overrideThumbnail.value = newThumbnailUrl
-
-                                                                        // Update the database to remove the custom thumbnail
-                                                                        database.query {
-                                                                            update(playlist.playlist.copy(thumbnailUrl = newThumbnailUrl))
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                        isCustomThumbnail = false 
-                                                    },
-                                                    onDismiss = menuState::dismiss
-                                                )
-                                            }
-                                        )
-                                    } else {
-                                        showEditNoteDialog = true
-                                    }
-                                },
-                                alignment = Alignment.BottomEnd
-                            )
+                            // OverlayEditButton removed as per request
                         }
                     }
                 }
@@ -1226,53 +1181,7 @@ fun LocalPlaylistHeader(
                             )
                         }
                         if (editable) {
-                            OverlayEditButton(
-                                visible = true,
-                                onClick = {
-                                    if (isCustomThumbnail) {
-                                        menuState.show(
-                                            {
-                                                CustomThumbnailMenu(
-                                                    onEdit = {
-                                                        pickLauncher.launch(
-                                                            PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                                        )
-                                                    },
-                                                    onRemove = {
-                                                        when {
-                                                            playlist.playlist.browseId == null -> {
-                                                                overrideThumbnail.value = null
-
-                                                                // Update the database to remove the custom thumbnail
-                                                                database.query {
-                                                                    update(playlist.playlist.copy(thumbnailUrl = null))
-                                                                }
-                                                            }
-                                                            else -> {
-                                                                scope.launch(Dispatchers.IO) {
-                                                                    YouTube.removeThumbnailPlaylist(playlist.playlist.browseId).onSuccess { newThumbnailUrl -> newThumbnailUrl
-                                                                        overrideThumbnail.value = newThumbnailUrl
-
-                                                                        // Update the database to remove the custom thumbnail
-                                                                        database.query {
-                                                                            update(playlist.playlist.copy(thumbnailUrl = newThumbnailUrl))
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                        isCustomThumbnail = false 
-                                                    },
-                                                    onDismiss = menuState::dismiss
-                                                )
-                                            }
-                                        )
-                                    } else {
-                                        showEditNoteDialog = true
-                                    }
-                                },
-                                alignment = Alignment.BottomEnd
-                            )
+                            // OverlayEditButton removed as per request
                         }
                     }
                 }
@@ -1351,7 +1260,55 @@ fun LocalPlaylistHeader(
 
                     if (editable) {
                         IconButton(
-                            onClick = onShowEditDialog,
+                            onClick = {
+                                menuState.show {
+                                    PlaylistEditOptionMenu(
+                                        onChangeCover = {
+                                            if (isCustomThumbnail) {
+                                                menuState.show {
+                                                    CustomThumbnailMenu(
+                                                        onEdit = {
+                                                            pickLauncher.launch(
+                                                                PickVisualMediaRequest(mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                                            )
+                                                        },
+                                                        onRemove = {
+                                                            when {
+                                                                playlist.playlist.browseId == null -> {
+                                                                    overrideThumbnail.value = null
+
+                                                                    // Update the database to remove the custom thumbnail
+                                                                    database.query {
+                                                                        update(playlist.playlist.copy(thumbnailUrl = null))
+                                                                    }
+                                                                }
+                                                                else -> {
+                                                                    scope.launch(Dispatchers.IO) {
+                                                                        YouTube.removeThumbnailPlaylist(playlist.playlist.browseId).onSuccess { newThumbnailUrl ->
+                                                                            overrideThumbnail.value = newThumbnailUrl
+
+                                                                            // Update the database to remove the custom thumbnail
+                                                                            database.query {
+                                                                                update(playlist.playlist.copy(thumbnailUrl = newThumbnailUrl))
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            isCustomThumbnail = false
+                                                        },
+                                                        onDismiss = menuState::dismiss
+                                                    )
+                                                }
+                                            } else {
+                                                showEditNoteDialog = true
+                                            }
+                                        },
+                                        onRename = onShowEditDialog,
+                                        onDismiss = menuState::dismiss
+                                    )
+                                }
+                            },
                             modifier = Modifier.size(40.dp)
                         ) {
                             Icon(
