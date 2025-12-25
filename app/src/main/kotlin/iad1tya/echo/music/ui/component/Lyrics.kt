@@ -66,6 +66,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.CircularProgressIndicator
 import iad1tya.echo.music.lyrics.LyricsTranslationHelper
+import iad1tya.echo.music.ui.component.LyricsShareDialog
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -529,6 +530,7 @@ fun Lyrics(
 
     var showProgressDialog by remember { mutableStateOf(false) }
     var showShareDialog by remember { mutableStateOf(false) }
+    var showImageCustomizationDialog by remember { mutableStateOf(false) }
     var shareDialogData by remember { mutableStateOf<Triple<String, String, String>?>(null) }
 
     var showColorPickerDialog by remember { mutableStateOf(false) }
@@ -1126,50 +1128,7 @@ fun Lyrics(
                             .fillMaxWidth()
                             .clickable {
                                 showShareDialog = false
-                                showProgressDialog = true
-                                scope.launch {
-                                    try {
-                                        val screenWidth = configuration.screenWidthDp
-                                        val screenHeight = configuration.screenHeightDp
-                                        
-                                        // Use default colors based on theme
-                                        val bgColor = if (useDarkTheme) Color(0xFF121212).toArgb() else Color(0xFFF5F5F5).toArgb()
-                                        val txtColor = if (useDarkTheme) Color.White.toArgb() else Color.Black.toArgb()
-                                        val secTxtColor = if (useDarkTheme) Color.White.copy(alpha = 0.7f).toArgb() else Color.Black.copy(alpha = 0.7f).toArgb()
-
-                                        val image = ComposeToImage.createLyricsImage(
-                                            context = context,
-                                            coverArtUrl = mediaMetadata?.thumbnailUrl,
-                                            songTitle = songTitle,
-                                            artistName = artists,
-                                            lyrics = lyricsText,
-                                            width = (screenWidth * density.density).toInt(),
-                                            height = (screenHeight * density.density).toInt(),
-                                            backgroundColor = bgColor,
-                                            textColor = txtColor,
-                                            secondaryTextColor = secTxtColor,
-                                        )
-                                        val timestamp = System.currentTimeMillis()
-                                        val filename = "lyrics_$timestamp"
-                                        val uri = ComposeToImage.saveBitmapAsFile(context, image, filename)
-                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "image/png"
-                                            putExtra(Intent.EXTRA_STREAM, uri)
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        context.startActivity(Intent.createChooser(shareIntent, "Share Lyrics"))
-                                    } catch (e: Throwable) {
-                                        val errorMessage = if (e is OutOfMemoryError) {
-                                            "Out of memory while generating image. Please try selecting fewer lines."
-                                        } else {
-                                            "Failed to create image: ${e.message}"
-                                        }
-                                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                                        e.printStackTrace()
-                                    } finally {
-                                        showProgressDialog = false
-                                    }
-                                }
+                                showImageCustomizationDialog = true
                             }
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -1208,8 +1167,38 @@ fun Lyrics(
         }
     }
 
+    if (showImageCustomizationDialog && shareDialogData != null) {
+        val (lyricsText, _, _) = shareDialogData!!
+        mediaMetadata?.let { metadata ->
+            LyricsShareDialog(
+                mediaMetadata = metadata,
+                lyrics = lyricsText,
+                onDismiss = { showImageCustomizationDialog = false },
+                onShare = { bitmap ->
+                    scope.launch {
+                        try {
+                            val timestamp = System.currentTimeMillis()
+                            val filename = "lyrics_$timestamp"
+                            val uri = ComposeToImage.saveBitmapAsFile(context, bitmap, filename)
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Share Lyrics"))
+                            showImageCustomizationDialog = false
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Failed to share: ${e.message}", Toast.LENGTH_SHORT).show()
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            )
+        }
+
 
     }
+}
 }
 
 private const val METROLIST_AUTO_SCROLL_DURATION = 1500L // Much slower auto-scroll for smooth transitions

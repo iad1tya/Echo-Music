@@ -38,8 +38,12 @@ object ComposeToImage {
         width: Int,
         height: Int,
         backgroundColor: Int? = null,
+        gradientColors: List<Int>? = null,
         textColor: Int? = null,
-        secondaryTextColor: Int? = null
+        secondaryTextColor: Int? = null,
+        cornerRadius: Float = 20f,
+        textAlign: Layout.Alignment = Layout.Alignment.ALIGN_CENTER,
+        fontScale: Float = 1f
     ): Bitmap = withContext(Dispatchers.Default) {
         val cardSize = minOf(width, height) - 32
         val bitmap = createBitmap(cardSize, cardSize)
@@ -54,10 +58,20 @@ object ComposeToImage {
         val secondaryTxtColor = secondaryTextColor ?: defaultSecondaryTextColor
 
         val backgroundPaint = Paint().apply {
-            color = bgColor
+            if (gradientColors != null && gradientColors.size >= 2) {
+                shader = LinearGradient(
+                    0f, 0f, 
+                    cardSize.toFloat(), cardSize.toFloat(),
+                    gradientColors.toIntArray(),
+                    null,
+                    Shader.TileMode.CLAMP
+                )
+            } else {
+                color = bgColor
+            }
             isAntiAlias = true
         }
-        val cornerRadius = 20f
+        
         val backgroundRect = RectF(0f, 0f, cardSize.toFloat(), cardSize.toFloat())
         canvas.drawRoundRect(backgroundRect, cornerRadius, cornerRadius, backgroundPaint)
 
@@ -137,14 +151,14 @@ object ComposeToImage {
         val lyricsBottom = cardSize - (logoBlockHeight + 32)
         val availableLyricsHeight = lyricsBottom - lyricsTop
 
-        var lyricsTextSize = cardSize * 0.06f
+        var lyricsTextSize = cardSize * 0.06f * fontScale
         var lyricsLayout: StaticLayout
         do {
             lyricsPaint.textSize = lyricsTextSize
             lyricsLayout = StaticLayout.Builder.obtain(
                 lyrics, 0, lyrics.length, lyricsPaint, lyricsMaxWidth
             )
-                .setAlignment(Layout.Alignment.ALIGN_CENTER)
+                .setAlignment(textAlign)
                 .setIncludePad(false)
                 .setLineSpacing(10f, 1.3f)
                 .setMaxLines(10)
@@ -154,7 +168,7 @@ object ComposeToImage {
             } else {
                 break
             }
-        } while (lyricsTextSize > 26f)
+        } while (lyricsTextSize > (26f * fontScale))
         val lyricsYOffset = lyricsTop + (availableLyricsHeight - lyricsLayout.height) / 2f
 
         canvas.withTranslation((cardSize - lyricsMaxWidth) / 2f, lyricsYOffset) {
