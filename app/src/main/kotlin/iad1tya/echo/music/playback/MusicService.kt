@@ -60,8 +60,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
-import androidx.media3.cast.CastPlayer
-import androidx.media3.cast.SessionAvailabilityListener
+
 import com.google.android.gms.cast.framework.CastContext
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.TimeUnit
@@ -224,9 +223,7 @@ class MusicService :
     private lateinit var mediaSession: MediaLibrarySession
     
     // Google Cast support
-    private var castPlayer: CastPlayer? = null
-    private var castContext: CastContext? = null
-    private var isCastSessionAvailable = false
+    lateinit var castConnectionHandler: CastConnectionHandler
     
     // DLNA/UPnP support (placeholder)
     @Inject
@@ -320,6 +317,9 @@ class MusicService :
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         setupAudioFocusRequest()
         
+        // Initialize Google Cast handler
+        castConnectionHandler = CastConnectionHandler(this, scope, this)
+        
         // Initialize Google Cast - only if permissions are granted
         // On Android 12 and below, location permission is required for Cast device discovery
         try {
@@ -333,34 +333,13 @@ class MusicService :
             }
             
             if (hasRequiredPermissions) {
-                castContext = CastContext.getSharedInstance(this)
-                if (castContext != null) {
-                    castPlayer = CastPlayer(castContext!!).apply {
-                    setSessionAvailabilityListener(object : SessionAvailabilityListener {
-                        override fun onCastSessionAvailable() {
-                            this@MusicService.isCastSessionAvailable = true
-                            // Switch to cast player when session becomes available
-                            this@MusicService.switchToCastPlayer()
-                        }
-
-                        override fun onCastSessionUnavailable() {
-                            this@MusicService.isCastSessionAvailable = false
-                            // Switch back to local player when session ends
-                            this@MusicService.switchToLocalPlayer()
-                        }
-                    })
-                    }
-                    Log.d("MusicService", "Cast initialized successfully")
-                } else {
-                    Log.d("MusicService", "CastContext unavailable")
-                }
+                castConnectionHandler.initialize()
+                Log.d("MusicService", "CastConnectionHandler initialized")
             } else {
                 Log.d("MusicService", "Skipping Cast initialization - required permissions not granted")
             }
         } catch (e: Exception) {
             Log.e("MusicService", "Failed to initialize Cast: ${e.message}", e)
-            castContext = null
-            castPlayer = null
         }
         
         // Initialize DLNA (placeholder for future full implementation)
@@ -702,105 +681,7 @@ class MusicService :
         return hasAudioFocus
     }
     
-    /**
-     * Switch playback to Google Cast device
-     * Note: Media3 CastPlayer automatically handles playback transfer when a Cast session is available
-     */
-    private fun switchToCastPlayer() {
-        val currentPlayer = player
-        val playWhenReady = currentPlayer.playWhenReady
-        val currentPosition = currentPlayer.currentPosition
-        val currentMediaItem = currentPlayer.currentMediaItem ?: return
-        
-        castPlayer?.let { cast ->
-            // Update mode to avoid conflicts
-            player.pause()
 
-            // Update MediaSession and sync volume
-            mediaSession.player = cast
-            val currentVolume = playerVolume.value
-            cast.volume = currentVolume
-            
-            // Resolve the actual URL for the current song asynchronously
-            // The Cast Receiver requires a direct URL, it cannot use our local ResolvingDataSource
-            scope.launch(Dispatchers.IO) {
-                try {
-                    val mediaId = currentMediaItem.mediaId
-                    // Resolve the playback URL using YTPlayerUtils
-                    val playbackData = YTPlayerUtils.playerResponseForPlayback(
-                        videoId = mediaId,
-                        audioQuality = audioQuality,
-                        connectivityManager = connectivityManager
-                    ).getOrThrow()
-                    
-                    val streamUrl = playbackData.streamUrl
-                    
-                    // Use local proxy for Cast to avoid IP restriction issues
-                    val proxyUrl = dlnaManager.prepareProxy(streamUrl)
-                    
-                    // Create a new MediaItem with the resolved URI
-                    val resolvedMediaItem = currentMediaItem.buildUpon()
-                        .setUri(proxyUrl)
-                        .setMimeType("audio/mpeg") // Explicitly set mime type for Cast
-                        .build()
-                        
-                    withContext(Dispatchers.Main) {
-                        // Set the resolved item on the Cast Player
-                        cast.setMediaItem(resolvedMediaItem, currentPosition)
-                        cast.playWhenReady = playWhenReady
-                        cast.prepare()
-                        Log.d("MusicService", "Cast playback started with resolved URL for $mediaId")
-                    }
-                } catch (e: Exception) {
-                    Log.e("MusicService", "Failed to resolve URL for Cast", e)
-                    reportException(e)
-                    withContext(Dispatchers.Main) {
-                         // Fallback: try setting item as is (unlikely to work without custom receiver)
-                        cast.setMediaItem(currentMediaItem, currentPosition)
-                        cast.playWhenReady = playWhenReady
-                        cast.prepare()
-                    }
-                }
-            }
-            
-            Log.d("MusicService", "Transferred playback to Cast player")
-        }
-    }
-    
-    /**
-     * Switch playback back to local ExoPlayer
-     */
-    private fun switchToLocalPlayer() {
-        val cast = castPlayer ?: run {
-            Log.w("MusicService", "Attempted to switch from Cast player but castPlayer is null")
-            return
-        }
-        
-        try {
-            val playWhenReady = cast.playWhenReady
-            val currentPosition = cast.currentPosition
-            
-            // Note: We can't transfer the queue back easily if we only played one song
-            // Ideally we would sync the state. For now, we resume the local player where it left off
-            // or at the cast position if valid.
-            
-            // Update MediaSession to use local Player
-            mediaSession.player = player
-
-            // Stop cast player
-            cast.stop()
-            
-            // Resume local player
-            if (playWhenReady) {
-                player.play()
-            }
-            
-            Log.d("MusicService", "Transferred playback to local player")
-        } catch (e: Exception) {
-            Log.e("MusicService", "Failed to switch to local player", e)
-            reportException(e)
-        }
-    }
 
     private fun waitOnNetworkError() {
         waitingForNetworkConnection.value = true
@@ -1846,26 +1727,50 @@ class MusicService :
         connectivityObserver.unregister()
         abandonAudioFocus()
         releaseLoudnessEnhancer()
-        mediaSession.release()
         player.removeListener(this)
         player.removeListener(sleepTimer)
+        
+        if (::castConnectionHandler.isInitialized) {
+            castConnectionHandler.release()
+        }
+        mediaSession.release()
         player.release()
         
-        // Release cast player
-        castPlayer?.apply {
-            setSessionAvailabilityListener(null)
-            release()
-        }
-        castPlayer = null
-        
-        // Stop DLNA
-        try {
-            dlnaManager.stop()
-        } catch (e: Exception) {
-            Log.e("MusicService", "Failed to stop DLNA: ${e.message}")
-        }
+        // Release DLNA manager
+        dlnaManager.stop()
         
         super.onDestroy()
+    }
+
+    suspend fun getStreamUrl(mediaId: String): String? {
+        // Return cached URL if available and not expired
+        songUrlCache[mediaId]?.takeIf { it.second > System.currentTimeMillis() }?.let {
+            return it.first
+        }
+        
+        // Resolve URL if not cached
+        return try {
+            val playbackData = YTPlayerUtils.playerResponseForPlayback(
+                videoId = mediaId,
+                audioQuality = audioQuality,
+                connectivityManager = connectivityManager
+            ).getOrNull()
+            
+            val streamUrl = playbackData?.streamUrl
+            if (streamUrl != null) {
+                // Prepare proxy
+                val proxyUrl = dlnaManager.prepareProxy(streamUrl)
+                // Cache it with expiry
+                val expiry = System.currentTimeMillis() + (playbackData.streamExpiresInSeconds * 1000L)
+                songUrlCache[mediaId] = proxyUrl to expiry
+                proxyUrl
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("MusicService", "Failed to resolve URL for Cast: ${e.message}")
+            null
+        }
     }
 
     override fun onBind(intent: Intent?) = super.onBind(intent) ?: binder

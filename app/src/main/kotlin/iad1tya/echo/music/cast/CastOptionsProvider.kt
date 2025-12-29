@@ -1,36 +1,44 @@
 package iad1tya.echo.music.cast
 
 import android.content.Context
+import com.google.android.gms.cast.CastMediaControlIntent
 import com.google.android.gms.cast.framework.CastOptions
 import com.google.android.gms.cast.framework.OptionsProvider
 import com.google.android.gms.cast.framework.SessionProvider
 import com.google.android.gms.cast.framework.media.CastMediaOptions
+import com.google.android.gms.cast.framework.media.MediaIntentReceiver
 import com.google.android.gms.cast.framework.media.NotificationOptions
-import timber.log.Timber
 
+/**
+ * CastOptionsProvider for Google Cast integration.
+ * This class provides the Cast options for the app.
+ */
 class CastOptionsProvider : OptionsProvider {
+
     override fun getCastOptions(context: Context): CastOptions {
-        return try {
-            val notificationOptions = NotificationOptions.Builder()
-                .setTargetActivityClassName(iad1tya.echo.music.MainActivity::class.java.name)
-                .build()
-            
-            val mediaOptions = CastMediaOptions.Builder()
-                .setNotificationOptions(notificationOptions)
-                .setExpandedControllerActivityClassName(iad1tya.echo.music.MainActivity::class.java.name)
-                .build()
-            
-            CastOptions.Builder()
-                .setReceiverApplicationId(com.google.android.gms.cast.CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
-                .setCastMediaOptions(mediaOptions)
-                .build()
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to initialize Cast options - creating minimal configuration")
-            // Return minimal CastOptions to prevent crash
-            CastOptions.Builder()
-                .setReceiverApplicationId(com.google.android.gms.cast.CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
-                .build()
-        }
+        val notificationOptions = NotificationOptions.Builder()
+            .setActions(
+                listOf(
+                    MediaIntentReceiver.ACTION_SKIP_PREV,
+                    MediaIntentReceiver.ACTION_TOGGLE_PLAYBACK,
+                    MediaIntentReceiver.ACTION_SKIP_NEXT,
+                    MediaIntentReceiver.ACTION_STOP_CASTING
+                ),
+                intArrayOf(1, 2) // Indices of actions for compact view
+            )
+            .setTargetActivityClassName(iad1tya.echo.music.MainActivity::class.java.name)
+            .build()
+
+        val mediaOptions = CastMediaOptions.Builder()
+            .setNotificationOptions(notificationOptions)
+            .setExpandedControllerActivityClassName(iad1tya.echo.music.MainActivity::class.java.name)
+            .build()
+
+        return CastOptions.Builder()
+            .setReceiverApplicationId(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
+            .setCastMediaOptions(mediaOptions)
+            .setStopReceiverApplicationWhenEndingSession(true)
+            .build()
     }
 
     override fun getAdditionalSessionProviders(context: Context): List<SessionProvider>? {
