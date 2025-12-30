@@ -103,10 +103,11 @@ fun ContentSettings(
     val (proxyPassword, onProxyPasswordChange) = rememberPreference(key = ProxyPasswordKey, defaultValue = "password")
     val (enableKugou, onEnableKugouChange) = rememberPreference(key = EnableKugouKey, defaultValue = true)
     val (enableLrclib, onEnableLrclibChange) = rememberPreference(key = EnableLrcLibKey, defaultValue = true)
+    val (enableBetterLyrics, onEnableBetterLyricsChange) = rememberPreference(key = EnableBetterLyricsKey, defaultValue = true)
     val (preferredProvider, onPreferredProviderChange) =
         rememberEnumPreference(
             key = PreferredLyricsProviderKey,
-            defaultValue = PreferredLyricsProvider.LRCLIB,
+            defaultValue = PreferredLyricsProvider.BETTER_LYRICS,
         )
     val (lengthTop, onLengthTopChange) = rememberPreference(key = TopSize, defaultValue = "50")
     val (quickPicks, onQuickPicksChange) = rememberEnumPreference(key = QuickPicksKey, defaultValue = QuickPicks.QUICK_PICKS)
@@ -455,15 +456,22 @@ fun ContentSettings(
             checked = enableKugou,
             onCheckedChange = onEnableKugouChange,
         )
+        SwitchPreference(
+            title = { Text(stringResource(R.string.enable_better_lyrics)) },
+            icon = { Icon(painterResource(R.drawable.lyrics), null) },
+            checked = enableBetterLyrics,
+            onCheckedChange = onEnableBetterLyricsChange,
+        )
         ListPreference(
             title = { Text(stringResource(R.string.set_first_lyrics_provider)) },
             icon = { Icon(painterResource(R.drawable.lyrics), null) },
             selectedValue = preferredProvider,
-            values = listOf(PreferredLyricsProvider.LRCLIB, PreferredLyricsProvider.KUGOU),
+            values = listOf(PreferredLyricsProvider.LRCLIB, PreferredLyricsProvider.KUGOU, PreferredLyricsProvider.BETTER_LYRICS),
             valueText = {
                 when (it) {
                     PreferredLyricsProvider.LRCLIB -> "LrcLib"
                     PreferredLyricsProvider.KUGOU -> "KuGou"
+                    PreferredLyricsProvider.BETTER_LYRICS -> "Better Lyrics"
                 }
             },
             onValueSelected = onPreferredProviderChange,

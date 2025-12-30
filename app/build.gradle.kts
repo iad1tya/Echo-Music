@@ -225,6 +225,7 @@ dependencies {
     implementation(project(":innertube"))
     implementation(project(":kugou"))
     implementation(project(":lrclib"))
+    implementation(project(":betterlyrics"))
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.serialization.json)

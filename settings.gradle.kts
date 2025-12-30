@@ -20,6 +20,7 @@ include(":app")
 include(":innertube")
 include(":kugou")
 include(":lrclib")
+include(":betterlyrics")
 
 // Use a local copy of NewPipe Extractor by uncommenting the lines below.
 // We assume, that Echo and NewPipe Extractor have the same parent directory.
