@@ -7,6 +7,9 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -73,6 +76,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -778,6 +782,43 @@ fun Lyrics(
                     key = { index, item -> "$index-${item.time}" } // Add stable key
                 ) { index, item ->
                     val isSelected = selectedIndices.contains(index)
+                    val isActive = index == displayedCurrentLineIndex && isSynced
+                    val distance = kotlin.math.abs(index - displayedCurrentLineIndex)
+
+                    // Target values for animation
+                    val targetScale = when {
+                        !isSynced || isActive -> 1.05f 
+                        distance == 1 -> 0.95f 
+                        distance >= 2 -> 0.85f  
+                        else -> 1f
+                    }
+
+                    val targetAlpha = when {
+                        !isSynced || (isSelectionModeActive && isSelected) -> 1f
+                        isActive -> 1f
+                        distance == 1 -> 0.6f
+                        distance == 2 -> 0.3f
+                        else -> 0.15f
+                    }
+                    
+                    val animatedScale by animateFloatAsState(
+                        targetValue = targetScale,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "scale"
+                    )
+
+                    val animatedAlpha by animateFloatAsState(
+                        targetValue = targetAlpha,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "alpha"
+                    )
+
                     val itemModifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp)) // Clip for background
@@ -849,26 +890,10 @@ fun Lyrics(
                             else Color.Transparent
                         )
                         .padding(horizontal = 24.dp, vertical = 8.dp)
-                        .alpha(
-                            when {
-                                !isSynced || (isSelectionModeActive && isSelected) -> 1f
-                                index == displayedCurrentLineIndex -> 1f // Active line - full opacity
-                                kotlin.math.abs(index - displayedCurrentLineIndex) == 1 -> 0.7f // Adjacent lines - medium opacity
-                                kotlin.math.abs(index - displayedCurrentLineIndex) == 2 -> 0.4f // 2 lines away - low opacity  
-                                else -> 0.2f // Far lines - very low opacity (deep water effect)
-                            }
-                        )
-                        // Add subtle scale effect for depth
                         .graphicsLayer {
-                            val distance = kotlin.math.abs(index - displayedCurrentLineIndex)
-                            val scale = when {
-                                !isSynced || index == displayedCurrentLineIndex -> 1f
-                                distance == 1 -> 0.95f // Slightly smaller
-                                distance >= 2 -> 0.9f // Even smaller for distant lines
-                                else -> 1f
-                            }
-                            scaleX = scale
-                            scaleY = scale
+                            scaleX = animatedScale
+                            scaleY = animatedScale
+                            alpha = animatedAlpha
                         }
 
                     Column(
@@ -881,18 +906,24 @@ fun Lyrics(
                     ) {
                         Text(
                             text = item.text,
-                            fontSize = 24.sp, // Uniform size for all lines matching latest enh version
-                            color = if (index == displayedCurrentLineIndex && isSynced) {
-                                textColor // Full color for active line
+                            fontSize = 24.sp, 
+                            color = if (isActive) {
+                                textColor 
                             } else {
-                                textColor.copy(alpha = 0.8f) // Slightly muted for inactive lines
+                                textColor.copy(alpha = 0.8f) 
                             },
+                            style = TextStyle(
+                                shadow = if (isActive) Shadow(
+                                    color = textColor.copy(alpha = 0.5f),
+                                    blurRadius = 30f
+                                ) else Shadow.None
+                            ),
                             textAlign = when (lyricsTextPosition) {
                                 LyricsPosition.LEFT -> TextAlign.Left
                                 LyricsPosition.CENTER -> TextAlign.Center
                                 LyricsPosition.RIGHT -> TextAlign.Right
                             },
-                            fontWeight = if (index == displayedCurrentLineIndex && isSynced) FontWeight.ExtraBold else FontWeight.Bold
+                            fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold
                         )
                         if (currentSong?.romanizeLyrics == true
                             && (romanizeJapaneseLyrics ||
