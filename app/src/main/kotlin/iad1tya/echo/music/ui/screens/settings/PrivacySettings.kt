@@ -2,6 +2,7 @@ package iad1tya.echo.music.ui.screens.settings
 
 import android.os.Build
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -41,6 +42,10 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import iad1tya.echo.music.LocalDatabase
 import iad1tya.echo.music.LocalPlayerAwareWindowInsets
+import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.Notifications
 import iad1tya.echo.music.R
 import iad1tya.echo.music.constants.DisableScreenshotKey
 import iad1tya.echo.music.constants.PauseListenHistoryKey
@@ -187,6 +192,130 @@ fun PrivacySettings(
             icon = { Icon(painterResource(R.drawable.clear_all), null) },
             onClick = { showClearSearchHistoryDialog = true },
         )
+
+        PreferenceGroupTitle(
+            title = "Permissions"
+        )
+
+        val context = androidx.compose.ui.platform.LocalContext.current
+        
+        data class PermissionInfo(
+            val permission: String,
+            val name: String,
+            val description: String,
+            val icon: androidx.compose.ui.graphics.vector.ImageVector
+        )
+
+        val permissions = remember {
+            val list = mutableListOf(
+                 PermissionInfo(
+                    android.Manifest.permission.RECORD_AUDIO,
+                    "Microphone",
+                    "Required to identify songs playing around you.",
+                    androidx.compose.material.icons.Icons.Rounded.Mic
+                )
+            )
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                list.add(PermissionInfo(
+                    android.Manifest.permission.POST_NOTIFICATIONS,
+                    "Notifications",
+                    "Used to show playback controls and updates.",
+                    androidx.compose.material.icons.Icons.Rounded.Notifications
+                ))
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                list.add(PermissionInfo(
+                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                    "Bluetooth",
+                    "Required to connect to Bluetooth audio devices.",
+                    androidx.compose.material.icons.Icons.Rounded.Bluetooth
+                ))
+            }
+             list.add(PermissionInfo(
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                "Location",
+                "Used to discover Cast devices on your network.",
+                androidx.compose.material.icons.Icons.Rounded.LocationOn
+            ))
+            
+            list
+        }
+
+        permissions.forEach { perm ->
+            val isGranted = androidx.core.content.ContextCompat.checkSelfPermission(
+                context, 
+                perm.permission
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        val intent = android.content.Intent(
+                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        ).apply {
+                            data = android.net.Uri.fromParts("package", context.packageName, null)
+                        }
+                        context.startActivity(intent)
+                    }
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                androidx.compose.foundation.layout.Row(
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ){
+                        Icon(
+                            imageVector = perm.icon,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Column {
+                            Text(
+                                text = perm.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                    
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = if (isGranted) 
+                                    androidx.compose.ui.graphics.Color(0xFF4CAF50).copy(alpha = 0.2f) 
+                                else 
+                                    MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (isGranted) "Granted" else "Denied",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isGranted) 
+                                androidx.compose.ui.graphics.Color(0xFF4CAF50) 
+                            else 
+                                MaterialTheme.colorScheme.error,
+                             fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                     text = perm.description,
+                     style = MaterialTheme.typography.bodySmall,
+                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                     modifier = Modifier.padding(start = 40.dp)
+                )
+            }
+        }
 
         PreferenceGroupTitle(
             title = stringResource(R.string.misc),
