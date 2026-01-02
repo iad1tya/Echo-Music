@@ -66,7 +66,6 @@ import iad1tya.echo.music.ui.component.NewAction
 import iad1tya.echo.music.ui.component.NewActionGrid
 import iad1tya.echo.music.ui.component.TextFieldDialog
 import iad1tya.echo.music.viewmodels.LyricsMenuViewModel
-import iad1tya.echo.music.lyrics.LyricsTranslationHelper
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 

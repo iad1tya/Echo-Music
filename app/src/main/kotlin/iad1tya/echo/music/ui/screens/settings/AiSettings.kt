@@ -204,6 +204,24 @@ fun AiSettings(
                 icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
             )
 
+            if (autoTranslateLyrics) {
+                var translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Literal")
+                ListPreference(
+                    title = { Text("Translation Mode") },
+                    selectedValue = translateMode,
+                    values = listOf("Literal", "Meaning"),
+                    valueText = { 
+                        when(it) {
+                            "Literal" -> "Simple / Literal"
+                            "Meaning" -> "Meaning / Contextual"
+                            else -> it
+                        }
+                    },
+                    onValueSelected = { translateMode = it },
+                    icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
+                )
+            }
+
             ListPreference(
                 title = { Text("Target Language") },
                 selectedValue = translateLanguage,

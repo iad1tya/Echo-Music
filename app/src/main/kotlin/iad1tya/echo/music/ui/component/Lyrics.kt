@@ -198,6 +198,7 @@ fun Lyrics(
     val openRouterModel by rememberPreference(OpenRouterModelKey, "mistralai/mistral-small-3.1-24b-instruct:free")
     val autoTranslateLyrics by rememberPreference(AutoTranslateLyricsKey, false)
     val translateLanguage by rememberPreference(TranslateLanguageKey, "en")
+    val translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Literal")
     
     val scope = rememberCoroutineScope()
 
@@ -376,6 +377,7 @@ fun Lyrics(
                      apiKey = openRouterApiKey,
                      baseUrl = openRouterBaseUrl,
                      model = openRouterModel,
+                     mode = translateMode,
                      scope = scope
                  )
              } else if (openRouterApiKey.isBlank()) {
@@ -394,6 +396,7 @@ fun Lyrics(
                     apiKey = openRouterApiKey,
                     baseUrl = openRouterBaseUrl,
                     model = openRouterModel,
+                    mode = translateMode,
                     scope = scope
                 )
             }

@@ -39,6 +39,7 @@ object LyricsTranslationHelper {
         apiKey: String,
         baseUrl: String,
         model: String,
+        mode: String,
         scope: CoroutineScope
     ) {
         translationJob?.cancel()
@@ -48,7 +49,10 @@ object LyricsTranslationHelper {
         lyrics.forEach { it.translatedTextFlow.value = null }
         
         translationJob = scope.launch(Dispatchers.IO) {
-            val fullText = lyrics.joinToString("\n") { it.text }
+            // Filter out blank lines to ensure 1:1 mapping reliability
+            val nonEmptyEntries = lyrics.filter { it.text.isNotBlank() }
+            
+            val fullText = nonEmptyEntries.joinToString("\n") { it.text }
             if (fullText.isBlank()) {
                 _status.value = TranslationStatus.Idle
                 return@launch
@@ -59,18 +63,20 @@ object LyricsTranslationHelper {
                 targetLanguage = targetLanguage,
                 apiKey = apiKey,
                 baseUrl = baseUrl,
-                model = model
+                model = model,
+                mode = mode
             )
             
             result.onSuccess { translatedLines ->
-                if (translatedLines.size == lyrics.size) {
-                     lyrics.forEachIndexed { index, entry ->
+                if (translatedLines.size == nonEmptyEntries.size) {
+                     nonEmptyEntries.forEachIndexed { index, entry ->
                          entry.translatedTextFlow.value = translatedLines[index]
                      }
                 } else {
-                    val minSize = minOf(translatedLines.size, lyrics.size)
+                    // Fallback: Try to map as many as possible
+                    val minSize = minOf(translatedLines.size, nonEmptyEntries.size)
                     for (i in 0 until minSize) {
-                        lyrics[i].translatedTextFlow.value = translatedLines[i]
+                        nonEmptyEntries[i].translatedTextFlow.value = translatedLines[i]
                     }
                 }
                 _status.value = TranslationStatus.Success

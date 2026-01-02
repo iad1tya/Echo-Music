@@ -300,6 +300,7 @@ val AiProviderKey = stringPreferencesKey("aiProvider")
 val OpenRouterBaseUrlKey = stringPreferencesKey("openRouterBaseUrl")
 val OpenRouterModelKey = stringPreferencesKey("openRouterModel")
 val AutoTranslateLyricsKey = booleanPreferencesKey("autoTranslateLyrics")
+val TranslateModeKey = stringPreferencesKey("translateMode")
 val TranslateLanguageKey = stringPreferencesKey("translateLanguage")
 
 val PlayerVolumeKey = floatPreferencesKey("playerVolume")

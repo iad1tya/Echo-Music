@@ -25,6 +25,7 @@ object OpenRouterService {
         apiKey: String,
         baseUrl: String,
         model: String,
+        mode: String,
         maxRetries: Int = 3,
         sourceLanguage: String? = null
     ): Result<List<String>> = withContext(Dispatchers.IO) {
@@ -33,7 +34,11 @@ object OpenRouterService {
         while (currentAttempt < maxRetries) {
             try {
                 // Request JSON array explicitly
-                val prompt = "Translate the following lyrics to $targetLanguage. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines and structure exactly. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
+                val prompt = if (mode == "Meaning") {
+                    "Translate the following lyrics to $targetLanguage, conveying the deeper meaning and context. You can rephrase to capture the essence. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines mostly but focus on meaning. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
+                } else {
+                    "Translate the following lyrics to $targetLanguage. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines and structure exactly. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
+                }
                 
                 val messages = JSONArray().apply {
                     put(JSONObject().apply {
