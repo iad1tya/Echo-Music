@@ -30,6 +30,7 @@ fun NavigationTitle(
     modifier: Modifier = Modifier,
     label: String? = null,
     thumbnail: (@Composable () -> Unit)? = null,
+    action: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
     Row(
@@ -66,6 +67,8 @@ fun NavigationTitle(
                 maxLines = 1,
             )
         }
+
+        action?.invoke()
 
         if (onClick != null) {
             Icon(

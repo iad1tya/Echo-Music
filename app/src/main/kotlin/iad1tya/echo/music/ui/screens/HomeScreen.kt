@@ -93,6 +93,9 @@ import iad1tya.echo.music.extensions.togglePlayPause
 import iad1tya.echo.music.models.toMediaMetadata
 import iad1tya.echo.music.playback.queues.ListQueue
 import iad1tya.echo.music.playback.queues.LocalAlbumRadio
+import iad1tya.echo.music.extensions.toMediaItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import iad1tya.echo.music.playback.queues.YouTubeAlbumRadio
 import iad1tya.echo.music.playback.queues.YouTubeQueue
 import iad1tya.echo.music.ui.component.AlbumGridItem
@@ -399,6 +402,36 @@ fun HomeScreen(
                     item(key = "quick_picks_title") {
                         NavigationTitle(
                             title = stringResource(R.string.quick_picks),
+                            action = {
+                                androidx.compose.material3.Button(
+                                    onClick = {
+                                        playerConnection.playQueue(
+                                            ListQueue(
+                                                title = "Quick Picks",
+                                                items = quickPicks.map { it.toMediaItem() },
+                                            )
+                                        )
+                                    },
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                        containerColor = Color.Black,
+                                        contentColor = Color.White
+                                    ),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "Play all",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                            },
                             modifier = Modifier.animateItem()
                         )
                     }
