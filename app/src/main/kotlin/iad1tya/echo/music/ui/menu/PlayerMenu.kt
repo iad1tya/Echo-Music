@@ -426,7 +426,7 @@ fun PlayerMenu(
                 )
                  MenuEntry(
                     icon = R.drawable.download,
-                    text = "Advance Download (Beta)",
+                    text = "Advance Download",
                     onClick = {
                         showAdvancedDownloadDialog = true
                     }
