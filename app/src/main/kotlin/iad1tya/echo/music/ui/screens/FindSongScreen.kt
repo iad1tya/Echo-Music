@@ -60,6 +60,11 @@ import iad1tya.echo.music.ui.component.AnimatedGradientBackground
 import iad1tya.echo.music.ui.theme.PlayerColorExtractor
 import iad1tya.echo.music.utils.rememberPreference
 
+import android.provider.Settings
+import android.net.Uri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FindSongScreen(
@@ -71,13 +76,40 @@ fun FindSongScreen(
     val context = LocalContext.current
     val playerConnection = LocalPlayerConnection.current ?: return
     var hasStartedListening by remember { mutableStateOf(false) }
+    var isPermissionDenied by remember { mutableStateOf(false) }
     
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+
+    // Re-check permission on resume
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isPermissionDenied) {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                    isPermissionDenied = false
+                    if (!hasStartedListening) {
+                         viewModel.startListening()
+                         hasStartedListening = true
+                    }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted && !hasStartedListening) {
-            viewModel.startListening()
-            hasStartedListening = true
+        if (isGranted) {
+            isPermissionDenied = false
+            if (!hasStartedListening) {
+                viewModel.startListening()
+                hasStartedListening = true
+            }
+        } else {
+            isPermissionDenied = true
         }
     }
 
@@ -173,27 +205,76 @@ fun FindSongScreen(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            when (val currentState = state) {
-                is RecognitionState.Idle, is RecognitionState.Listening -> {
-                    ListeningView(isListening = currentState is RecognitionState.Listening)
-                }
-                is RecognitionState.Success -> {
-                    SuccessView(
-                        track = currentState.track,
-                        navController = navController,
-                        onPlay = {
-                            viewModel.playSong(currentState.track, playerConnection)
-                            onOpenPlayer()
+            if (isPermissionDenied) {
+                PermissionDeniedView(
+                    onOpenSettings = {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
                         }
-                    )
-                }
-                is RecognitionState.Error -> {
-                    ErrorView(
-                        message = currentState.message,
-                        onRetry = { viewModel.startListening() }
-                    )
+                        context.startActivity(intent)
+                    }
+                )
+            } else {
+                when (val currentState = state) {
+                    is RecognitionState.Idle, is RecognitionState.Listening -> {
+                        ListeningView(isListening = currentState is RecognitionState.Listening)
+                    }
+                    is RecognitionState.Success -> {
+                        SuccessView(
+                            track = currentState.track,
+                            navController = navController,
+                            onPlay = {
+                                viewModel.playSong(currentState.track, playerConnection)
+                                onOpenPlayer()
+                            }
+                        )
+                    }
+                    is RecognitionState.Error -> {
+                        ErrorView(
+                            message = currentState.message,
+                            onRetry = { viewModel.startListening() }
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PermissionDeniedView(onOpenSettings: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(32.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Mic,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Microphone Permission Required",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Echo needs access to your microphone to identify songs playing around you.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onOpenSettings,
+            shape = RoundedCornerShape(50),
+            modifier = Modifier.height(48.dp)
+        ) {
+            Text("Open Settings")
         }
     }
 }
