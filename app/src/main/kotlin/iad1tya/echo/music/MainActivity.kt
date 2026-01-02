@@ -384,14 +384,7 @@ class MainActivity : ComponentActivity() {
             val permissionsLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
-                val deniedPermissions = permissions.filterValues { !it }.keys
-                if (deniedPermissions.isNotEmpty()) {
-                    Toast.makeText(
-                        this,
-                        "Some permissions were denied. App features may be limited.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+
             }
             
             LaunchedEffect(Unit) {
