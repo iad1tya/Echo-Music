@@ -415,6 +415,41 @@ fun PlaylistMenu(
                     NewAction(
                         icon = {
                             Icon(
+                                painter = painterResource(if (downloadState == Download.STATE_COMPLETED) R.drawable.offline else R.drawable.download),
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp),
+                                tint = if (downloadState == Download.STATE_COMPLETED) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        text = if (downloadState == Download.STATE_COMPLETED) stringResource(R.string.remove_download) else stringResource(R.string.action_download),
+                        onClick = {
+                            when (downloadState) {
+                                Download.STATE_COMPLETED, Download.STATE_DOWNLOADING, Download.STATE_QUEUED -> {
+                                    showRemoveDownloadDialog = true
+                                }
+                                else -> {
+                                    songs.forEach { song ->
+                                        val downloadRequest =
+                                            DownloadRequest
+                                                .Builder(song.id, song.id.toUri())
+                                                .setCustomCacheKey(song.id)
+                                                .setData(song.song.title.toByteArray())
+                                                .build()
+                                        DownloadService.sendAddDownload(
+                                            context,
+                                            ExoDownloadService::class.java,
+                                            downloadRequest,
+                                            false,
+                                        )
+                                    }
+                                }
+                            }
+                            onDismiss()
+                        }
+                    ),
+                    NewAction(
+                        icon = {
+                            Icon(
                                 painter = painterResource(R.drawable.share),
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
@@ -513,71 +548,6 @@ fun PlaylistMenu(
             }
         }
         if (downloadPlaylist != true) {
-            item {
-                when (downloadState) {
-                    Download.STATE_COMPLETED -> {
-                        ListItem(
-                            headlineContent = {
-                                Text(
-                                    text = stringResource(R.string.remove_download),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            },
-                            leadingContent = {
-                                Icon(
-                                    painter = painterResource(R.drawable.offline),
-                                    contentDescription = null,
-                                )
-                            },
-                            modifier = Modifier.clickable {
-                                showRemoveDownloadDialog = true
-                            }
-                        )
-                    }
-                    Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> {
-                        ListItem(
-                            headlineContent = { Text(text = stringResource(R.string.downloading)) },
-                            leadingContent = {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            },
-                            modifier = Modifier.clickable {
-                                showRemoveDownloadDialog = true
-                            }
-                        )
-                    }
-                    else -> {
-                        ListItem(
-                            headlineContent = { Text(text = stringResource(R.string.action_download)) },
-                            leadingContent = {
-                                Icon(
-                                    painter = painterResource(R.drawable.download),
-                                    contentDescription = null,
-                                )
-                            },
-                            modifier = Modifier.clickable {
-                                songs.forEach { song ->
-                                    val downloadRequest =
-                                        DownloadRequest
-                                            .Builder(song.id, song.id.toUri())
-                                            .setCustomCacheKey(song.id)
-                                            .setData(song.song.title.toByteArray())
-                                            .build()
-                                    DownloadService.sendAddDownload(
-                                        context,
-                                        ExoDownloadService::class.java,
-                                        downloadRequest,
-                                        false,
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-            // Advanced Download Option
             // Advanced Download Option
             item {
                 ListItem(
@@ -593,6 +563,7 @@ fun PlaylistMenu(
                     }
                 )
             }
+
         }
         if (autoPlaylist != true) {
             item {
