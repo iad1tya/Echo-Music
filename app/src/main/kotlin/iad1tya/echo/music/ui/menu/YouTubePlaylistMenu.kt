@@ -78,7 +78,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
+import iad1tya.echo.music.ui.component.AdvancedPlaylistDownloadDialog
+import iad1tya.echo.music.models.toMediaMetadata
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -99,6 +100,15 @@ fun YouTubePlaylistMenu(
     var showChoosePlaylistDialog by rememberSaveable { mutableStateOf(false) }
     var showImportPlaylistDialog by rememberSaveable { mutableStateOf(false) }
     var showErrorPlaylistAddDialog by rememberSaveable { mutableStateOf(false) }
+    var showAdvancedPlaylistDownloadDialog by remember { mutableStateOf(false) }
+
+    if (showAdvancedPlaylistDownloadDialog) {
+        AdvancedPlaylistDownloadDialog(
+            songs = songs.map { it.toMediaMetadata() },
+            playlistId = playlist.id,
+            onDismiss = { showAdvancedPlaylistDownloadDialog = false }
+        )
+    }
 
     val notAddedList by remember {
         mutableStateOf(mutableListOf<MediaMetadata>())
@@ -526,6 +536,20 @@ fun YouTubePlaylistMenu(
                     }
                 }
             }
+        }
+        item {
+            ListItem(
+                headlineContent = { Text(text = "Advance Download") },
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(R.drawable.download),
+                        contentDescription = null,
+                    )
+                },
+                modifier = Modifier.clickable {
+                    showAdvancedPlaylistDownloadDialog = true
+                }
+            )
         }
         item {
             ListItem(

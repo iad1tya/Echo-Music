@@ -77,7 +77,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
-
+import iad1tya.echo.music.ui.component.AdvancedPlaylistDownloadDialog
+import iad1tya.echo.music.models.toMediaMetadata
 @Composable
 fun PlaylistMenu(
     playlist: Playlist,
@@ -265,8 +266,22 @@ fun PlaylistMenu(
         )
     }
 
+
+
     var showDeletePlaylistDialog by remember {
         mutableStateOf(false)
+    }
+    
+    var showAdvancedPlaylistDownloadDialog by remember {
+        mutableStateOf(false)
+    }
+
+    if (showAdvancedPlaylistDownloadDialog) {
+        AdvancedPlaylistDownloadDialog(
+            songs = songs.map { it.toMediaMetadata() },
+            playlistId = playlist.id,
+            onDismiss = { showAdvancedPlaylistDownloadDialog = false }
+        )
     }
 
     if (showDeletePlaylistDialog) {
@@ -561,6 +576,22 @@ fun PlaylistMenu(
                         )
                     }
                 }
+            }
+            // Advanced Download Option
+            // Advanced Download Option
+            item {
+                ListItem(
+                    headlineContent = { Text(text = "Advance Download") },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.download),
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        showAdvancedPlaylistDownloadDialog = true
+                    }
+                )
             }
         }
         if (autoPlaylist != true) {
