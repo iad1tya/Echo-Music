@@ -35,9 +35,9 @@ object OpenRouterService {
             try {
                 // Request JSON array explicitly
                 val prompt = if (mode == "Meaning") {
-                    "Translate the following lyrics to $targetLanguage, conveying the deeper meaning and context. You can rephrase to capture the essence. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines mostly but focus on meaning. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
+                    "Translate the following lyrics to $targetLanguage, conveying the deeper meaning and context. You can rephrase to capture the essence and emotion of the song. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines mostly but focus on meaning. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
                 } else {
-                    "Translate the following lyrics to $targetLanguage. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines and structure exactly. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
+                    "Provide the romanized/transliterated version of the following lyrics in Latin script. If the lyrics are already in Latin script, return them exactly as is. Do not translate the meaning into English or any other language, just transliterate the script. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines and structure exactly. Do not add any keys like 'translation', just the array: [\"romanized line 1\", \"romanized line 2\", ...].\n\nInput Lyrics:\n$text"
                 }
                 
                 val messages = JSONArray().apply {
