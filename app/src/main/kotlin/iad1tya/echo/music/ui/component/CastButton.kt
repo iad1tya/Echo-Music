@@ -183,8 +183,10 @@ private fun updateRoutes(
         onUpdate(emptyList())
         return
     }
-    val routes = router.routes.filter { route ->
-        route.matchesSelector(selector) && !route.isDefault
-    }
+    val routes = router.routes
+        .filter { route ->
+            route.matchesSelector(selector) && !route.isDefault
+        }
+        .distinctBy { it.name }
     onUpdate(routes)
 }
