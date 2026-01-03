@@ -388,7 +388,7 @@ fun AccountSettings(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.discover_tune),
+                    painter = painterResource(R.drawable.wrapped),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = Color.White
