@@ -35,6 +35,7 @@ import iad1tya.echo.music.LocalPlayerAwareWindowInsets
 import iad1tya.echo.music.R
 import iad1tya.echo.music.constants.AiProviderKey
 import iad1tya.echo.music.constants.AutoTranslateLyricsKey
+import iad1tya.echo.music.constants.AutoTranslateLyricsMismatchKey
 import iad1tya.echo.music.constants.LanguageCodeToName
 import iad1tya.echo.music.constants.OpenRouterApiKey
 import iad1tya.echo.music.constants.OpenRouterBaseUrlKey
@@ -59,6 +60,7 @@ fun AiSettings(
     var openRouterBaseUrl by rememberPreference(OpenRouterBaseUrlKey, "https://openrouter.ai/api/v1/chat/completions")
     var openRouterModel by rememberPreference(OpenRouterModelKey, "mistralai/mistral-small-3.1-24b-instruct:free")
     var autoTranslateLyrics by rememberPreference(AutoTranslateLyricsKey, false)
+    var autoTranslateLyricsMismatch by rememberPreference(AutoTranslateLyricsMismatchKey, false)
     var translateLanguage by rememberPreference(TranslateLanguageKey, "en")
 
     val aiProviders = mapOf(
@@ -202,6 +204,15 @@ fun AiSettings(
                 checked = autoTranslateLyrics,
                 onCheckedChange = { autoTranslateLyrics = it },
                 icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
+            )
+
+            SwitchPreference(
+                title = { Text("Translate only on language mismatch") },
+                description = "Skip translation if lyrics identify as your system language",
+                checked = autoTranslateLyricsMismatch,
+                onCheckedChange = { autoTranslateLyricsMismatch = it },
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) },
+                isEnabled = autoTranslateLyrics
             )
 
             if (autoTranslateLyrics) {

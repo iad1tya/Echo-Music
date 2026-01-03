@@ -40,6 +40,7 @@ firebaseBom = "33.9.0"
 googleServices = "4.4.2"
 firebaseCrashlyticsGradle = "3.0.2"
 castFramework = "21.5.0"
+mlkitLanguageId = "17.0.6"
 
 [libraries]
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
@@ -131,6 +132,7 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsGradle" }
+mlkit-language-id = { module = "com.google.mlkit:language-id", version.ref = "mlkitLanguageId" }
 
 [plugins]
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

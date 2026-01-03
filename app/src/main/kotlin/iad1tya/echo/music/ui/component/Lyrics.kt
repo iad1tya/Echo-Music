@@ -159,7 +159,10 @@ import iad1tya.echo.music.constants.OpenRouterApiKey
 import iad1tya.echo.music.constants.OpenRouterBaseUrlKey
 import iad1tya.echo.music.constants.OpenRouterModelKey
 import iad1tya.echo.music.constants.AutoTranslateLyricsKey
+import iad1tya.echo.music.constants.AutoTranslateLyricsMismatchKey
 import iad1tya.echo.music.constants.TranslateLanguageKey
+import iad1tya.echo.music.lyrics.LanguageDetectionHelper
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.M)
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -197,6 +200,7 @@ fun Lyrics(
     val openRouterBaseUrl by rememberPreference(OpenRouterBaseUrlKey, "https://openrouter.ai/api/v1/chat/completions")
     val openRouterModel by rememberPreference(OpenRouterModelKey, "mistralai/mistral-small-3.1-24b-instruct:free")
     val autoTranslateLyrics by rememberPreference(AutoTranslateLyricsKey, false)
+    val autoTranslateLyricsMismatch by rememberPreference(AutoTranslateLyricsMismatchKey, false)
     val translateLanguage by rememberPreference(TranslateLanguageKey, "en")
     val translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Literal")
     
@@ -386,19 +390,32 @@ fun Lyrics(
         }
     }
 
-    LaunchedEffect(lines, autoTranslateLyrics, openRouterApiKey, isVisible) {
+    LaunchedEffect(lines, autoTranslateLyrics, autoTranslateLyricsMismatch, openRouterApiKey, isVisible) {
         if (isVisible && autoTranslateLyrics && openRouterApiKey.isNotBlank() && lines.isNotEmpty()) {
             val needsTranslation = lines.any { it.translatedTextFlow.value == null }
             if (needsTranslation) {
-                LyricsTranslationHelper.translateLyrics(
-                    lyrics = lines,
-                    targetLanguage = translateLanguage,
-                    apiKey = openRouterApiKey,
-                    baseUrl = openRouterBaseUrl,
-                    model = openRouterModel,
-                    mode = translateMode,
-                    scope = scope
-                )
+                var shouldTranslate = true
+                if (autoTranslateLyricsMismatch) {
+                    val combinedText = lines.take(5).joinToString(" ") { it.text }
+                    val detectedLang = LanguageDetectionHelper.identifyLanguage(combinedText)
+                    val systemLang = Locale.getDefault().language
+                    
+                    if (detectedLang != null && detectedLang == systemLang) {
+                        shouldTranslate = false
+                    }
+                }
+
+                if (shouldTranslate) {
+                    LyricsTranslationHelper.translateLyrics(
+                        lyrics = lines,
+                        targetLanguage = translateLanguage,
+                        apiKey = openRouterApiKey,
+                        baseUrl = openRouterBaseUrl,
+                        model = openRouterModel,
+                        mode = translateMode,
+                        scope = scope
+                    )
+                }
             }
         }
     }
