@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -356,6 +358,50 @@ fun AccountSettings(
                 Text(
                     text = stringResource(R.string.settings),
                     style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+
+        Spacer(Modifier.height(4.dp))
+
+        // Your Recap button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(50))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF8E2DE2),
+                            Color(0xFF4A00E0)
+                        )
+                    )
+                )
+                .clickable {
+                    onClose()
+                    navController.navigate("wrapped")
+                }
+                .padding(horizontal = 18.dp, vertical = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.discover_tune),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
+                )
+
+                Spacer(Modifier.width(16.dp))
+
+                Text(
+                    text = "Your Recap",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                 )
             }
         }

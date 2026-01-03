@@ -660,6 +660,10 @@ class MainActivity : ComponentActivity() {
                     val isFindScreen = remember(navBackStackEntry) {
                         navBackStackEntry?.destination?.route == Screens.Find.route
                     }
+                    
+                    val isWrappedScreen = remember(navBackStackEntry) {
+                        navBackStackEntry?.destination?.route == "wrapped"
+                    }
 
                     val shouldShowSearchBar = remember(active, navBackStackEntry, isFindScreen) {
                         active ||
@@ -668,8 +672,8 @@ class MainActivity : ComponentActivity() {
                                 (active && !isFindScreen) 
                     }
 
-                    val shouldShowNavigationBar = remember(navBackStackEntry, active, isAmbientMode, isFindScreen) {
-                        !isAmbientMode && !isFindScreen
+                    val shouldShowNavigationBar = remember(navBackStackEntry, active, isAmbientMode, isFindScreen, isWrappedScreen) {
+                        !isAmbientMode && !isFindScreen && !isWrappedScreen
                     }
 
                     val isLandscape = remember(configuration) {
@@ -1208,7 +1212,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             bottomBar = {
-                                if (!isAmbientMode) {
+                                if (!isAmbientMode && !isWrappedScreen) {
                                     if (isFindScreen) {
                                         BottomSheetPlayer(
                                             state = playerBottomSheetState,

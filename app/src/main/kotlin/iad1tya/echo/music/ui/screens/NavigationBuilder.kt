@@ -57,6 +57,7 @@ import iad1tya.echo.music.ui.screens.playlist.OnlinePlaylistScreen
 import iad1tya.echo.music.ui.screens.playlist.TopPlaylistScreen
 import iad1tya.echo.music.ui.screens.playlist.CachePlaylistScreen
 import iad1tya.echo.music.ui.screens.search.OnlineSearchResult
+import iad1tya.echo.music.ui.screens.WrappedScreen
 import iad1tya.echo.music.ui.screens.settings.AboutScreen
 import iad1tya.echo.music.ui.screens.settings.AccountSettings
 import iad1tya.echo.music.ui.screens.settings.AppearanceSettings
@@ -299,6 +300,9 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings") {
         SettingsScreen(navController, scrollBehavior, latestVersionName)
+    }
+    composable("wrapped") {
+        WrappedScreen(navController)
     }
     composable("settings/appearance") {
         AppearanceSettings(navController, scrollBehavior)
