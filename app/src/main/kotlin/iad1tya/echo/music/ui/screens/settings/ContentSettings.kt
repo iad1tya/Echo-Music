@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -80,6 +81,7 @@ import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.utils.setAppLocale
 import java.net.Proxy
 import java.util.Locale
+import androidx.compose.ui.text.withStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +91,7 @@ fun ContentSettings(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
     // Used only before Android 13
     val (appLanguage, onAppLanguageChange) = rememberPreference(key = AppLanguageKey, defaultValue = SYSTEM_DEFAULT)
@@ -445,11 +448,47 @@ fun ContentSettings(
         }
 
         PreferenceGroupTitle(title = stringResource(R.string.sponsor_block))
-        SwitchPreference(
+        val creditText = androidx.compose.ui.text.buildAnnotatedString {
+            append("Built and maintained by ")
+            pushStringAnnotation(tag = "URL", annotation = "https://ajay.app/")
+            withStyle(style = androidx.compose.ui.text.SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)) {
+                append("Ajay Ramachandran")
+            }
+            pop()
+        }
+
+        PreferenceEntry(
             title = { Text(stringResource(R.string.enable_sponsor_block)) },
-            icon = { Icon(painterResource(R.drawable.edit), null) },
-            checked = sponsorBlockEnabled,
-            onCheckedChange = onSponsorBlockEnabledChange,
+            icon = { Icon(painterResource(R.drawable.sponsor_block), null) },
+            onClick = { onSponsorBlockEnabledChange(!sponsorBlockEnabled) },
+            trailingContent = {
+                 Switch(
+                    checked = sponsorBlockEnabled,
+                    onCheckedChange = onSponsorBlockEnabledChange,
+                    thumbContent = {
+                        Icon(
+                            painter = painterResource(
+                                id = if (sponsorBlockEnabled) R.drawable.check else R.drawable.close
+                            ),
+                            contentDescription = null,
+                            modifier = Modifier.size(SwitchDefaults.IconSize),
+                        )
+                    }
+                )
+            },
+            content = {
+                androidx.compose.foundation.text.ClickableText(
+                    text = creditText,
+                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                    onClick = { offset ->
+                        creditText.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                            .firstOrNull()?.let { annotation ->
+                                uriHandler.openUri(annotation.item)
+                            }
+                    },
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         )
 
         PreferenceGroupTitle(title = stringResource(R.string.lyrics))
