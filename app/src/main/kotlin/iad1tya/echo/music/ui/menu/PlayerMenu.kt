@@ -272,9 +272,6 @@ fun PlayerMenu(
                     }
                 }
             }
-            item {
-                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            }
         }
         
         item {
@@ -376,10 +373,6 @@ fun PlayerMenu(
                     modifier = Modifier.padding(12.dp)
                 )
             }
-        }
-
-        item {
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
         }
 
         if (artists.isNotEmpty()) {

@@ -89,6 +89,9 @@ import iad1tya.echo.music.constants.RepeatModeKey
 import iad1tya.echo.music.constants.ShowLyricsKey
 import iad1tya.echo.music.constants.SimilarContent
 import iad1tya.echo.music.constants.SkipSilenceKey
+import iad1tya.echo.music.constants.SponsorBlockEnabledKey
+import iad1tya.echo.music.api.SponsorBlockService
+import android.widget.Toast
 import iad1tya.echo.music.constants.StopMusicOnTaskClearKey
 import iad1tya.echo.music.db.MusicDatabase
 import iad1tya.echo.music.db.entities.Event
@@ -443,8 +446,15 @@ class MusicService :
             updateNotification()
         }
 
-        currentMediaMetadata.distinctUntilChangedBy { it?.id }.collectLatest(scope) { mediaMetadata ->
-            if (mediaMetadata != null && database.lyrics(mediaMetadata.id).first() == null) {
+        combine(
+            currentMediaMetadata.distinctUntilChangedBy { it?.id },
+            dataStore.data.map { it[ShowLyricsKey] ?: false }.distinctUntilChanged(),
+        ) { mediaMetadata, showLyrics ->
+            mediaMetadata to showLyrics
+        }.collectLatest(scope) { (mediaMetadata, showLyrics) ->
+            if (showLyrics && mediaMetadata != null && database.lyrics(mediaMetadata.id)
+                    .first() == null
+            ) {
                 val lyrics = lyricsHelper.getLyrics(mediaMetadata)
                 database.query {
                     upsert(
@@ -453,6 +463,40 @@ class MusicService :
                             lyrics = lyrics,
                         ),
                     )
+                }
+            }
+        }
+
+        // SponsorBlock Integration
+        val currentSkipSegments = MutableStateFlow<List<SponsorBlockService.Segment>>(emptyList())
+        
+        combine(
+            currentMediaMetadata.distinctUntilChangedBy { it?.id },
+            dataStore.data.map { it[SponsorBlockEnabledKey] ?: true }.distinctUntilChanged()
+        ) { media, enabled ->
+             media to enabled
+        }.collectLatest(scope) { (media, enabled) ->
+            if (enabled && media != null) {
+                currentSkipSegments.value = SponsorBlockService.getSkipSegments(media.id)
+            } else {
+                currentSkipSegments.value = emptyList()
+            }
+        }
+
+        // SponsorBlock Skipper
+        scope.launch {
+            while (isActive) {
+                delay(1000L)
+                if (player.isPlaying && currentSkipSegments.value.isNotEmpty()) {
+                    val position = player.currentPosition / 1000f
+                    val segment = currentSkipSegments.value.firstOrNull { position >= it.start && position < it.end }
+                    
+                    if (segment != null) {
+                        player.seekTo((segment.end * 1000).toLong())
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@MusicService, "Skipped ${segment.category}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             }
         }

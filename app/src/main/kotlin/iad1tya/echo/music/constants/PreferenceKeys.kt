@@ -115,6 +115,8 @@ val ShowTopPlaylistKey = booleanPreferencesKey("show_top_playlist")
 val ShowCachedPlaylistKey = booleanPreferencesKey("show_cached_playlist")
 val ShowUploadedPlaylistKey = booleanPreferencesKey("show_uploaded_playlist")
 val EnableGoogleCastKey = booleanPreferencesKey("enableGoogleCast")
+val SponsorBlockEnabledKey = booleanPreferencesKey("sponsorBlockEnabled")
+val SponsorBlockCategoriesKey = stringPreferencesKey("sponsorBlockCategories")
 
 enum class LibraryViewType {
     LIST,

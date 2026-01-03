@@ -101,6 +101,7 @@ fun ContentSettings(
     val (proxyUrl, onProxyUrlChange) = rememberPreference(key = ProxyUrlKey, defaultValue = "host:port")
     val (proxyUsername, onProxyUsernameChange) = rememberPreference(key = ProxyUsernameKey, defaultValue = "username")
     val (proxyPassword, onProxyPasswordChange) = rememberPreference(key = ProxyPasswordKey, defaultValue = "password")
+    val (sponsorBlockEnabled, onSponsorBlockEnabledChange) = rememberPreference(key = SponsorBlockEnabledKey, defaultValue = true)
     val (enableKugou, onEnableKugouChange) = rememberPreference(key = EnableKugouKey, defaultValue = true)
     val (enableLrclib, onEnableLrclibChange) = rememberPreference(key = EnableLrcLibKey, defaultValue = true)
     val (enableBetterLyrics, onEnableBetterLyricsChange) = rememberPreference(key = EnableBetterLyricsKey, defaultValue = true)
@@ -442,6 +443,14 @@ fun ContentSettings(
                 onClick = {showProxyConfigurationDialog = true}
             )
         }
+
+        PreferenceGroupTitle(title = stringResource(R.string.sponsor_block))
+        SwitchPreference(
+            title = { Text(stringResource(R.string.enable_sponsor_block)) },
+            icon = { Icon(painterResource(R.drawable.edit), null) },
+            checked = sponsorBlockEnabled,
+            onCheckedChange = onSponsorBlockEnabledChange,
+        )
 
         PreferenceGroupTitle(title = stringResource(R.string.lyrics))
         SwitchPreference(

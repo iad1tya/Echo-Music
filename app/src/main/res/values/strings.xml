@@ -338,6 +338,8 @@
     <string name="enable_lrclib">Enable LrcLib lyrics provider</string>
     <string name="enable_kugou">Enable KuGou lyrics provider</string>
     <string name="hide_explicit">Hide explicit content</string>
+    <string name="sponsor_block">SponsorBlock</string>
+    <string name="enable_sponsor_block">Enable SponsorBlock</string>
 
     <string name="backup_restore">Backup and restore</string>
     <string name="action_backup">Backup</string>
