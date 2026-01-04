@@ -58,6 +58,7 @@ import iad1tya.echo.music.constants.AutoDownloadOnLikeKey
 import iad1tya.echo.music.constants.AutoLoadMoreKey
 import iad1tya.echo.music.constants.DisableLoadMoreWhenRepeatAllKey
 import iad1tya.echo.music.constants.AutoSkipNextOnErrorKey
+import iad1tya.echo.music.constants.DoubleTapToLikeKey
 import iad1tya.echo.music.constants.PersistentQueueKey
 import iad1tya.echo.music.constants.SimilarContent
 import iad1tya.echo.music.constants.SkipSilenceKey
@@ -134,6 +135,10 @@ fun PlayerSettings(
     )
     val (tapAlbumArtForLyrics, onTapAlbumArtForLyricsChange) = rememberPreference(
         TapAlbumArtForLyricsKey,
+        defaultValue = false
+    )
+    val (doubleTapToLike, onDoubleTapToLikeChange) = rememberPreference(
+        DoubleTapToLikeKey,
         defaultValue = false
     )
     val (historyDuration, onHistoryDurationChange) = rememberPreference(
@@ -271,6 +276,14 @@ fun PlayerSettings(
             icon = { Icon(painterResource(R.drawable.lyrics), null) },
             checked = tapAlbumArtForLyrics,
             onCheckedChange = onTapAlbumArtForLyricsChange
+        )
+
+        SwitchPreference(
+            title = { Text("Double tap to like") },
+            description = "Double tap on album art to like the song",
+            icon = { Icon(painterResource(R.drawable.favorite), null) },
+            checked = doubleTapToLike,
+            onCheckedChange = onDoubleTapToLikeChange
         )
 
         SwitchPreference(

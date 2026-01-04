@@ -81,6 +81,7 @@ import iad1tya.echo.music.constants.ShowLyricsKey
 import iad1tya.echo.music.constants.SwipeThumbnailKey
 import iad1tya.echo.music.constants.TapAlbumArtForLyricsKey
 import iad1tya.echo.music.constants.ThumbnailCornerRadius
+import iad1tya.echo.music.constants.DoubleTapToLikeKey
 import iad1tya.echo.music.utils.rememberEnumPreference
 import iad1tya.echo.music.utils.rememberPreference
 import kotlinx.coroutines.delay
@@ -107,6 +108,7 @@ fun Thumbnail(
 
     val swipeThumbnail by rememberPreference(SwipeThumbnailKey, true)
     val tapAlbumArtForLyrics by rememberPreference(TapAlbumArtForLyricsKey, false)
+    val doubleTapToLike by rememberPreference(DoubleTapToLikeKey, false)
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
     
@@ -298,6 +300,11 @@ fun Thumbnail(
                                                 }
                                             },
                                             onDoubleTap = { offset ->
+                                                if (doubleTapToLike) {
+                                                    playerConnection.toggleLike()
+                                                    return@detectTapGestures
+                                                }
+
                                                 val currentPosition = playerConnection.player.currentPosition
                                                 val duration = playerConnection.player.duration
 
