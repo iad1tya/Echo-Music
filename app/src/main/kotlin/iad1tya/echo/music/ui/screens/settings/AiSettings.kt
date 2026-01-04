@@ -203,21 +203,21 @@ fun AiSettings(
                 title = { Text("Auto translate all songs") },
                 checked = autoTranslateLyrics,
                 onCheckedChange = { autoTranslateLyrics = it },
-                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
-            )
-
-            SwitchPreference(
-                title = { Text("Translate only on language mismatch") },
-                description = "Skip translation if lyrics identify as your system language",
-                checked = autoTranslateLyricsMismatch,
-                onCheckedChange = { autoTranslateLyricsMismatch = it },
-                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) },
-                isEnabled = autoTranslateLyrics
+                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.translate), null) }
             )
 
             if (autoTranslateLyrics) {
+                SwitchPreference(
+                    modifier = Modifier.padding(start = 24.dp),
+                    title = { Text("Translate only on language mismatch") },
+                    description = "Skip translation if lyrics identify as your system language",
+                    checked = autoTranslateLyricsMismatch,
+                    onCheckedChange = { autoTranslateLyricsMismatch = it }
+                )
+
                 var translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Translated")
                 ListPreference(
+                    modifier = Modifier.padding(start = 24.dp),
                     title = { Text("Translation Mode") },
                     selectedValue = translateMode,
                     values = listOf("Romanized", "Translated"),
@@ -228,20 +228,19 @@ fun AiSettings(
                             else -> it
                         }
                     },
-                    onValueSelected = { translateMode = it },
-                    icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
+                    onValueSelected = { translateMode = it }
                 )
-            }
 
-            if (!autoTranslateLyricsMismatch) {
-                ListPreference(
-                    title = { Text("Target Language") },
-                    selectedValue = translateLanguage,
-                    values = LanguageCodeToName.keys.sortedBy { LanguageCodeToName[it] },
-                    valueText = { LanguageCodeToName[it] ?: it },
-                    onValueSelected = { translateLanguage = it },
-                    icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
-                )
+                if (!autoTranslateLyricsMismatch) {
+                    ListPreference(
+                        modifier = Modifier.padding(start = 24.dp),
+                        title = { Text("Target Language") },
+                        selectedValue = translateLanguage,
+                        values = LanguageCodeToName.keys.sortedBy { LanguageCodeToName[it] },
+                        valueText = { LanguageCodeToName[it] ?: it },
+                        onValueSelected = { translateLanguage = it }
+                    )
+                }
             }
 
 
