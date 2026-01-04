@@ -34,16 +34,18 @@ object OpenRouterService {
         while (currentAttempt < maxRetries) {
             try {
                 // Request JSON array explicitly
+                val jsonInstruction = "Return ONLY a JSON array of strings. Do not provide any explanations, questions, or conversational text. If the target language code is unclear, map it to the closest match or default to English. Output only the JSON array."
+                
                 val prompt = if (mode == "Meaning") {
-                    "Translate the following lyrics to $targetLanguage, conveying the deeper meaning and context. You can rephrase to capture the essence and emotion of the song. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines mostly but focus on meaning. Do not add any keys like 'translation', just the array: [\"translated line 1\", \"translated line 2\", ...].\n\nInput Lyrics:\n$text"
+                    "Translate the following lyrics to $targetLanguage, conveying the deeper meaning and context. You can rephrase to capture the essence and emotion of the song. Preserve the number of lines mostly but focus on meaning. $jsonInstruction\n\nInput Lyrics:\n$text"
                 } else {
-                    "Provide the romanized/transliterated version of the following lyrics in Latin script. If the lyrics are already in Latin script, return them exactly as is. Do not translate the meaning into English or any other language, just transliterate the script. Return ONLY a JSON array of strings, where each string corresponds to a line of the input. Preserve the number of lines and structure exactly. Do not add any keys like 'translation', just the array: [\"romanized line 1\", \"romanized line 2\", ...].\n\nInput Lyrics:\n$text"
+                    "Translate the following lyrics to $targetLanguage literally. Provide a direct, word-for-word translation where possible, maintaining the original structure. Do not romanize unless the target language script requires it. Preserve the number of lines and structure exactly. $jsonInstruction\n\nInput Lyrics:\n$text"
                 }
                 
                 val messages = JSONArray().apply {
                     put(JSONObject().apply {
                         put("role", "system")
-                        put("content", "You are a helpful assistant that translates lyrics accurately. You must output valid JSON.")
+                        put("content", "You are a helpful assistant that translates lyrics. You MUST return ONLY a valid JSON array of strings. Do not output anything else. Do not ask questions.")
                     })
                     put(JSONObject().apply {
                         put("role", "user")
@@ -52,14 +54,20 @@ object OpenRouterService {
                 }
 
                 val jsonBody = JSONObject().apply {
-                    put("model", model.ifBlank { "google/gemini-flash-1.5" })
+                    if (model.isNotBlank()) {
+                        put("model", model)
+                    }
                     put("messages", messages)
                     // Removed response_format to ensure compatibility with all models
                 }
 
                 val request = Request.Builder()
                     .url(baseUrl.ifBlank { "https://openrouter.ai/api/v1/chat/completions" })
-                    .addHeader("Authorization", "Bearer ${apiKey.trim()}")
+                    .apply {
+                        if (apiKey.isNotBlank()) {
+                            addHeader("Authorization", "Bearer ${apiKey.trim()}")
+                        }
+                    }
                     .addHeader("Content-Type", "application/json")
                     .addHeader("HTTP-Referer", "https://github.com/iad1tya/Echo-Music")
                     .addHeader("X-Title", "Echo Music")
