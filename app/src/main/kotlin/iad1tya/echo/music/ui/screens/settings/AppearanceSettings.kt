@@ -172,12 +172,12 @@ fun AppearanceSettings(
 
     val (swipeToSong, onSwipeToSongChange) = rememberPreference(
         SwipeToSongKey,
-        defaultValue = false
+        defaultValue = true
     )
 
     val (swipeToRemoveSong, onSwipeToRemoveSongChange) = rememberPreference(
         SwipeToRemoveSongKey,
-        defaultValue = false
+        defaultValue = true
     )
 
     val (showLikedPlaylist, onShowLikedPlaylistChange) = rememberPreference(
