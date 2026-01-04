@@ -216,15 +216,15 @@ fun AiSettings(
             )
 
             if (autoTranslateLyrics) {
-                var translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Literal")
+                var translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Translated")
                 ListPreference(
                     title = { Text("Translation Mode") },
                     selectedValue = translateMode,
-                    values = listOf("Literal", "Meaning"),
+                    values = listOf("Romanized", "Translated"),
                     valueText = { 
                         when(it) {
-                            "Literal" -> "Simple / Literal"
-                            "Meaning" -> "Meaning / Contextual"
+                            "Romanized" -> "Romanized (Script only)"
+                            "Translated" -> "Translated"
                             else -> it
                         }
                     },
@@ -233,14 +233,16 @@ fun AiSettings(
                 )
             }
 
-            ListPreference(
-                title = { Text("Target Language") },
-                selectedValue = translateLanguage,
-                values = LanguageCodeToName.keys.sortedBy { LanguageCodeToName[it] },
-                valueText = { LanguageCodeToName[it] ?: it },
-                onValueSelected = { translateLanguage = it },
-                icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
-            )
+            if (!autoTranslateLyricsMismatch) {
+                ListPreference(
+                    title = { Text("Target Language") },
+                    selectedValue = translateLanguage,
+                    values = LanguageCodeToName.keys.sortedBy { LanguageCodeToName[it] },
+                    valueText = { LanguageCodeToName[it] ?: it },
+                    onValueSelected = { translateLanguage = it },
+                    icon = { androidx.compose.material3.Icon(painterResource(R.drawable.language), null) }
+                )
+            }
 
 
         }

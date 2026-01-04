@@ -36,10 +36,10 @@ object OpenRouterService {
                 // Request JSON array explicitly
                 val jsonInstruction = "Return ONLY a JSON array of strings. Do not provide any explanations, questions, or conversational text. If the target language code is unclear, map it to the closest match or default to English. Output only the JSON array."
                 
-                val prompt = if (mode == "Meaning") {
-                    "Translate the following lyrics to $targetLanguage, conveying the deeper meaning and context. You can rephrase to capture the essence and emotion of the song. Preserve the number of lines mostly but focus on meaning. $jsonInstruction\n\nInput Lyrics:\n$text"
+                val prompt = if (mode == "Romanized") {
+                    "Provide the romanized/transliterated version of the following lyrics in Latin script. If the lyrics are already in Latin script, return them exactly as is. Do not translate the meaning into English or any other language, just transliterate the script. Preserve the number of lines and structure exactly. $jsonInstruction\n\nInput Lyrics:\n$text"
                 } else {
-                    "Translate the following lyrics to $targetLanguage literally. Provide a direct, word-for-word translation where possible, maintaining the original structure. Do not romanize unless the target language script requires it. Preserve the number of lines and structure exactly. $jsonInstruction\n\nInput Lyrics:\n$text"
+                    "Translate the following lyrics to $targetLanguage. Provide a direct, accurate translation. Preserve the number of lines and structure exactly. $jsonInstruction\n\nInput Lyrics:\n$text"
                 }
                 
                 val messages = JSONArray().apply {

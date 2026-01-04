@@ -408,7 +408,7 @@ fun Lyrics(
                 if (shouldTranslate) {
                     LyricsTranslationHelper.translateLyrics(
                         lyrics = lines,
-                        targetLanguage = translateLanguage,
+                        targetLanguage = if (autoTranslateLyricsMismatch) Locale.getDefault().language else translateLanguage,
                         apiKey = openRouterApiKey,
                         baseUrl = openRouterBaseUrl,
                         model = openRouterModel,
