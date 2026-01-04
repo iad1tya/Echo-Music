@@ -389,7 +389,7 @@ fun AccountSettings(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Your recap of 2025 is here",
+                    text = "Your 2025 recap is here",
                     style = MaterialTheme.typography.titleMedium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold
