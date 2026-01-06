@@ -32,7 +32,6 @@ constructor(
 ) {
     private var lyricsProviders =
         listOf(
-            BetterLyricsProvider,
             LrcLibLyricsProvider,
             KuGouLyricsProvider,
             YouTubeSubtitleLyricsProvider,
@@ -42,28 +41,19 @@ constructor(
     val preferred =
         context.dataStore.data
             .map {
-                it[PreferredLyricsProviderKey].toEnum(PreferredLyricsProvider.BETTER_LYRICS)
+                it[PreferredLyricsProviderKey].toEnum(PreferredLyricsProvider.LRCLIB)
             }.distinctUntilChanged()
             .map {
                 lyricsProviders = when (it) {
                     PreferredLyricsProvider.LRCLIB -> listOf(
                         LrcLibLyricsProvider,
-                        BetterLyricsProvider,
                         KuGouLyricsProvider,
                         YouTubeSubtitleLyricsProvider,
                         YouTubeLyricsProvider
                     )
                     PreferredLyricsProvider.KUGOU -> listOf(
                         KuGouLyricsProvider,
-                        BetterLyricsProvider,
                         LrcLibLyricsProvider,
-                        YouTubeSubtitleLyricsProvider,
-                        YouTubeLyricsProvider
-                    )
-                    PreferredLyricsProvider.BETTER_LYRICS -> listOf(
-                        BetterLyricsProvider,
-                        LrcLibLyricsProvider,
-                        KuGouLyricsProvider,
                         YouTubeSubtitleLyricsProvider,
                         YouTubeLyricsProvider
                     )
