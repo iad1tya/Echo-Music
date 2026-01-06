@@ -625,6 +625,18 @@ fun AppearanceSettings(
                 }
             },
         )
+
+        val (showFindInNavbar, onShowFindInNavbarChange) = rememberPreference(
+            iad1tya.echo.music.constants.ShowFindInNavbarKey,
+            defaultValue = true
+        )
+
+        SwitchPreference(
+            title = { Text(stringResource(R.string.find_song)) },
+            icon = { Icon(painterResource(R.drawable.graphic_eq), null) },
+            checked = showFindInNavbar,
+            onCheckedChange = onShowFindInNavbarChange
+        )
     }
 
     Box {

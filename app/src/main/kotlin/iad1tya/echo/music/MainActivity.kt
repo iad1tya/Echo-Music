@@ -558,7 +558,11 @@ class MainActivity : ComponentActivity() {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
-                    val navigationItems = remember { Screens.MainScreens }
+                    val (showFindInNavbar) = rememberPreference(iad1tya.echo.music.constants.ShowFindInNavbarKey, defaultValue = true)
+                    val navigationItems = remember(showFindInNavbar) {
+                        if (showFindInNavbar) Screens.MainScreens
+                        else Screens.MainScreens.filter { it != Screens.Find }
+                    }
                     val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                     val (useNewMiniPlayerDesign) = rememberPreference(UseNewMiniPlayerDesignKey, defaultValue = true)
                     val defaultOpenTab = remember {

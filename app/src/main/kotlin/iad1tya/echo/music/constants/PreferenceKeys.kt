@@ -335,6 +335,7 @@ val AccountChannelHandleKey = stringPreferencesKey("accountChannelHandle")
 val ActiveAccountIdKey = stringPreferencesKey("activeAccountId")
 val UseLoginForBrowse = booleanPreferencesKey("useLoginForBrowse")
 val LastImportantNoticeVersionKey = stringPreferencesKey("lastImportantNoticeVersion")
+val ShowFindInNavbarKey = booleanPreferencesKey("show_find_in_navbar")
 
 
 val LanguageCodeToName =
