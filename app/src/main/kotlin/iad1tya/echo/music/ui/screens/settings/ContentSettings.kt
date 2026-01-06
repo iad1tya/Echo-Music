@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
+import android.Manifest
 import android.provider.Settings
 import android.os.LocaleList
 import android.util.Log
@@ -83,15 +84,22 @@ import java.net.Proxy
 import java.util.Locale
 import androidx.compose.ui.text.withStyle
 
+import androidx.hilt.navigation.compose.hiltViewModel
+import iad1tya.echo.music.viewmodels.SettingsViewModel
+import androidx.compose.runtime.collectAsState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentSettings(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    
+
 
     // Used only before Android 13
     val (appLanguage, onAppLanguageChange) = rememberPreference(key = AppLanguageKey, defaultValue = SYSTEM_DEFAULT)
@@ -490,6 +498,8 @@ fun ContentSettings(
             }
         )
 
+
+
         PreferenceGroupTitle(title = stringResource(R.string.lyrics))
         SwitchPreference(
             title = { Text(stringResource(R.string.enable_lrclib)) },
@@ -523,6 +533,8 @@ fun ContentSettings(
             icon = { Icon(painterResource(R.drawable.language_korean_latin), null) },
             onClick = { navController.navigate("settings/content/romanization") }
         )
+
+
 
         PreferenceGroupTitle(title = stringResource(R.string.misc))
         EditTextPreference(

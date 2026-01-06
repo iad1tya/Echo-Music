@@ -113,9 +113,19 @@ val ShowDownloadedPlaylistKey = booleanPreferencesKey("show_downloaded_playlist"
 val ShowTopPlaylistKey = booleanPreferencesKey("show_top_playlist")
 val ShowCachedPlaylistKey = booleanPreferencesKey("show_cached_playlist")
 val ShowUploadedPlaylistKey = booleanPreferencesKey("show_uploaded_playlist")
+val ShowLocalPlaylistKey = booleanPreferencesKey("show_local_playlist")
 val EnableGoogleCastKey = booleanPreferencesKey("enableGoogleCast")
 val SponsorBlockEnabledKey = booleanPreferencesKey("sponsorBlockEnabled")
 val SponsorBlockCategoriesKey = stringPreferencesKey("sponsorBlockCategories")
+
+// Local Media Scanner
+val ScanPathsKey = stringPreferencesKey("scanPaths")
+val ExcludedScanPathsKey = stringPreferencesKey("excludedScanPaths")
+val ScannerSensitivityKey = intPreferencesKey("scannerSensitivity") // 1, 2, 3
+val ScannerStrictExtKey = booleanPreferencesKey("scannerStrictExt")
+val ScannerStrictFilePathsKey = booleanPreferencesKey("scannerStrictFilePaths")
+val LastLocalScanKey = longPreferencesKey("lastLocalScan")
+val LookupYtmArtistsKey = booleanPreferencesKey("lookupYtmArtists")
 
 enum class LibraryViewType {
     LIST,
@@ -133,7 +143,8 @@ enum class SongFilter {
     LIBRARY,
     LIKED,
     DOWNLOADED,
-    UPLOADED
+    UPLOADED,
+    LOCAL
 }
 
 enum class ArtistFilter {

@@ -58,6 +58,9 @@ import iad1tya.echo.music.ui.component.Material3SettingsGroup
 import iad1tya.echo.music.ui.component.Material3SettingsItem
 import iad1tya.echo.music.ui.component.fetchReleaseNotesText
 import iad1tya.echo.music.ui.utils.backToMain
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -312,6 +315,18 @@ fun SettingsScreen(
                     icon = painterResource(R.drawable.language),
                     title = { Text(stringResource(R.string.content)) },
                     onClick = { navController.navigate("settings/content") }
+                )
+            )
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Material3SettingsGroup(
+            items = listOf(
+                Material3SettingsItem(
+                    icon = painterResource(R.drawable.library_music),
+                    title = { Text(stringResource(R.string.local_media)) },
+                    onClick = { navController.navigate("settings/local_media") }
                 )
             )
         )

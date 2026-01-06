@@ -16,8 +16,15 @@ fun Song.toMediaItem() =
     MediaItem
         .Builder()
         .setMediaId(song.id)
-        .setUri(song.id)
-        .setCustomCacheKey(song.id)
+        .apply {
+            if (song.isLocal && song.localPath != null) {
+                setUri(android.net.Uri.fromFile(java.io.File(song.localPath!!)))
+            } else {
+                setUri(song.id)
+                setCustomCacheKey(song.id)
+                setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG)
+            }
+        }
         .setTag(toMediaMetadata())
         .setMediaMetadata(
             androidx.media3.common.MediaMetadata
@@ -30,7 +37,6 @@ fun Song.toMediaItem() =
                 .setMediaType(MEDIA_TYPE_MUSIC)
                 .build(),
         )
-        .setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG)
         .build()
 
 fun SongItem.toMediaItem() =
