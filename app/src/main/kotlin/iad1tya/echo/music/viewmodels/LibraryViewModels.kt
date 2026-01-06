@@ -89,6 +89,15 @@ constructor(
                     SongFilter.LIKED -> database.likedSongs(sortType, descending).map { it.filterExplicit(hideExplicit) }
                     SongFilter.DOWNLOADED -> database.downloadedSongs(sortType, descending).map { it.filterExplicit(hideExplicit) }
                     SongFilter.UPLOADED -> database.uploadedSongs(sortType, descending).map { it.filterExplicit(hideExplicit) }
+                    SongFilter.LOCAL -> database.localSongs(sortType, descending).map { it.filterExplicit(hideExplicit) }
+                }.map { list ->
+                    android.util.Log.d("LibrarySongsVM", "Filter: $filter, Songs found: ${list.size}")
+                    if (filter == SongFilter.LOCAL) {
+                        list.take(5).forEach { song ->
+                            android.util.Log.d("LibrarySongsVM", "Local Song: ${song.song.title}, Path: ${song.song.localPath}")
+                        }
+                    }
+                    list
                 }
             }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 

@@ -5,6 +5,10 @@ All notable changes to Echo Music will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.3] - 2026-01-06
+- **Local Media Scanner**: Added ability to scan and import locally stored music files via the Content settings.
+- **Manual Lyrics Fix**: Fixed an issue where manually selected lyrics were overwritten by auto-fetched lyrics.
+
 ## [3.1.3] - 2025-11-22
 - Fixed a database migration issue.  
   The schema was at version 25, but only a **1 → 2** migration was defined.  

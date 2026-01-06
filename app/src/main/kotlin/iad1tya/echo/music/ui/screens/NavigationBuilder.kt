@@ -337,6 +337,9 @@ fun NavGraphBuilder.navigationBuilder(
     composable("settings/ai") {
         AiSettings(navController, scrollBehavior)
     }
+    composable("settings/local_media") {
+        iad1tya.echo.music.ui.screens.settings.LocalMediaSettings(androidx.hilt.navigation.compose.hiltViewModel())
+    }
     composable("login") {
         LoginScreen(navController)
     }

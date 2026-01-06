@@ -93,7 +93,7 @@ class MusicDatabase(
         SortedSongAlbumMap::class,
         PlaylistSongMapPreview::class,
     ],
-    version = 25,
+    version = 26,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -493,5 +493,12 @@ class Migration22To23: AutoMigrationSpec {
         // Add isUploaded column
         db.execSQL("ALTER TABLE song ADD COLUMN isUploaded INTEGER NOT NULL DEFAULT 0")
         db.execSQL("ALTER TABLE album ADD COLUMN isUploaded INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+class Migration25To26 : AutoMigrationSpec {
+    override fun onPostMigrate(db: SupportSQLiteDatabase) {
+        // Add localPath column
+        db.execSQL("ALTER TABLE song ADD COLUMN localPath TEXT DEFAULT NULL")
     }
 }

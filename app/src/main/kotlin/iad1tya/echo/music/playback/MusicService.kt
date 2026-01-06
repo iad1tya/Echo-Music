@@ -456,13 +456,16 @@ class MusicService :
                     .first() == null
             ) {
                 val lyrics = lyricsHelper.getLyrics(mediaMetadata)
-                database.query {
-                    upsert(
-                        LyricsEntity(
-                            id = mediaMetadata.id,
-                            lyrics = lyrics,
-                        ),
-                    )
+                // Check again if lyrics were added manually during the fetch duration
+                if (database.lyrics(mediaMetadata.id).first() == null) {
+                    database.query {
+                        upsert(
+                            LyricsEntity(
+                                id = mediaMetadata.id,
+                                lyrics = lyrics,
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -1522,6 +1525,9 @@ class MusicService :
 
     private fun createDataSourceFactory(): DataSource.Factory {
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
+            if (dataSpec.uri.scheme == "file") {
+                return@Factory dataSpec
+            }
             val mediaId = dataSpec.key ?: run {
                 Log.e("MusicService", "DataSpec has no media id key")
                 throw PlaybackException(

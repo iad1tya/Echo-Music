@@ -128,6 +128,7 @@ fun AutoPlaylistScreen(
     val playlist = when (viewModel.playlist) {
         "liked" -> stringResource(R.string.liked)
         "uploaded" -> stringResource(R.string.uploaded_playlist)
+        "local" -> "Local Songs"
         else -> stringResource(R.string.offline)
     }
 
@@ -160,6 +161,7 @@ fun AutoPlaylistScreen(
         "liked" -> PlaylistType.LIKE
         "downloaded" -> PlaylistType.DOWNLOAD
         "uploaded" -> PlaylistType.UPLOADED
+        "local" -> PlaylistType.LOCAL
         else -> PlaylistType.OTHER
     }
 
@@ -290,6 +292,7 @@ fun AutoPlaylistScreen(
                             PlaylistType.LIKE -> stringResource(R.string.no_liked_songs)
                             PlaylistType.DOWNLOAD -> stringResource(R.string.no_downloaded_songs)
                             PlaylistType.UPLOADED -> stringResource(R.string.no_uploaded_songs)
+                            PlaylistType.LOCAL -> "No local songs found"
                             else -> stringResource(R.string.playlist_is_empty)
                         }
                         EmptyPlaceholder(
@@ -710,5 +713,5 @@ fun AutoPlaylistScreen(
 }
 
 enum class PlaylistType {
-    LIKE, DOWNLOAD, UPLOADED, OTHER
+    LIKE, DOWNLOAD, UPLOADED, LOCAL, OTHER
 }

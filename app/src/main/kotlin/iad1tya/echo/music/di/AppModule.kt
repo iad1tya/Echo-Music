@@ -13,6 +13,7 @@ import iad1tya.echo.music.db.MusicDatabase
 import iad1tya.echo.music.repositories.AccountRepository
 import iad1tya.echo.music.utils.dataStore
 import iad1tya.echo.music.utils.get
+import iad1tya.echo.music.utils.scanners.LocalMediaScanner
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -92,4 +93,11 @@ object AppModule {
             databaseProvider
         )
     }
+
+    @Singleton
+    @Provides
+    fun provideLocalMediaScanner(
+        @ApplicationContext context: Context,
+        database: MusicDatabase,
+    ): LocalMediaScanner = LocalMediaScanner(context, database)
 }

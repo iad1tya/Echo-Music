@@ -235,8 +235,7 @@ import java.net.URLEncoder
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
-import iad1tya.echo.music.constants.ShowNewYearWelcomeKey
-import iad1tya.echo.music.ui.component.NewYearWelcomeDialog
+
 
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
@@ -553,23 +552,17 @@ class MainActivity : ComponentActivity() {
                     val bottomInsetDp = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
                     val navController = rememberNavController()
-                    val (showNewYearWelcome, onShowNewYearWelcomeChange) = rememberPreference(ShowNewYearWelcomeKey, defaultValue = true)
 
-                    if (showNewYearWelcome && !showSplash) {
-                        NewYearWelcomeDialog(
-                            onDismiss = { onShowNewYearWelcomeChange(false) },
-                            onSeeWrap = {
-                                onShowNewYearWelcomeChange(false)
-                                navController.navigate("wrapped")
-                            }
-                        )
-                    }
                     val homeViewModel: HomeViewModel = hiltViewModel()
                     val accountImageUrl by homeViewModel.accountImageUrl.collectAsState()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
-                    val navigationItems = remember { Screens.MainScreens }
+                    val (showFindInNavbar) = rememberPreference(iad1tya.echo.music.constants.ShowFindInNavbarKey, defaultValue = true)
+                    val navigationItems = remember(showFindInNavbar) {
+                        if (showFindInNavbar) Screens.MainScreens
+                        else Screens.MainScreens.filter { it != Screens.Find }
+                    }
                     val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                     val (useNewMiniPlayerDesign) = rememberPreference(UseNewMiniPlayerDesignKey, defaultValue = true)
                     val defaultOpenTab = remember {

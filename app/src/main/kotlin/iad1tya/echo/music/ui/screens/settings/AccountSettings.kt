@@ -364,41 +364,7 @@ fun AccountSettings(
 
         Spacer(Modifier.height(4.dp))
 
-        // Your Recap button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF8E2DE2),
-                            Color(0xFF4A00E0)
-                        )
-                    )
-                )
-                .clickable {
-                    onClose()
-                    navController.navigate("wrapped")
-                }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Your 2025 recap is here",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
-        }
 
-        Spacer(Modifier.height(4.dp))
 
         if (isLoggedIn) {
             SwitchPreference(

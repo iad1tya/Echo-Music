@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
+import android.Manifest
 import android.provider.Settings
 import android.os.LocaleList
 import android.util.Log
@@ -83,15 +84,22 @@ import java.net.Proxy
 import java.util.Locale
 import androidx.compose.ui.text.withStyle
 
+import androidx.hilt.navigation.compose.hiltViewModel
+import iad1tya.echo.music.viewmodels.SettingsViewModel
+import androidx.compose.runtime.collectAsState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentSettings(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    
+
 
     // Used only before Android 13
     val (appLanguage, onAppLanguageChange) = rememberPreference(key = AppLanguageKey, defaultValue = SYSTEM_DEFAULT)
@@ -107,11 +115,10 @@ fun ContentSettings(
     val (sponsorBlockEnabled, onSponsorBlockEnabledChange) = rememberPreference(key = SponsorBlockEnabledKey, defaultValue = true)
     val (enableKugou, onEnableKugouChange) = rememberPreference(key = EnableKugouKey, defaultValue = true)
     val (enableLrclib, onEnableLrclibChange) = rememberPreference(key = EnableLrcLibKey, defaultValue = true)
-    val (enableBetterLyrics, onEnableBetterLyricsChange) = rememberPreference(key = EnableBetterLyricsKey, defaultValue = true)
     val (preferredProvider, onPreferredProviderChange) =
         rememberEnumPreference(
             key = PreferredLyricsProviderKey,
-            defaultValue = PreferredLyricsProvider.BETTER_LYRICS,
+            defaultValue = PreferredLyricsProvider.LRCLIB,
         )
     val (lengthTop, onLengthTopChange) = rememberPreference(key = TopSize, defaultValue = "50")
     val (quickPicks, onQuickPicksChange) = rememberEnumPreference(key = QuickPicksKey, defaultValue = QuickPicks.QUICK_PICKS)
@@ -491,6 +498,8 @@ fun ContentSettings(
             }
         )
 
+
+
         PreferenceGroupTitle(title = stringResource(R.string.lyrics))
         SwitchPreference(
             title = { Text(stringResource(R.string.enable_lrclib)) },
@@ -504,22 +513,16 @@ fun ContentSettings(
             checked = enableKugou,
             onCheckedChange = onEnableKugouChange,
         )
-        SwitchPreference(
-            title = { Text(stringResource(R.string.enable_better_lyrics)) },
-            icon = { Icon(painterResource(R.drawable.lyrics), null) },
-            checked = enableBetterLyrics,
-            onCheckedChange = onEnableBetterLyricsChange,
-        )
+
         ListPreference(
             title = { Text(stringResource(R.string.set_first_lyrics_provider)) },
             icon = { Icon(painterResource(R.drawable.lyrics), null) },
             selectedValue = preferredProvider,
-            values = listOf(PreferredLyricsProvider.LRCLIB, PreferredLyricsProvider.KUGOU, PreferredLyricsProvider.BETTER_LYRICS),
+            values = listOf(PreferredLyricsProvider.LRCLIB, PreferredLyricsProvider.KUGOU),
             valueText = {
                 when (it) {
                     PreferredLyricsProvider.LRCLIB -> "LrcLib"
                     PreferredLyricsProvider.KUGOU -> "KuGou"
-                    PreferredLyricsProvider.BETTER_LYRICS -> "Better Lyrics"
                 }
             },
             onValueSelected = onPreferredProviderChange,
@@ -530,6 +533,8 @@ fun ContentSettings(
             icon = { Icon(painterResource(R.drawable.language_korean_latin), null) },
             onClick = { navController.navigate("settings/content/romanization") }
         )
+
+
 
         PreferenceGroupTitle(title = stringResource(R.string.misc))
         EditTextPreference(

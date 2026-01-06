@@ -35,7 +35,6 @@ val ContentLanguageKey = stringPreferencesKey("contentLanguage")
 val ContentCountryKey = stringPreferencesKey("contentCountry")
 val EnableKugouKey = booleanPreferencesKey("enableKugou")
 val EnableLrcLibKey = booleanPreferencesKey("enableLrclib")
-val EnableBetterLyricsKey = booleanPreferencesKey("enableBetterLyrics")
 val HideExplicitKey = booleanPreferencesKey("hideExplicit")
 val ProxyEnabledKey = booleanPreferencesKey("proxyEnabled")
 val ProxyUrlKey = stringPreferencesKey("proxyUrl")
@@ -114,9 +113,19 @@ val ShowDownloadedPlaylistKey = booleanPreferencesKey("show_downloaded_playlist"
 val ShowTopPlaylistKey = booleanPreferencesKey("show_top_playlist")
 val ShowCachedPlaylistKey = booleanPreferencesKey("show_cached_playlist")
 val ShowUploadedPlaylistKey = booleanPreferencesKey("show_uploaded_playlist")
+val ShowLocalPlaylistKey = booleanPreferencesKey("show_local_playlist")
 val EnableGoogleCastKey = booleanPreferencesKey("enableGoogleCast")
 val SponsorBlockEnabledKey = booleanPreferencesKey("sponsorBlockEnabled")
 val SponsorBlockCategoriesKey = stringPreferencesKey("sponsorBlockCategories")
+
+// Local Media Scanner
+val ScanPathsKey = stringPreferencesKey("scanPaths")
+val ExcludedScanPathsKey = stringPreferencesKey("excludedScanPaths")
+val ScannerSensitivityKey = intPreferencesKey("scannerSensitivity") // 1, 2, 3
+val ScannerStrictExtKey = booleanPreferencesKey("scannerStrictExt")
+val ScannerStrictFilePathsKey = booleanPreferencesKey("scannerStrictFilePaths")
+val LastLocalScanKey = longPreferencesKey("lastLocalScan")
+val LookupYtmArtistsKey = booleanPreferencesKey("lookupYtmArtists")
 
 enum class LibraryViewType {
     LIST,
@@ -134,7 +143,8 @@ enum class SongFilter {
     LIBRARY,
     LIKED,
     DOWNLOADED,
-    UPLOADED
+    UPLOADED,
+    LOCAL
 }
 
 enum class ArtistFilter {
@@ -261,7 +271,6 @@ enum class QuickPicks {
 enum class PreferredLyricsProvider {
     LRCLIB,
     KUGOU,
-    BETTER_LYRICS,
 }
 
 enum class PlayerButtonsStyle {
@@ -335,7 +344,8 @@ val AccountChannelHandleKey = stringPreferencesKey("accountChannelHandle")
 val ActiveAccountIdKey = stringPreferencesKey("activeAccountId")
 val UseLoginForBrowse = booleanPreferencesKey("useLoginForBrowse")
 val LastImportantNoticeVersionKey = stringPreferencesKey("lastImportantNoticeVersion")
-val ShowNewYearWelcomeKey = booleanPreferencesKey("show_new_year_welcome")
+val ShowFindInNavbarKey = booleanPreferencesKey("show_find_in_navbar")
+
 
 val LanguageCodeToName =
     mapOf(
