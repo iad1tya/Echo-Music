@@ -235,8 +235,7 @@ import java.net.URLEncoder
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
-import iad1tya.echo.music.constants.ShowNewYearWelcomeKey
-import iad1tya.echo.music.ui.component.NewYearWelcomeDialog
+
 
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
@@ -553,17 +552,7 @@ class MainActivity : ComponentActivity() {
                     val bottomInsetDp = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
                     val navController = rememberNavController()
-                    val (showNewYearWelcome, onShowNewYearWelcomeChange) = rememberPreference(ShowNewYearWelcomeKey, defaultValue = true)
 
-                    if (showNewYearWelcome && !showSplash) {
-                        NewYearWelcomeDialog(
-                            onDismiss = { onShowNewYearWelcomeChange(false) },
-                            onSeeWrap = {
-                                onShowNewYearWelcomeChange(false)
-                                navController.navigate("wrapped")
-                            }
-                        )
-                    }
                     val homeViewModel: HomeViewModel = hiltViewModel()
                     val accountImageUrl by homeViewModel.accountImageUrl.collectAsState()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
