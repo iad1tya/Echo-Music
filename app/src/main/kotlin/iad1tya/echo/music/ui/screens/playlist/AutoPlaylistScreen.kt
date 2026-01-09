@@ -2,6 +2,7 @@ package iad1tya.echo.music.ui.screens.playlist
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -128,7 +129,7 @@ fun AutoPlaylistScreen(
     val playlist = when (viewModel.playlist) {
         "liked" -> stringResource(R.string.liked)
         "uploaded" -> stringResource(R.string.uploaded_playlist)
-        "local" -> "Local Songs"
+        "local" -> stringResource(R.string.local_media)
         else -> stringResource(R.string.offline)
     }
 
@@ -292,7 +293,7 @@ fun AutoPlaylistScreen(
                             PlaylistType.LIKE -> stringResource(R.string.no_liked_songs)
                             PlaylistType.DOWNLOAD -> stringResource(R.string.no_downloaded_songs)
                             PlaylistType.UPLOADED -> stringResource(R.string.no_uploaded_songs)
-                            PlaylistType.LOCAL -> "No local songs found"
+                            PlaylistType.LOCAL -> stringResource(R.string.no_local_media_found)
                             else -> stringResource(R.string.playlist_is_empty)
                         }
                         EmptyPlaceholder(
@@ -317,15 +318,29 @@ fun AutoPlaylistScreen(
                                     modifier = Modifier
                                         .size(AlbumThumbnailSize)
                                         .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                                        .fillMaxWidth(),
+                                        .fillMaxWidth()
+                                        .then(
+                                            if (playlistType == PlaylistType.LOCAL) {
+                                                Modifier.background(Color(0xFFB7A3E3))
+                                            } else Modifier
+                                        ),
                                 ) {
-                                    AsyncImage(
-                                        model = songs!![0].song.thumbnailUrl,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                                    if (playlistType == PlaylistType.LOCAL) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.storage),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(64.dp),
+                                            tint = Color.Black
                                         )
+                                    } else {
+                                        AsyncImage(
+                                            model = songs!![0].song.thumbnailUrl,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                                        )
+                                    }
                                     }
 
                                     Column(
@@ -356,82 +371,85 @@ fun AutoPlaylistScreen(
                                             fontWeight = FontWeight.Normal,
                                         )
 
-                                        Row {
-                                            when (downloadState) {
-                                                Download.STATE_COMPLETED -> {
-                                                    IconButton(
-                                                        onClick = {
-                                                            showRemoveDownloadDialog = true
-                                                        },
-                                                    ) {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.offline),
-                                                            contentDescription = null,
-                                                        )
+                                        // Only show download and playlist buttons for non-local playlists
+                                        if (playlistType != PlaylistType.LOCAL) {
+                                            Row {
+                                                when (downloadState) {
+                                                    Download.STATE_COMPLETED -> {
+                                                        IconButton(
+                                                            onClick = {
+                                                                showRemoveDownloadDialog = true
+                                                            },
+                                                        ) {
+                                                            Icon(
+                                                                painter = painterResource(R.drawable.offline),
+                                                                contentDescription = null,
+                                                            )
+                                                        }
+                                                    }
+
+                                                    Download.STATE_DOWNLOADING -> {
+                                                        IconButton(
+                                                            onClick = {
+                                                                songs!!.forEach { song ->
+                                                                    DownloadService.sendRemoveDownload(
+                                                                        context,
+                                                                        ExoDownloadService::class.java,
+                                                                        song.song.id,
+                                                                        false,
+                                                                    )
+                                                                }
+                                                            },
+                                                        ) {
+                                                            CircularProgressIndicator(
+                                                                strokeWidth = 2.dp,
+                                                                modifier = Modifier.size(24.dp),
+                                                            )
+                                                        }
+                                                    }
+
+                                                    else -> {
+                                                        IconButton(
+                                                            onClick = {
+                                                                songs!!.forEach { song ->
+                                                                    val downloadRequest =
+                                                                        DownloadRequest
+                                                                            .Builder(
+                                                                                song.song.id,
+                                                                                song.song.id.toUri(),
+                                                                            )
+                                                                            .setCustomCacheKey(song.song.id)
+                                                                            .setData(song.song.title.toByteArray())
+                                                                            .build()
+                                                                    DownloadService.sendAddDownload(
+                                                                        context,
+                                                                        ExoDownloadService::class.java,
+                                                                        downloadRequest,
+                                                                        false,
+                                                                    )
+                                                                }
+                                                            },
+                                                        ) {
+                                                            Icon(
+                                                                painter = painterResource(R.drawable.download),
+                                                                contentDescription = null,
+                                                            )
+                                                        }
                                                     }
                                                 }
 
-                                                Download.STATE_DOWNLOADING -> {
-                                                    IconButton(
-                                                        onClick = {
-                                                            songs!!.forEach { song ->
-                                                                DownloadService.sendRemoveDownload(
-                                                                    context,
-                                                                    ExoDownloadService::class.java,
-                                                                    song.song.id,
-                                                                    false,
-                                                                )
-                                                            }
-                                                        },
-                                                    ) {
-                                                        CircularProgressIndicator(
-                                                            strokeWidth = 2.dp,
-                                                            modifier = Modifier.size(24.dp),
+                                                IconButton(
+                                                    onClick = {
+                                                        playerConnection.addToQueue(
+                                                            items = songs!!.map { it.toMediaItem() },
                                                         )
-                                                    }
-                                                }
-
-                                                else -> {
-                                                    IconButton(
-                                                        onClick = {
-                                                            songs!!.forEach { song ->
-                                                                val downloadRequest =
-                                                                    DownloadRequest
-                                                                        .Builder(
-                                                                            song.song.id,
-                                                                            song.song.id.toUri(),
-                                                                        )
-                                                                        .setCustomCacheKey(song.song.id)
-                                                                        .setData(song.song.title.toByteArray())
-                                                                        .build()
-                                                                DownloadService.sendAddDownload(
-                                                                    context,
-                                                                    ExoDownloadService::class.java,
-                                                                    downloadRequest,
-                                                                    false,
-                                                                )
-                                                            }
-                                                        },
-                                                    ) {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.download),
-                                                            contentDescription = null,
-                                                        )
-                                                    }
-                                                }
-                                            }
-
-                                            IconButton(
-                                                onClick = {
-                                                    playerConnection.addToQueue(
-                                                        items = songs!!.map { it.toMediaItem() },
+                                                    },
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.queue_music),
+                                                        contentDescription = null,
                                                     )
-                                                },
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.queue_music),
-                                                    contentDescription = null,
-                                                )
+                                                }
                                             }
                                         }
                                     }
