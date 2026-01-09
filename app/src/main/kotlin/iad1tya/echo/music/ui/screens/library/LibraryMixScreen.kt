@@ -224,7 +224,7 @@ private fun QuickAccessSection(
              QuickAccessCard(
                 title = stringResource(R.string.local_media),
                 icon = R.drawable.storage, // Using storage icon as proxy for folder if folder not found
-                backgroundColor = Color(0xFFB7A3E3), // Light Purple/Lavender
+                backgroundColor = Color(0xFF7E57C2), // Purple
                 onClick = { navController.navigate("auto_playlist/local") },
                 modifier = Modifier.weight(1f)
             )
