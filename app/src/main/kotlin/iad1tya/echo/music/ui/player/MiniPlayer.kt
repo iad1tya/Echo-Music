@@ -371,6 +371,7 @@ private fun NewMiniPlayer(
                                 model = metadata.thumbnailUrl,
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
+                                error = painterResource(R.drawable.echo_logo),
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(CircleShape)
@@ -857,6 +858,7 @@ private fun LegacyMiniMediaInfo(
                 model = mediaMetadata.thumbnailUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
+                error = painterResource(R.drawable.echo_logo),
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(ThumbnailCornerRadius)),

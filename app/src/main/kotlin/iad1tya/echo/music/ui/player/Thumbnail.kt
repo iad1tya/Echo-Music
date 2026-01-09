@@ -354,6 +354,7 @@ fun Thumbnail(
                                             .build(),
                                         contentDescription = null,
                                         contentScale = ContentScale.Fit,
+                                        error = painterResource(R.drawable.echo_logo),
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 }
