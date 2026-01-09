@@ -321,7 +321,7 @@ fun AutoPlaylistScreen(
                                         .fillMaxWidth()
                                         .then(
                                             if (playlistType == PlaylistType.LOCAL) {
-                                                Modifier.background(Color(0xFFB7A3E3))
+                                                Modifier.background(Color.Black)
                                             } else Modifier
                                         ),
                                 ) {
@@ -330,7 +330,7 @@ fun AutoPlaylistScreen(
                                             painter = painterResource(R.drawable.storage),
                                             contentDescription = null,
                                             modifier = Modifier.size(64.dp),
-                                            tint = Color.Black
+                                            tint = Color.White
                                         )
                                     } else {
                                         AsyncImage(

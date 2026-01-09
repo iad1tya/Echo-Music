@@ -1078,6 +1078,7 @@ fun ItemThumbnail(
                     .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .build(),
                 contentDescription = null,
+                error = painterResource(R.drawable.echo_logo),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape)
