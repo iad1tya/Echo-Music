@@ -142,7 +142,7 @@ fun AlbumMenu(
 
     val rotationAnimation by animateFloatAsState(
         targetValue = refetchIconDegree,
-        animationSpec = tween(durationMillis = 800),
+        animationSpec = tween(durationMillis = 450),
         label = "",
     )
 

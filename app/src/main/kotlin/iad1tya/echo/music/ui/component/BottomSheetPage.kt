@@ -88,8 +88,8 @@ fun BottomSheetPage(
 
     AnimatedVisibility(
         visible = state.isVisible,
-        enter = fadeIn(animationSpec = tween(250, easing = LinearEasing)),
-        exit = fadeOut(animationSpec = tween(200, easing = LinearEasing)),
+        enter = fadeIn(animationSpec = tween(180, easing = LinearEasing)),
+        exit = fadeOut(animationSpec = tween(150, easing = LinearEasing)),
     ) {
         BackHandler {
             state.dismiss()

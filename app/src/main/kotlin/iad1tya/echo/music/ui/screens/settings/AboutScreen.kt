@@ -107,7 +107,7 @@ fun AboutScreen(
     var logoAnimated by remember { mutableStateOf(false) }
     val logoScale by animateFloatAsState(
         targetValue = if (logoAnimated) 1f else 0.8f,
-        animationSpec = tween(durationMillis = 600),
+        animationSpec = tween(durationMillis = 350),
         label = "logoScale"
     )
     

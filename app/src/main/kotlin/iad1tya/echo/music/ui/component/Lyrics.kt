@@ -825,7 +825,7 @@ fun Lyrics(
                         targetValue = targetScale,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
+                            stiffness = Spring.StiffnessMedium
                         ),
                         label = "scale"
                     )
@@ -834,7 +834,7 @@ fun Lyrics(
                         targetValue = targetAlpha,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessLow
+                            stiffness = Spring.StiffnessMedium
                         ),
                         label = "alpha"
                     )
@@ -882,7 +882,7 @@ fun Lyrics(
                                             if (kotlin.math.abs(offset) > 10) { // Only animate if not already centered
                                                 lazyListState.animateScrollBy(
                                                     value = offset.toFloat(),
-                                                    animationSpec = tween(durationMillis = 1500) // Reduced to half speed
+                                                    animationSpec = tween(durationMillis = 800) // Fast smooth scroll
                                                 )
                                             }
                                         }

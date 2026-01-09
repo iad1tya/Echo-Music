@@ -1486,7 +1486,7 @@ private fun reset(offset: MutableState<Float>, scope: CoroutineScope) {
         animate(
             initialValue = offset.value,
             targetValue = 0f,
-            animationSpec = tween(durationMillis = 300)
+            animationSpec = tween(durationMillis = 200)
         ) { value, _ -> offset.value = value }
     }
 }

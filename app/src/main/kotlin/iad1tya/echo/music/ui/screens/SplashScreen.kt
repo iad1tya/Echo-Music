@@ -41,13 +41,13 @@ fun SplashScreen(
         launch {
             scale.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
             )
         }
         launch {
             alpha.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 800)
+                animationSpec = tween(durationMillis = 400)
             )
         }
         delay(1500) // 1.5 seconds - gives time for app to load smoothly

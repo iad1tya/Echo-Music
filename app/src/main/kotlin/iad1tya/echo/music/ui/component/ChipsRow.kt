@@ -117,7 +117,7 @@ fun <Int> ChoiceChipsRow(
     var expandIconDegree by remember { mutableFloatStateOf(0f) }
     val rotationAnimation by animateFloatAsState(
         targetValue = expandIconDegree,
-        animationSpec = tween(durationMillis = 400),
+        animationSpec = tween(durationMillis = 250),
         label = "",
     )
 

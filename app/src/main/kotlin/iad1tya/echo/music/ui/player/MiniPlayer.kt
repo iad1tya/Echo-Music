@@ -196,7 +196,7 @@ private fun NewMiniPlayer(
     // Optimized animation spec for smoother, more responsive feel
     val animationSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessMedium,
+        stiffness = Spring.StiffnessHigh,
         visibilityThreshold = 0.1f
     )
 
@@ -620,7 +620,7 @@ private fun LegacyMiniPlayer(
 
     val animationSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessLow
+        stiffness = Spring.StiffnessMedium
     )
 
     fun calculateAutoSwipeThreshold(swipeSensitivity: Float): Int {
