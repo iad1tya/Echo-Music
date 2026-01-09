@@ -1313,17 +1313,23 @@ class MainActivity : ComponentActivity() {
                                                                         searchBarScrollBehavior.state.resetHeightOffset()
                                                                     }
                                                                 } else {
-                                                                    if (screen.route == Screens.Home.route) {
-                                                                        navController.navigate(screen.route) {
-                                                                            popUpTo(navController.graph.id)
-                                                                        }
-                                                                    } else {
-                                                                        navController.navigate(screen.route) {
-                                                                            popUpTo(navController.graph.startDestinationId) {
-                                                                                saveState = true
+                                                                    // Try to pop back to the destination if it exists in back stack
+                                                                    val popped = navController.popBackStack(screen.route, inclusive = false, saveState = false)
+                                                                    
+                                                                    if (!popped) {
+                                                                        // Destination not in back stack, navigate to it
+                                                                        if (screen.route == Screens.Home.route) {
+                                                                            navController.navigate(screen.route) {
+                                                                                popUpTo(navController.graph.id)
                                                                             }
-                                                                            launchSingleTop = true
-                                                                            restoreState = true
+                                                                        } else {
+                                                                            navController.navigate(screen.route) {
+                                                                                popUpTo(navController.graph.startDestinationId) {
+                                                                                    saveState = true
+                                                                                }
+                                                                                launchSingleTop = true
+                                                                                restoreState = true
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
