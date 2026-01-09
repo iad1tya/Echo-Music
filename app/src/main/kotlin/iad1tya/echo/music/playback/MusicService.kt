@@ -100,7 +100,6 @@ import iad1tya.echo.music.db.entities.LyricsEntity
 import iad1tya.echo.music.db.entities.RelatedSongMap
 import iad1tya.echo.music.di.DownloadCache
 import iad1tya.echo.music.di.PlayerCache
-import iad1tya.echo.music.dlna.DLNAManager
 import iad1tya.echo.music.extensions.SilentHandler
 import iad1tya.echo.music.extensions.collect
 import iad1tya.echo.music.extensions.collectLatest
@@ -227,10 +226,6 @@ class MusicService :
     
     // Google Cast support
     lateinit var castConnectionHandler: CastConnectionHandler
-    
-    // DLNA/UPnP support (placeholder)
-    @Inject
-    lateinit var dlnaManager: DLNAManager
 
     private var isAudioEffectSessionOpened = false
     private var loudnessEnhancer: LoudnessEnhancer? = null
@@ -343,52 +338,6 @@ class MusicService :
             }
         } catch (e: Exception) {
             Log.e("MusicService", "Failed to initialize Cast: ${e.message}", e)
-        }
-        
-        // Initialize DLNA (placeholder for future full implementation)
-        try {
-            if (::dlnaManager.isInitialized) {
-                dlnaManager.start()
-                Log.d("MusicService", "DLNA service initialized")
-                
-                // Monitor DLNA device selection changes
-                scope.launch {
-                    dlnaManager.selectedDevice.collect { device ->
-                        if (device != null) {
-                            Log.d("MusicService", "DLNA device selected: ${device.name}")
-                            // If currently playing, stream to DLNA device
-                            if (player.playbackState == Player.STATE_READY && player.currentMediaItem != null) {
-                                val metadata = currentMediaMetadata.value
-                                val mediaUrl = player.currentMediaItem?.localConfiguration?.uri?.toString() ?: ""
-                                
-                                if (mediaUrl.isNotEmpty()) {
-                                    val success = dlnaManager.playMedia(
-                                        mediaUrl = mediaUrl,
-                                        title = metadata?.title ?: "",
-                                        artist = metadata?.artists?.firstOrNull()?.name ?: ""
-                                    )
-                                    
-                                    if (success) {
-                                        // Pause local player
-                                        player.pause()
-                                    }
-                                }
-                            }
-                        } else {
-                            Log.d("MusicService", "DLNA device deselected, resuming local playback")
-                            // Resume local playback if it was paused for DLNA
-                            if (player.playbackState == Player.STATE_READY && !player.playWhenReady) {
-                                player.play()
-                            }
-                        }
-                    }
-                }
-            } else {
-                Log.w("MusicService", "DLNA manager not initialized by Hilt")
-            }
-        } catch (e: Exception) {
-            Log.e("MusicService", "Failed to initialize DLNA: ${e.message}", e)
-            reportException(e)
         }
 
         mediaLibrarySessionCallback.apply {
@@ -1212,36 +1161,6 @@ class MusicService :
             // Player is ready
         }
         
-        // Stream to DLNA device if selected
-        scope.launch {
-            try {
-                val selectedDevice = dlnaManager.selectedDevice.value
-                if (selectedDevice != null && mediaItem != null) {
-                    val metadata = currentMediaMetadata.value
-                    val mediaUrl = mediaItem.localConfiguration?.uri?.toString() ?: ""
-                    
-                    if (mediaUrl.isNotEmpty()) {
-                        Log.d("MusicService", "Streaming to DLNA device: ${selectedDevice.name}")
-                        val success = dlnaManager.playMedia(
-                            mediaUrl = mediaUrl,
-                            title = metadata?.title ?: "",
-                            artist = metadata?.artists?.firstOrNull()?.name ?: ""
-                        )
-                        
-                        if (success) {
-                            // Pause local player when streaming to DLNA
-                            player.pause()
-                            Log.d("MusicService", "Successfully started DLNA playback")
-                        } else {
-                            Log.e("MusicService", "Failed to start DLNA playback")
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("MusicService", "Error streaming to DLNA: ${e.message}", e)
-            }
-        }
-        
         // Update widget
         updateWidget()
 
@@ -1282,29 +1201,6 @@ class MusicService :
         // Reset consecutive error counter when playback is successful
         if (playbackState == Player.STATE_READY) {
             consecutivePlaybackErr = 0
-        }
-        
-        // Sync DLNA playback state
-        scope.launch {
-            try {
-                val selectedDevice = dlnaManager.selectedDevice.value
-                if (selectedDevice != null) {
-                    when (playbackState) {
-                        Player.STATE_READY -> {
-                            if (player.playWhenReady) {
-                                dlnaManager.resume()
-                            } else {
-                                dlnaManager.pause()
-                            }
-                        }
-                        Player.STATE_ENDED -> {
-                            dlnaManager.stopPlayback()
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("MusicService", "Error syncing DLNA state: ${e.message}", e)
-            }
         }
         
         // Update widget
@@ -1779,9 +1675,6 @@ class MusicService :
         mediaSession.release()
         player.release()
         
-        // Release DLNA manager
-        dlnaManager.stop()
-        
         super.onDestroy()
     }
 
@@ -1801,12 +1694,10 @@ class MusicService :
             
             val streamUrl = playbackData?.streamUrl
             if (streamUrl != null) {
-                // Prepare proxy
-                val proxyUrl = dlnaManager.prepareProxy(streamUrl)
                 // Cache it with expiry
                 val expiry = System.currentTimeMillis() + (playbackData.streamExpiresInSeconds * 1000L)
-                songUrlCache[mediaId] = proxyUrl to expiry
-                proxyUrl
+                songUrlCache[mediaId] = streamUrl to expiry
+                streamUrl
             } else {
                 null
             }
