@@ -49,44 +49,99 @@ object LyricsTranslationHelper {
         lyrics.forEach { it.translatedTextFlow.value = null }
         
         translationJob = scope.launch(Dispatchers.IO) {
-            // Filter out blank lines to ensure 1:1 mapping reliability
-            val nonEmptyEntries = lyrics.filter { it.text.isNotBlank() }
-            
-            val fullText = nonEmptyEntries.joinToString("\n") { it.text }
-            if (fullText.isBlank()) {
-                _status.value = TranslationStatus.Idle
-                return@launch
-            }
+            try {
+                // Validate inputs
+                if (apiKey.isBlank()) {
+                    _status.value = TranslationStatus.Error("API key is required")
+                    return@launch
+                }
+                
+                if (lyrics.isEmpty()) {
+                    _status.value = TranslationStatus.Error("No lyrics to translate")
+                    return@launch
+                }
+                
+                // Create full text while preserving structure (including empty lines)
+                val fullText = lyrics.joinToString("\n") { it.text }
+                
+                if (fullText.isBlank()) {
+                    _status.value = TranslationStatus.Error("Lyrics are empty")
+                    return@launch
+                }
 
-            val result = OpenRouterService.translate(
-                text = fullText,
-                targetLanguage = targetLanguage,
-                apiKey = apiKey,
-                baseUrl = baseUrl,
-                model = model,
-                mode = mode
-            )
-            
-            result.onSuccess { translatedLines ->
-                if (translatedLines.size == nonEmptyEntries.size) {
-                     nonEmptyEntries.forEachIndexed { index, entry ->
-                         entry.translatedTextFlow.value = translatedLines[index]
-                     }
-                } else {
-                    // Fallback: Try to map as many as possible
-                    val minSize = minOf(translatedLines.size, nonEmptyEntries.size)
-                    for (i in 0 until minSize) {
-                        nonEmptyEntries[i].translatedTextFlow.value = translatedLines[i]
+                // Validate language for translation mode
+                if (mode != "Romanized" && targetLanguage.isBlank()) {
+                    _status.value = TranslationStatus.Error("Target language is required for translation")
+                    return@launch
+                }
+
+                val result = OpenRouterService.translate(
+                    text = fullText,
+                    targetLanguage = if (mode == "Romanized") "Latin" else targetLanguage,
+                    apiKey = apiKey,
+                    baseUrl = baseUrl,
+                    model = model,
+                    mode = mode
+                )
+                
+                result.onSuccess { translatedLines ->
+                    // Robust mapping with validation
+                    when {
+                        translatedLines.size == lyrics.size -> {
+                            // Perfect match - direct mapping
+                            lyrics.forEachIndexed { index, entry ->
+                                entry.translatedTextFlow.value = translatedLines[index]
+                            }
+                            _status.value = TranslationStatus.Success
+                        }
+                        translatedLines.size > lyrics.size -> {
+                            // More translations than expected - use first N
+                            lyrics.forEachIndexed { index, entry ->
+                                entry.translatedTextFlow.value = translatedLines[index]
+                            }
+                            _status.value = TranslationStatus.Success
+                        }
+                        translatedLines.size < lyrics.size -> {
+                            // Fewer translations - map what we have, leave rest as original
+                            translatedLines.forEachIndexed { index, translation ->
+                                if (index < lyrics.size) {
+                                    lyrics[index].translatedTextFlow.value = translation
+                                }
+                            }
+                            // Fill remaining with original text for romanization, empty for translation
+                            for (i in translatedLines.size until lyrics.size) {
+                                lyrics[i].translatedTextFlow.value = if (mode == "Romanized") lyrics[i].text else ""
+                            }
+                            _status.value = TranslationStatus.Success
+                        }
+                        else -> {
+                            _status.value = TranslationStatus.Error("Unexpected translation result")
+                        }
+                    }
+                    
+                    // Auto-hide success message after 3 seconds
+                    delay(3000)
+                    if (_status.value is TranslationStatus.Success) {
+                        _status.value = TranslationStatus.Idle
+                    }
+                }.onFailure { error ->
+                    val errorMessage = error.message ?: "Unknown error occurred"
+                    
+                    // Show error in UI
+                    _status.value = TranslationStatus.Error(errorMessage)
+                    
+                    // Also display error in first line for user visibility
+                    if (lyrics.isNotEmpty()) {
+                        lyrics[0].translatedTextFlow.value = "⚠️ Error: ${errorMessage.take(50)}"
                     }
                 }
-                _status.value = TranslationStatus.Success
-                delay(3000) // Show success for 3 seconds
-                _status.value = TranslationStatus.Idle
-            }.onFailure { error ->
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "Translation failed"
+                _status.value = TranslationStatus.Error(errorMessage)
+                
                 if (lyrics.isNotEmpty()) {
-                    lyrics[0].translatedTextFlow.value = "Error: ${error.message}"
+                    lyrics[0].translatedTextFlow.value = "⚠️ ${errorMessage.take(50)}"
                 }
-                _status.value = TranslationStatus.Error(error.message ?: "Unknown error")
             }
         }
     }

@@ -93,13 +93,13 @@ object LyricsUtils {
 
     private val GENERAL_CYRILLIC_ROMAJI_MAP: Map<String, String> = mapOf(
         "А" to "A", "Б" to "B", "В" to "V", "Г" to "G", "Ґ" to "G", "Д" to "D",
-        "Ѓ" to "Ǵ", "Ђ" to "Đ", "Е" to "E", "Ё" to "Yo", "Є" to "Ye", "Ж" to "Zh",
+        "Ѓ" to "Gj", "Ђ" to "Dj", "Е" to "E", "Ё" to "Yo", "Є" to "Ye", "Ж" to "Zh",
         "З" to "Z", "Ѕ" to "Dz", "И" to "I", "І" to "I", "Ї" to "Yi", "Й" to "Y",
         "Ј" to "Y", "К" to "K", "Л" to "L", "Љ" to "Ly", "М" to "M", "Н" to "N",
         "Њ" to "Ny", "О" to "O", "П" to "P", "Р" to "R", "С" to "S", "Т" to "T",
-        "Ћ" to "Ć", "У" to "U", "Ў" to "Ŭ", "Ф" to "F", "Х" to "Kh", "Ц" to "Ts",
-        "Ч" to "Ch", "Џ" to "Dž", "Ш" to "Sh", "Щ" to "Shch", "Ъ" to "ʺ", "Ы" to "Y",
-        "Ь" to "ʹ", "Э" to "E", "Ю" to "Yu", "Я" to "Ya",
+        "Ћ" to "Ch", "У" to "U", "Ў" to "U", "Ф" to "F", "Х" to "Kh", "Ц" to "Ts",
+        "Ч" to "Ch", "Џ" to "Dzh", "Ш" to "Sh", "Щ" to "Shch", "Ъ" to """, "Ы" to "Y",
+        "Ь" to "'", "Э" to "E", "Ю" to "Yu", "Я" to "Ya",
         "Ѡ" to "O", "Ѣ" to "Ya", "Ѥ" to "Ye", "Ѧ" to "Ya", "Ѩ" to "Ya",
         "Ѫ" to "U", "Ѭ" to "Yu", "Ѯ" to "Ks", "Ѱ" to "Ps", "Ѳ" to "F",
         "Ѵ" to "I", "Ѷ" to "I", "Ғ" to "Gh", "Ҕ" to "G", "Җ" to "Zh",
@@ -107,16 +107,16 @@ object LyricsUtils {
         "Ң" to "Ng", "Ҥ" to "Ng", "Ҧ" to "P", "Ҩ" to "O", "Ҫ" to "S",
         "Ҭ" to "T", "Ү" to "U", "Ұ" to "U", "Ҳ" to "Kh", "Ҵ" to "Ts",
         "Ҷ" to "Ch", "Ҹ" to "Ch", "Һ" to "H", "Ҽ" to "Ch", "Ҿ" to "Ch",
-        "Ќ" to "Ḱ", "Ө" to "Ö",
+        "Ќ" to "Ḱ", "Ө" to "O",
 
         "а" to "a", "б" to "b", "в" to "v", "г" to "g", "ґ" to "g", "д" to "d",
-        "ѓ" to "ǵ", "ђ" to "đ", "е" to "e", "ё" to "yo", "є" to "ye", "ж" to "zh",
+        "ѓ" to "ǵ", "ђ" to "dj", "е" to "e", "ё" to "yo", "є" to "ye", "ж" to "zh",
         "з" to "z", "ѕ" to "dz", "и" to "i", "і" to "i", "ї" to "yi", "й" to "y",
         "ј" to "y", "к" to "k", "л" to "l", "љ" to "ly", "м" to "m", "н" to "n",
         "њ" to "ny", "о" to "o", "п" to "p", "р" to "r", "с" to "s", "т" to "t",
-        "ћ" to "ć", "у" to "u", "ў" to "ŭ", "ф" to "f", "х" to "kh", "ц" to "ts",
-        "ч" to "ch", "џ" to "dž", "ш" to "sh", "щ" to "shch", "ъ" to "ʺ", "ы" to "y",
-        "ь" to "ʹ", "э" to "e", "ю" to "yu", "я" to "ya",
+        "ћ" to "ch", "у" to "u", "ў" to "u", "ф" to "f", "х" to "kh", "ц" to "ts",
+        "ч" to "ch", "џ" to "dzh", "ш" to "sh", "щ" to "shch", "ъ" to """, "ы" to "y",
+        "ь" to "'", "э" to "e", "ю" to "yu", "я" to "ya",
         "ѡ" to "o", "ѣ" to "ya", "ѥ" to "ye", "ѧ" to "ya", "ѩ" to "ya",
         "ѫ" to "u", "ѭ" to "yu", "ѯ" to "ks", "ѱ" to "ps", "ѳ" to "f",
         "ѵ" to "i", "ѷ" to "i", "ғ" to "gh", "ҕ" to "g", "җ" to "zh",
@@ -124,7 +124,7 @@ object LyricsUtils {
         "ң" to "ng", "ҥ" to "ng", "ҧ" to "p", "ҩ" to "o", "ҫ" to "s",
         "ҭ" to "t", "ү" to "u", "ұ" to "u", "ҳ" to "kh", "ҵ" to "ts",
         "ҷ" to "ch", "ҹ" to "ch", "һ" to "h", "ҽ" to "ch", "ҿ" to "ch",
-        "ќ" to "ḱ", "ө" to "ö"
+        "ќ" to "kj", "ө" to "o"
     )
 
     private val RUSSIAN_ROMAJI_MAP: Map<String, String> = mapOf(
@@ -140,11 +140,11 @@ object LyricsUtils {
     )
 
     private val SERBIAN_ROMAJI_MAP: Map<String, String> = mapOf(
-        "Ж" to "Ž", "Љ" to "Lj", "Њ" to "Nj", "Ц" to "C", "Ч" to "Č",
-        "Џ" to "Dž", "Ш" to "Š", "Х" to "H",
+        "Ж" to "Zh", "Љ" to "Lj", "Њ" to "Nj", "Ц" to "C", "Ч" to "Ch",
+        "Џ" to "Dzh", "Ш" to "Sh", "Х" to "H",
 
-        "ж" to "ž", "љ" to "lj", "њ" to "nj", "ц" to "c", "ч" to "č",
-        "џ" to "dž", "ш" to "š", "х" to "h"
+        "ж" to "zh", "љ" to "lj", "њ" to "nj", "ц" to "c", "ч" to "ch",
+        "џ" to "dzh", "ш" to "sh", "х" to "h"
     )
 
     private val BULGARIAN_ROMAJI_MAP: Map<String, String> = mapOf(
@@ -160,16 +160,16 @@ object LyricsUtils {
     )
 
     private val KYRGYZ_ROMAJI_MAP: Map<String, String> = mapOf(
-        "Ү" to "Ü", "ү" to "ü", "Ы" to "Y", "ы" to "y"
+        "Ү" to "U", "ү" to "u", "Ы" to "Y", "ы" to "y"
     )
 
     private val MACEDONIAN_ROMAJI_MAP: Map<String, String> = mapOf(
         "Ѓ" to "Gj", "Ѕ" to "Dz", "И" to "I", "Ј" to "J", "Љ" to "Lj",
-        "Њ" to "Nj", "Ќ" to "Kj", "Џ" to "Dž", "Ч" to "Č", "Ш" to "Sh",
+        "Њ" to "Nj", "Ќ" to "Kj", "Џ" to "Dzh", "Ч" to "Ch", "Ш" to "Sh",
         "Ж" to "Zh", "Ц" to "C", "Х" to "H",
 
         "ѓ" to "gj", "ѕ" to "dz", "и" to "i", "ј" to "j", "љ" to "lj",
-        "њ" to "nj", "ќ" to "kj", "џ" to "dž", "ч" to "č", "ш" to "sh",
+        "њ" to "nj", "ќ" to "kj", "џ" to "dzh", "ч" to "č", "ш" to "sh",
         "ж" to "zh", "ц" to "c", "х" to "h"
     )
 
