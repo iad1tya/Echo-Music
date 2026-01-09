@@ -214,15 +214,33 @@ private fun QuickAccessSection(
             }
         }
         
-        if (showDownloaded) {
-            Spacer(modifier = Modifier.height(8.dp))
-            QuickAccessCard(
-                title = stringResource(R.string.offline),
-                icon = R.drawable.download,
-                backgroundColor = Color(0xFFFFFFFF), // White
-                onClick = { navController.navigate("auto_playlist/downloaded") },
-                modifier = Modifier.fillMaxWidth()
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Local Media (New Tile)
+             QuickAccessCard(
+                title = stringResource(R.string.local_media),
+                icon = R.drawable.storage, // Using storage icon as proxy for folder if folder not found
+                backgroundColor = Color(0xFFA5D6A7), // Light Green/Teal mix or maybe Purple 0xFF7E57C2
+                onClick = { navController.navigate("auto_playlist/local") },
+                modifier = Modifier.weight(1f)
             )
+
+            // Downloads / Offline
+            if (showDownloaded) {
+                QuickAccessCard(
+                    title = stringResource(R.string.offline),
+                    icon = R.drawable.download,
+                    backgroundColor = Color(0xFFFFFFFF), // White
+                    onClick = { navController.navigate("auto_playlist/downloaded") },
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                 Spacer(modifier = Modifier.weight(1f))
+            }
         }
     }
 }
