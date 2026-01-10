@@ -49,7 +49,7 @@ val ShimmerTheme =
         infiniteRepeatable(
             animation =
             tween(
-                durationMillis = 800,
+                durationMillis = 600,
                 easing = LinearEasing,
                 delayMillis = 250,
             ),

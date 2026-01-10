@@ -456,8 +456,8 @@ class VideoPlayerActivity : ComponentActivity() {
             // Custom Control Overlay
             AnimatedVisibility(
                 visible = showControls && !isLoading,
-                enter = fadeIn(animationSpec = tween(300)),
-                exit = fadeOut(animationSpec = tween(300)),
+                enter = fadeIn(animationSpec = tween(200)),
+                exit = fadeOut(animationSpec = tween(200)),
                 modifier = Modifier.fillMaxSize()
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {

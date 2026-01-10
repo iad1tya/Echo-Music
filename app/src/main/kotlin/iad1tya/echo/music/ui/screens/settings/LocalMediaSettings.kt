@@ -1,5 +1,7 @@
 package iad1tya.echo.music.ui.screens.settings
 
+import iad1tya.echo.music.LocalPlayerAwareWindowInsets
+
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
@@ -16,6 +18,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,6 +47,12 @@ import iad1tya.echo.music.ui.component.*
 import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.viewmodels.SettingsViewModel
 import java.net.URLDecoder
+import androidx.navigation.NavController
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 
 // Simple helpers
 fun uriListFromString(str: String): List<Uri> {
@@ -113,9 +123,12 @@ fun absoluteFilePathFromUri(context: android.content.Context, uri: Uri): String?
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalMediaSettings(
-    viewModel: SettingsViewModel
+    navController: NavController,
+    scrollBehavior: TopAppBarScrollBehavior,
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -150,9 +163,20 @@ fun LocalMediaSettings(
         }
     )
 
-    Column {
+    Column(
+        Modifier
+            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(
+            Modifier.windowInsetsPadding(
+                LocalPlayerAwareWindowInsets.current.only(
+                    WindowInsetsSides.Top
+                )
+            )
+        )
 
-        PreferenceGroupTitle(title = "Local Media")
+
 
         // Progress / Scan Button
         Row(
@@ -243,6 +267,65 @@ fun LocalMediaSettings(
             description = "If metadata is missing, use filename",
             checked = strictFilePaths,
             onCheckedChange = onStrictFilePathsChange
+        )
+    }
+
+    Box {
+        // Blurred gradient background
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .zIndex(10f)
+                .then(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        Modifier.graphicsLayer {
+                            renderEffect = android.graphics.RenderEffect.createBlurEffect(
+                                25f,
+                                25f,
+                                android.graphics.Shader.TileMode.CLAMP
+                            ).asComposeRenderEffect()
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        
+        TopAppBar(
+            title = { 
+                Text(
+                    text = stringResource(R.string.local_media),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.zalando_sans_expanded)),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                )
+            },
+            navigationIcon = {
+                IconButton(
+                    onClick = { navController.navigateUp() },
+                ) {
+                    Icon(
+                        androidx.compose.ui.res.painterResource(R.drawable.arrow_back),
+                        contentDescription = null,
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent
+            ),
+            modifier = Modifier.zIndex(11f)
         )
     }
 

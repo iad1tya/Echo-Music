@@ -47,13 +47,13 @@ fun NewActionButton(
 ) {
     val animatedBackground by animateColorAsState(
         targetValue = if (enabled) backgroundColor else backgroundColor.copy(alpha = 0.5f),
-        animationSpec = tween(200),
+        animationSpec = tween(150),
         label = "background"
     )
     
     val animatedContent by animateColorAsState(
         targetValue = if (enabled) contentColor else contentColor.copy(alpha = 0.5f),
-        animationSpec = tween(200),
+        animationSpec = tween(150),
         label = "content"
     )
 
@@ -227,13 +227,13 @@ fun NewIconButton(
 ) {
     val animatedBackground by animateColorAsState(
         targetValue = if (enabled) backgroundColor else backgroundColor.copy(alpha = 0.5f),
-        animationSpec = tween(200),
+        animationSpec = tween(150),
         label = "background"
     )
     
     val animatedContent by animateColorAsState(
         targetValue = if (enabled) contentColor else contentColor.copy(alpha = 0.5f),
-        animationSpec = tween(200),
+        animationSpec = tween(150),
         label = "content"
     )
 

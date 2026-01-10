@@ -196,7 +196,7 @@ private fun NewMiniPlayer(
     // Optimized animation spec for smoother, more responsive feel
     val animationSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessMedium,
+        stiffness = Spring.StiffnessHigh,
         visibilityThreshold = 0.1f
     )
 
@@ -371,6 +371,7 @@ private fun NewMiniPlayer(
                                 model = metadata.thumbnailUrl,
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
+                                error = painterResource(R.drawable.echo_logo),
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(CircleShape)
@@ -619,7 +620,7 @@ private fun LegacyMiniPlayer(
 
     val animationSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessLow
+        stiffness = Spring.StiffnessMedium
     )
 
     fun calculateAutoSwipeThreshold(swipeSensitivity: Float): Int {
@@ -857,6 +858,7 @@ private fun LegacyMiniMediaInfo(
                 model = mediaMetadata.thumbnailUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
+                error = painterResource(R.drawable.echo_logo),
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(ThumbnailCornerRadius)),

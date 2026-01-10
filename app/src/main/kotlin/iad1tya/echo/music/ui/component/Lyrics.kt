@@ -825,7 +825,7 @@ fun Lyrics(
                         targetValue = targetScale,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessLow
+                            stiffness = Spring.StiffnessMedium
                         ),
                         label = "scale"
                     )
@@ -834,7 +834,7 @@ fun Lyrics(
                         targetValue = targetAlpha,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessLow
+                            stiffness = Spring.StiffnessMedium
                         ),
                         label = "alpha"
                     )
@@ -882,7 +882,7 @@ fun Lyrics(
                                             if (kotlin.math.abs(offset) > 10) { // Only animate if not already centered
                                                 lazyListState.animateScrollBy(
                                                     value = offset.toFloat(),
-                                                    animationSpec = tween(durationMillis = 1500) // Reduced to half speed
+                                                    animationSpec = tween(durationMillis = 800) // Fast smooth scroll
                                                 )
                                             }
                                         }
@@ -924,13 +924,53 @@ fun Lyrics(
                             LyricsPosition.RIGHT -> Alignment.End
                         }
                     ) {
+                        // Collect translated/romanized text
+                        val translatedText by item.translatedTextFlow.collectAsState()
+                        val romanizedText by item.romanizedTextFlow.collectAsState()
+                        
+                        // Determine what text to display based on mode and availability
+                        val displayText: String?
+                        val isTranslationError: Boolean
+                        
+                        when {
+                            // Translation mode: Show translated text if available, original as fallback
+                            translateMode == "Translated" -> {
+                                isTranslationError = translatedText?.startsWith("⚠️") == true || translatedText?.startsWith("Error:") == true
+                                displayText = if (translatedText != null && !isTranslationError) {
+                                    translatedText
+                                } else {
+                                    item.text // Fallback to original
+                                }
+                            }
+                            // Romanized mode: Show AI romanization if available, local romanization if available, original as fallback
+                            translateMode == "Romanized" -> {
+                                isTranslationError = translatedText?.startsWith("⚠️") == true || translatedText?.startsWith("Error:") == true
+                                displayText = when {
+                                    translatedText != null && !isTranslationError -> translatedText // AI romanization
+                                    romanizedText != null -> romanizedText // Local romanization
+                                    else -> item.text // Fallback to original
+                                }
+                            }
+                            // Literal mode or no translation: Show local romanization if available, otherwise original
+                            currentSong?.romanizeLyrics == true && romanizedText != null -> {
+                                isTranslationError = false
+                                displayText = romanizedText
+                            }
+                            // Default: Show original text
+                            else -> {
+                                isTranslationError = false
+                                displayText = item.text
+                            }
+                        }
+                        
+                        // Display the selected text
                         Text(
-                            text = item.text,
-                            fontSize = 24.sp, 
+                            text = displayText ?: item.text,
+                            fontSize = 24.sp,
                             color = if (isActive) {
-                                textColor 
+                                textColor
                             } else {
-                                textColor.copy(alpha = 0.8f) 
+                                textColor.copy(alpha = 0.8f)
                             },
                             style = TextStyle(
                                 shadow = if (isActive) Shadow(
@@ -945,61 +985,6 @@ fun Lyrics(
                             },
                             fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold
                         )
-                        if (currentSong?.romanizeLyrics == true
-                            && (romanizeJapaneseLyrics ||
-                                    romanizeKoreanLyrics ||
-                                    romanizeRussianLyrics ||
-                                    romanizeUkrainianLyrics ||
-                                    romanizeSerbianLyrics ||
-                                    romanizeBulgarianLyrics ||
-                                    romanizeBelarusianLyrics ||
-                                    romanizeKyrgyzLyrics ||
-                                    romanizeMacedonianLyrics)) {
-                            // Show romanized text if available
-                            val romanizedText by item.romanizedTextFlow.collectAsState()
-                            romanizedText?.let { romanized ->
-                                Text(
-                                    text = romanized,
-                                    fontSize = 18.sp,
-                                    color = textColor.copy(alpha = 0.8f),
-                                    textAlign = when (lyricsTextPosition) {
-                                        LyricsPosition.LEFT -> TextAlign.Left
-                                        LyricsPosition.CENTER -> TextAlign.Center
-                                        LyricsPosition.RIGHT -> TextAlign.Right
-                                    },
-                                    fontWeight = FontWeight.Normal,
-                                    modifier = Modifier.padding(top = 2.dp)
-                                )
-                            }
-                        }
-                        
-                        // Translated Lyrics
-                        val translatedText by item.translatedTextFlow.collectAsState()
-                        AnimatedVisibility(
-                            visible = translatedText != null,
-                            enter = expandVertically() + fadeIn() + slideInVertically(initialOffsetY = { -10 })
-                        ) {
-                            translatedText?.let { translation ->
-                                val isError = translation.startsWith("Error:")
-                                val displayText = if (isError) translation else "($translation)"
-                                val displayColor = if (isError) Color.Red else Color.White
-                                
-                                Text(
-                                    text = displayText,
-                                    fontSize = 20.sp,
-                                    color = displayColor,
-                                    textAlign = when (lyricsTextPosition) {
-                                        LyricsPosition.LEFT -> TextAlign.Left
-                                        LyricsPosition.CENTER -> TextAlign.Center
-                                        LyricsPosition.RIGHT -> TextAlign.Right
-                                    },
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier
-                                        .padding(top = 4.dp)
-                                        .alpha(if (isError) 1f else 0.9f) // Shiny/Magical effect: High alpha
-                                )
-                            }
-                        }
                     }
                 }
             }

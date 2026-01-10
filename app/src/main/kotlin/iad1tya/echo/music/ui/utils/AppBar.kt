@@ -20,7 +20,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 fun appBarScrollBehavior(
     state: TopAppBarState = rememberTopAppBarState(),
     canScroll: () -> Boolean = { true },
-    snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = Spring.StiffnessMediumLow),
+    snapAnimationSpec: AnimationSpec<Float>? = spring(stiffness = Spring.StiffnessMedium),
     flingAnimationSpec: DecayAnimationSpec<Float>? = rememberSplineBasedDecay(),
 ): TopAppBarScrollBehavior =
     AppBarScrollBehavior(

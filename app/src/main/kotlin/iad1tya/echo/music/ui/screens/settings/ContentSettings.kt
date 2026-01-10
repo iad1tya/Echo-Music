@@ -115,6 +115,7 @@ fun ContentSettings(
     val (sponsorBlockEnabled, onSponsorBlockEnabledChange) = rememberPreference(key = SponsorBlockEnabledKey, defaultValue = true)
     val (enableKugou, onEnableKugouChange) = rememberPreference(key = EnableKugouKey, defaultValue = true)
     val (enableLrclib, onEnableLrclibChange) = rememberPreference(key = EnableLrcLibKey, defaultValue = true)
+    val (enableSimpMusic, onEnableSimpMusicChange) = rememberPreference(key = EnableSimpMusicKey, defaultValue = true)
     val (preferredProvider, onPreferredProviderChange) =
         rememberEnumPreference(
             key = PreferredLyricsProviderKey,
@@ -508,6 +509,12 @@ fun ContentSettings(
             onCheckedChange = onEnableLrclibChange,
         )
         SwitchPreference(
+            title = { Text("Enable SimpMusic") },
+            icon = { Icon(painterResource(R.drawable.lyrics), null) },
+            checked = enableSimpMusic,
+            onCheckedChange = onEnableSimpMusicChange,
+        )
+        SwitchPreference(
             title = { Text(stringResource(R.string.enable_kugou)) },
             icon = { Icon(painterResource(R.drawable.lyrics), null) },
             checked = enableKugou,
@@ -518,10 +525,11 @@ fun ContentSettings(
             title = { Text(stringResource(R.string.set_first_lyrics_provider)) },
             icon = { Icon(painterResource(R.drawable.lyrics), null) },
             selectedValue = preferredProvider,
-            values = listOf(PreferredLyricsProvider.LRCLIB, PreferredLyricsProvider.KUGOU),
+            values = listOf(PreferredLyricsProvider.LRCLIB, PreferredLyricsProvider.SIMPMUSIC, PreferredLyricsProvider.KUGOU),
             valueText = {
                 when (it) {
                     PreferredLyricsProvider.LRCLIB -> "LrcLib"
+                    PreferredLyricsProvider.SIMPMUSIC -> "SimpMusic"
                     PreferredLyricsProvider.KUGOU -> "KuGou"
                 }
             },

@@ -248,9 +248,6 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var syncUtils: SyncUtils
-    
-    @Inject
-    lateinit var dlnaManager: iad1tya.echo.music.dlna.DLNAManager
 
     private lateinit var navController: NavHostController
     private var pendingIntent: Intent? = null
@@ -899,7 +896,6 @@ class MainActivity : ComponentActivity() {
                         LocalDownloadUtil provides downloadUtil,
                         LocalShimmerTheme provides ShimmerTheme,
                         LocalSyncUtils provides syncUtils,
-                        LocalDLNAManager provides dlnaManager,
                     ) {
                         Scaffold(
                             topBar = {
@@ -1176,7 +1172,7 @@ class MainActivity : ComponentActivity() {
                                         Crossfade(
                                             targetState = searchSource,
                                             label = "",
-                                            animationSpec = tween(200, easing = FastOutSlowInEasing),
+                                            animationSpec = tween(150, easing = FastOutSlowInEasing),
                                             modifier =
                                             Modifier
                                                 .fillMaxSize()
@@ -1748,4 +1744,3 @@ val LocalPlayerAwareWindowInsets =
     compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }
 val LocalDownloadUtil = staticCompositionLocalOf<DownloadUtil> { error("No DownloadUtil provided") }
 val LocalSyncUtils = staticCompositionLocalOf<SyncUtils> { error("No SyncUtils provided") }
-val LocalDLNAManager = staticCompositionLocalOf<iad1tya.echo.music.dlna.DLNAManager> { error("No DLNAManager provided") }

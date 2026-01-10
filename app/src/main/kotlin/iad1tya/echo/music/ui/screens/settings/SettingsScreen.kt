@@ -324,7 +324,7 @@ fun SettingsScreen(
         Material3SettingsGroup(
             items = listOf(
                 Material3SettingsItem(
-                    icon = painterResource(R.drawable.library_music),
+                    icon = painterResource(R.drawable.storage),
                     title = { Text(stringResource(R.string.local_media)) },
                     onClick = { navController.navigate("settings/local_media") }
                 )

@@ -6,11 +6,15 @@ import com.echo.kugou.models.SearchLyricsResponse
 import com.echo.kugou.models.SearchSongResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.encodeURLParameter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.decodeBase64String
@@ -37,6 +41,16 @@ private val client = HttpClient {
     install(ContentEncoding) {
         gzip()
         deflate()
+    }
+
+    install(HttpTimeout) {
+        requestTimeoutMillis = 30000
+        connectTimeoutMillis = 15000
+        socketTimeoutMillis = 30000
+    }
+
+    defaultRequest {
+        header(HttpHeaders.UserAgent, "Echo Music (https://github.com/iad1tya/Echo-Music)")
     }
 }
 

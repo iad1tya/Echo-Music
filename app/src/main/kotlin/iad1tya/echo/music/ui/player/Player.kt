@@ -153,7 +153,6 @@ import iad1tya.echo.music.ui.utils.ShowMediaInfo
 import iad1tya.echo.music.utils.makeTimeString
 import iad1tya.echo.music.utils.rememberEnumPreference
 import iad1tya.echo.music.utils.rememberPreference
-import iad1tya.echo.music.LocalDLNAManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -240,10 +239,6 @@ fun BottomSheetPlayer(
         collapsedBound = 0.dp,
         initialAnchor = 1
     )
-    
-    val dlnaManager = LocalDLNAManager.current
-    val dlnaDevices by dlnaManager.devices.collectAsState()
-    val selectedDLNADevice by dlnaManager.selectedDevice.collectAsState()
 
     if (!canSkipNext && automix.isNotEmpty()) {
         playerConnection.service.addToQueueAutomix(automix[0], 0)
@@ -2209,94 +2204,10 @@ fun BottomSheetPlayer(
                                 }
                             }
                             
-                            // Add DLNA Devices to the list
-                            if (selectedDLNADevice != null) {
-                                // DLNA device is currently selected/playing
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
-                                        .clickable {
-                                            dlnaManager.selectDevice(null)
-                                            Toast.makeText(context, "Switched to local playback", Toast.LENGTH_SHORT).show()
-                                        }
-                                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.wifi_proxy),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(28.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(Modifier.width(16.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            selectedDLNADevice!!.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            "${selectedDLNADevice!!.manufacturer} • ${selectedDLNADevice!!.modelName} • DLNA",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                    Icon(
-                                        painter = painterResource(R.drawable.check),
-                                        contentDescription = "Currently playing",
-                                        modifier = Modifier.size(24.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            } else if (dlnaDevices.isNotEmpty()) {
-                                // Show available DLNA devices
-                                dlnaDevices.forEach { device ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .clickable {
-                                                dlnaManager.selectDevice(device)
-                                                Toast.makeText(context, "Selected ${device.name}", Toast.LENGTH_SHORT).show()
-                                                audioRoutingSheetState.collapseSoft()
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.wifi_proxy),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(28.dp),
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Spacer(Modifier.width(16.dp))
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                device.name,
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Medium
-                                            )
-                                            Text(
-                                                "${device.manufacturer} • ${device.modelName} • DLNA",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            // Show scan button if no devices found (WiFi or DLNA)
+                            // Show scan button if no devices found (WiFi or Cast)
                             if (availableWifiRoutes.isEmpty() && connectedWifiRoutes.isEmpty() && 
-                                castSession.value == null && dlnaDevices.isEmpty() && selectedDLNADevice == null) {
-                                // No WiFi/Cast/DLNA devices found - show scanning status
+                                castSession.value == null) {
+                                // No WiFi/Cast devices found - show scanning status
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -2342,9 +2253,6 @@ fun BottomSheetPlayer(
                                                             Toast.makeText(context, "Scanning for WiFi & Cast devices...", Toast.LENGTH_SHORT).show()
                                                         }
                                                     }
-                                                    // Also trigger DLNA discovery
-                                                    dlnaManager.startDiscovery()
-                                                    Toast.makeText(context, "Scanning for DLNA devices...", Toast.LENGTH_SHORT).show()
                                                     
                                                     // Auto-stop scanning after 5 seconds
                                                     coroutineScope.launch {
