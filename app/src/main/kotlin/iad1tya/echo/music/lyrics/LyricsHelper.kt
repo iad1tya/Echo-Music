@@ -1,5 +1,7 @@
 package iad1tya.echo.music.lyrics
 
+import iad1tya.echo.music.lyrics.simpmusic.SimpMusicLyricsProvider
+
 import android.content.Context
 import android.util.LruCache
 import iad1tya.echo.music.constants.PreferredLyricsProvider
@@ -33,6 +35,7 @@ constructor(
     private var lyricsProviders =
         listOf(
             LrcLibLyricsProvider,
+            SimpMusicLyricsProvider,
             KuGouLyricsProvider,
             YouTubeSubtitleLyricsProvider,
             YouTubeLyricsProvider
@@ -47,6 +50,14 @@ constructor(
                 lyricsProviders = when (it) {
                     PreferredLyricsProvider.LRCLIB -> listOf(
                         LrcLibLyricsProvider,
+                        SimpMusicLyricsProvider,
+                        KuGouLyricsProvider,
+                        YouTubeSubtitleLyricsProvider,
+                        YouTubeLyricsProvider
+                    )
+                    PreferredLyricsProvider.SIMPMUSIC -> listOf(
+                        SimpMusicLyricsProvider,
+                        LrcLibLyricsProvider,
                         KuGouLyricsProvider,
                         YouTubeSubtitleLyricsProvider,
                         YouTubeLyricsProvider
@@ -54,6 +65,7 @@ constructor(
                     PreferredLyricsProvider.KUGOU -> listOf(
                         KuGouLyricsProvider,
                         LrcLibLyricsProvider,
+                        SimpMusicLyricsProvider,
                         YouTubeSubtitleLyricsProvider,
                         YouTubeLyricsProvider
                     )
