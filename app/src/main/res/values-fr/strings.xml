@@ -362,10 +362,12 @@
     
     <string name="new_version_available">Nouvelle version disponible</string>
     <string name="download_update">Télécharger la mise à jour</string>
-    <string name="install_update">Installer la mise à jour</string>
     <string name="translation_models">Modèles de traduction</string>
     <string name="clear_translation_models">Effacer les modèles de traduction</string> 
 
+    <string name="local_media">Médias Locaux</string>
+    <string name="no_local_media_found">Aucun média local trouvé</string>
+    
     <!-- Widget -->
     <string name="widget_description">Widget de lecteur de musique</string>
 </resources>
