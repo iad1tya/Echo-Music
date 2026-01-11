@@ -145,6 +145,7 @@
     <string name="unknown">Inconnu</string>
     <string name="copied">Copié dans le presse-papiers</string> 
 
+    <!-- Edit/Create -->
     <string name="edit_lyrics">Modifier les paroles</string>
     <string name="search_lyrics">Rechercher les paroles</string> 
 
