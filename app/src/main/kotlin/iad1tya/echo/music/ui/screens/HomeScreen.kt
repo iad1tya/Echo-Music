@@ -439,13 +439,16 @@ fun HomeScreen(
                     item(key = "quick_picks_list") {
                         LazyHorizontalGrid(
                             state = quickPicksLazyGridState,
-                            rows = GridCells.Fixed(4),
+                            rows = GridCells.Fixed(2),
                             flingBehavior = rememberSnapFlingBehavior(quickPicksSnapLayoutInfoProvider),
                             contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
                                 .asPaddingValues(),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(ListItemHeight * 4)
+                                .height((GridThumbnailHeight + with(LocalDensity.current) {
+                                    MaterialTheme.typography.bodyLarge.lineHeight.toDp() * 2 +
+                                            MaterialTheme.typography.bodyMedium.lineHeight.toDp() * 2
+                                }) * 2)
                                 .animateItem()
                         ) {
                             items(
@@ -456,56 +459,7 @@ fun HomeScreen(
                                 val song by database.song(originalSong.id)
                                     .collectAsState(initial = originalSong)
 
-                                SongListItem(
-                                    song = song!!,
-                                    showInLibraryIcon = true,
-                                    isActive = song!!.id == mediaMetadata?.id,
-                                    isPlaying = isPlaying,
-                                    isSwipeable = false,
-                                    trailingContent = {
-                                        IconButton(
-                                            onClick = {
-                                                menuState.show {
-                                                    SongMenu(
-                                                        originalSong = song!!,
-                                                        navController = navController,
-                                                        onDismiss = menuState::dismiss
-                                                    )
-                                                }
-                                            }
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(R.drawable.more_vert),
-                                                contentDescription = null
-                                            )
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .width(horizontalLazyGridItemWidth)
-                                        .combinedClickable(
-                                            onClick = {
-                                                if (song!!.id == mediaMetadata?.id) {
-                                                    playerConnection.player.togglePlayPause()
-                                                } else {
-                                                    playerConnection.playQueue(
-                                                        YouTubeQueue.radio(
-                                                            song!!.toMediaMetadata()
-                                                        )
-                                                    )
-                                                }
-                                            },
-                                            onLongClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                menuState.show {
-                                                    SongMenu(
-                                                        originalSong = song!!,
-                                                        navController = navController,
-                                                        onDismiss = menuState::dismiss
-                                                    )
-                                                }
-                                            }
-                                        )
-                                )
+                                localGridItem(song!!)
                             }
                         }
                     }
@@ -689,16 +643,12 @@ fun HomeScreen(
                             title = recommendation.title.title,
                             thumbnail = recommendation.title.thumbnailUrl?.let { thumbnailUrl ->
                                 {
-                                    val shape =
-                                        if (recommendation.title is Artist) CircleShape else RoundedCornerShape(
-                                            ThumbnailCornerRadius
-                                        )
                                     AsyncImage(
                                         model = thumbnailUrl,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(ListThumbnailSize)
-                                            .clip(shape)
+                                            .clip(RoundedCornerShape(ThumbnailCornerRadius))
                                     )
                                 }
                             },
@@ -736,16 +686,12 @@ fun HomeScreen(
                         label = section.label,
                         thumbnail = section.thumbnail?.let { thumbnailUrl ->
                             {
-                                val shape =
-                                    if (section.endpoint?.isArtistEndpoint == true) CircleShape else RoundedCornerShape(
-                                        ThumbnailCornerRadius
-                                    )
                                 AsyncImage(
                                     model = thumbnailUrl,
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(ListThumbnailSize)
-                                        .clip(shape)
+                                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
                                 )
                             }
                         },
