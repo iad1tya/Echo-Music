@@ -1322,11 +1322,7 @@ fun BottomSheetPlayer(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            MaterialTheme.colorScheme.surface.copy(
-                                alpha = lyricsSheetState.progress.coerceIn(0f, 1f)
-                            )
-                        )
+                        .background(Color.Transparent)
                 ) {
                     LyricsScreen(
                         mediaMetadata = metadata,

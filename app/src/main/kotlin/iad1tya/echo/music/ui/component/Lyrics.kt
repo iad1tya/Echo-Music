@@ -811,6 +811,7 @@ fun Lyrics(
                     val distance = kotlin.math.abs(index - displayedCurrentLineIndex)
 
                     // Target values for animation
+                    // Reduced active scale for subtle "bouncy" feel
                     val targetScale = when {
                         !isSynced || isActive -> 1.05f 
                         distance == 1 -> 0.95f 
@@ -829,8 +830,8 @@ fun Lyrics(
                     val animatedScale by animateFloatAsState(
                         targetValue = targetScale,
                         animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMedium
+                            dampingRatio = Spring.DampingRatioLowBouncy, // Gentle bounce
+                            stiffness = Spring.StiffnessLow // Slow and smooth
                         ),
                         label = "scale"
                     )
@@ -969,7 +970,8 @@ fun Lyrics(
                         }
                         
                         // Display the selected text
-                        val currentTextColor = if (isActive && palette.isNotEmpty()) palette.first() else textColor
+                        // Active color is always White for the glow effect
+                        val currentTextColor = if (isActive) Color.White else textColor
                         
                         Text(
                             text = displayText ?: item.text,
@@ -977,12 +979,13 @@ fun Lyrics(
                             color = if (isActive) {
                                 currentTextColor
                             } else {
-                                textColor.copy(alpha = 0.8f)
+                                textColor.copy(alpha = 0.5f) // Dim inactive lyrics more for contrast
                             },
                             style = TextStyle(
                                 shadow = if (isActive) Shadow(
-                                    color = currentTextColor.copy(alpha = 0.5f),
-                                    blurRadius = 30f
+                                    color = Color.White.copy(alpha = 0.8f), // Bright white glow
+                                    blurRadius = 40f, // Strong glow
+                                    offset = Offset(0f, 0f)
                                 ) else Shadow.None
                             ),
                             textAlign = when (lyricsTextPosition) {

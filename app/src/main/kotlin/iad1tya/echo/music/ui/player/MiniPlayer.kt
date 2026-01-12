@@ -178,7 +178,7 @@ private fun NewMiniPlayer(
                     val palette = Palette.from(bitmap)
                         .maximumColorCount(32)
                         .generate()
-                    gradientColors = PlayerColorExtractor.extractGradientColors(
+                    gradientColors = PlayerColorExtractor.extractMiniPlayerColors(
                         palette = palette,
                         fallbackColor = Color.Black.toArgb()
                     )

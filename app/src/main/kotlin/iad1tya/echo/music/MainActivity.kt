@@ -98,11 +98,15 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -1254,7 +1258,7 @@ class MainActivity : ComponentActivity() {
                                                             )
                                                         }
                                                     }
-                                                    .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer)
+                                                    .glassGrain(pureBlack)
                                             ) {
                                                 NavigationBar(
                                                     modifier = Modifier
@@ -1745,3 +1749,50 @@ val LocalPlayerAwareWindowInsets =
     compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }
 val LocalDownloadUtil = staticCompositionLocalOf<DownloadUtil> { error("No DownloadUtil provided") }
 val LocalSyncUtils = staticCompositionLocalOf<SyncUtils> { error("No SyncUtils provided") }
+
+/**
+ * Applies a translucent background with a grainy noise texture to simulate a "glassy" effect.
+ */
+fun Modifier.glassGrain(pureBlack: Boolean): Modifier = this.drawWithCache {
+    val noiseSize = 64
+    val noiseBitmap = android.graphics.Bitmap.createBitmap(noiseSize, noiseSize, android.graphics.Bitmap.Config.ARGB_8888)
+    val pixels = IntArray(noiseSize * noiseSize)
+    val random = java.util.Random()
+    
+    // Generate white noise pixels
+    for (i in pixels.indices) {
+        val alpha = random.nextInt(50) // Random alpha 0-50
+        // Use white granules
+        pixels[i] = android.graphics.Color.argb(alpha, 255, 255, 255)
+    }
+    noiseBitmap.setPixels(pixels, 0, noiseSize, 0, 0, noiseSize, noiseSize)
+    val noiseImage = noiseBitmap.asImageBitmap()
+    
+    val paint = androidx.compose.ui.graphics.Paint().apply {
+        shader = androidx.compose.ui.graphics.ImageShader(
+            noiseImage,
+            androidx.compose.ui.graphics.TileMode.Repeated,
+            androidx.compose.ui.graphics.TileMode.Repeated
+        )
+        // Very subtle grain visibility - decreased from 0.15f
+        alpha = 0.05f 
+    }
+
+    onDrawBehind {
+        // Base translucent layer - increased darkness from 0.85f
+        // Use Color.Black for both to ensure "blackish" look as requested, avoiding the grey 1E1E1E
+        val baseColor = Color.Black
+        drawRect(baseColor.copy(alpha = 0.96f))
+        
+        val w = size.width
+        val h = size.height
+        
+        drawIntoCanvas { canvas ->
+            val nativeCanvas = canvas.nativeCanvas
+            nativeCanvas.drawRect(
+                0f, 0f, w, h, 
+                paint.asFrameworkPaint()
+            )
+        }
+    }
+}

@@ -205,4 +205,54 @@ object PlayerColorExtractor {
         
         const val DARKER_VARIANT_FACTOR = 0.6f
     }
+    /**
+     * Extracts a "decent" (dark, subtle) gradient for the Mini Player
+     * Uses the accent color but significantly darkened to be less distracting
+     */
+    suspend fun extractMiniPlayerColors(
+        palette: Palette,
+        fallbackColor: Int
+    ): List<Color> = withContext(Dispatchers.Default) {
+        
+        // Match the logic of extractGradientColors to ensure consistency with Music Page
+        
+        // Extract all available colors with priority for dominant colors
+        val colorCandidates = listOfNotNull(
+            palette.dominantSwatch, // High priority for dominant color
+            palette.vibrantSwatch,
+            palette.darkVibrantSwatch,
+            palette.lightVibrantSwatch,
+            palette.mutedSwatch,
+            palette.darkMutedSwatch,
+            palette.lightMutedSwatch
+        )
+
+        // Select best color based on weight (dominance + vibrancy)
+        // This ensures we pick the SAME color as the Music Page background
+        val bestSwatch = colorCandidates.maxByOrNull { calculateColorWeight(it) }
+        val fallbackDominant = palette.dominantSwatch?.rgb?.let { Color(it) }
+            ?: Color(palette.getDominantColor(fallbackColor))
+
+        val primaryColor = if (bestSwatch != null) {
+            val bestColor = Color(bestSwatch.rgb)
+            // Ensure the color is suitable for use
+            if (isColorVibrant(bestColor)) {
+                enhanceColorVividness(bestColor, 1.5f)
+            } else {
+                // If not vibrant, use dominant color with slight enhancement
+                enhanceColorVividness(fallbackDominant, 1.1f)
+            }
+        } else {
+            enhanceColorVividness(fallbackDominant, 1.1f)
+        }
+        
+        // Create a solid block of this exact color
+        // Start: The exact primary color determined above
+        val deepStart = primaryColor
+        
+        // End: Same as start for a solid flat look
+        val darkEnd = primaryColor
+        
+        listOf(deepStart, darkEnd)
+    }
 }
