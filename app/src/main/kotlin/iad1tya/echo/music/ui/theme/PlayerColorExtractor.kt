@@ -56,14 +56,21 @@ object PlayerColorExtractor {
         }
         
         // Create sophisticated gradient with 3 color points for better contrast
+        val darkStart = primaryColor.copy(
+            red = (primaryColor.red * 0.7f).coerceIn(0f, 1f),
+            green = (primaryColor.green * 0.7f).coerceIn(0f, 1f),
+            blue = (primaryColor.blue * 0.7f).coerceIn(0f, 1f)
+        )
+        val darkEnd = primaryColor.copy(
+            red = (primaryColor.red * 0.3f).coerceIn(0f, 1f),
+            green = (primaryColor.green * 0.3f).coerceIn(0f, 1f),
+            blue = (primaryColor.blue * 0.3f).coerceIn(0f, 1f)
+        )
+        
         listOf(
             primaryColor, // Start: primary vibrant color
-            primaryColor.copy(
-                red = (primaryColor.red * 0.4f).coerceAtLeast(0f),
-                green = (primaryColor.green * 0.4f).coerceAtLeast(0f),
-                blue = (primaryColor.blue * 0.4f).coerceAtLeast(0f)
-            ), // Middle: Deep dark version of primary color (40% brightness)
-            Color.Black // End: Pure black for maximum contrast
+            darkStart,    // Middle: Darker version (70% brightness)
+            darkEnd       // End: Deep dark version (30% brightness) instead of pure black
         )
     }
 

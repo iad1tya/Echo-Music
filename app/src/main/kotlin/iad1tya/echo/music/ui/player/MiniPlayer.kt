@@ -314,7 +314,7 @@ private fun NewMiniPlayer(
                 .then(
                     if (gradientColors.isNotEmpty()) {
                         Modifier.background(
-                            Brush.horizontalGradient(
+                            Brush.verticalGradient(
                                 colors = gradientColors
                             )
                         )
