@@ -105,6 +105,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import iad1tya.echo.music.utils.makeTimeString
+import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,10 +141,10 @@ fun LyricsScreen(
     val currentLyrics by playerConnection.currentLyrics.collectAsState(initial = null)
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
 
+
     LaunchedEffect(mediaMetadata.id, currentLyrics) {
         if (currentLyrics == null) {
-
-            coroutineScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 try {
                     val entryPoint = EntryPointAccessors.fromApplication(
                         context.applicationContext,
@@ -151,8 +152,12 @@ fun LyricsScreen(
                     )
                     val lyricsHelper = entryPoint.lyricsHelper()
                     val lyrics = lyricsHelper.getLyrics(mediaMetadata)
-                    database.query {
-                        upsert(LyricsEntity(mediaMetadata.id, lyrics))
+                    
+                    // Check if lyrics were added manually while we were fetching
+                    if (database.lyrics(mediaMetadata.id).first() == null) {
+                        database.query {
+                            upsert(LyricsEntity(mediaMetadata.id, lyrics))
+                        }
                     }
                 } catch (e: Exception) {
                     // Handle error
