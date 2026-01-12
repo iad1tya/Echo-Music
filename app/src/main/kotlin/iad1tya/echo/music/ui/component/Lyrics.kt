@@ -172,6 +172,7 @@ fun Lyrics(
     sliderPositionProvider: () -> Long?,
     modifier: Modifier = Modifier,
     isVisible: Boolean = true,
+    palette: List<Color> = emptyList(),
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val menuState = LocalMenuState.current
@@ -518,7 +519,11 @@ fun Lyrics(
             !lyrics.isNullOrEmpty() && lyrics.startsWith("[")
         }
 
-    val textColor = Color.White
+    val textColor = if (playerBackground == PlayerBackgroundStyle.GRADIENT) {
+        Color.White
+    } else {
+        MaterialTheme.colorScheme.onBackground
+    }
 
     var currentLineIndex by remember {
         mutableIntStateOf(-1)
@@ -964,17 +969,19 @@ fun Lyrics(
                         }
                         
                         // Display the selected text
+                        val currentTextColor = if (isActive && palette.isNotEmpty()) palette.first() else textColor
+                        
                         Text(
                             text = displayText ?: item.text,
                             fontSize = 24.sp,
                             color = if (isActive) {
-                                textColor
+                                currentTextColor
                             } else {
                                 textColor.copy(alpha = 0.8f)
                             },
                             style = TextStyle(
                                 shadow = if (isActive) Shadow(
-                                    color = textColor.copy(alpha = 0.5f),
+                                    color = currentTextColor.copy(alpha = 0.5f),
                                     blurRadius = 30f
                                 ) else Shadow.None
                             ),

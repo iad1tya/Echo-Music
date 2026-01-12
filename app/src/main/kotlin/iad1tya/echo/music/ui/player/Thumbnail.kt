@@ -245,21 +245,21 @@ fun Thumbnail(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Echo header
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
-                ) {
-                    Text(
-                        text = "Echo Music",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        ),
-                        color = textBackgroundColor,
-                    )
-                }
+                // Echo header removed by user request
+                // Column(
+                //     horizontalAlignment = Alignment.CenterHorizontally,
+                //     modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+                // ) {
+                //     Text(
+                //         text = "Echo Music",
+                //         style = MaterialTheme.typography.titleLarge.copy(
+                //             fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                //             fontWeight = FontWeight.Bold,
+                //             fontSize = 20.sp
+                //         ),
+                //         color = textBackgroundColor,
+                //     )
+                // }
                 
                 // Thumbnail content
                 BoxWithConstraints(

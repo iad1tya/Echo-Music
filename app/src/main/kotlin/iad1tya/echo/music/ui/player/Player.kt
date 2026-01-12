@@ -1253,11 +1253,83 @@ fun BottomSheetPlayer(
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    // 1. Blurred Background Layer
+                    mediaMetadata?.let { metadata ->
+                        AsyncImage(
+                            model = coil3.request.ImageRequest.Builder(LocalContext.current)
+                                .data(metadata.thumbnailUrl)
+                                .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
+                                .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
+                                .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                                .build(),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(100.dp) // Strong blur for background
+                        )
+                        
+                        // Dark overlay to ensure text readability against the blurred image
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.5f))
+                        )
+                    }
+
+                    // 2. Foreground Content (Thumbnail + Controls)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                            .padding(bottom = queueSheetState.collapsedBound),
+                    ) {
+                        // Top Bar alignment handling
+                         Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                                .height(48.dp) // Approximate height for top bar area
+                        ) {
+                             // Back and Share buttons will be placed here by the Box below, 
+                             // but we reserve space in the column if needed or just let them float.
+                             // Actually, the Back and Share buttons are floating in the outer Box. 
+                             // We just need the Column to start below them or have padding.
+                        }
+                        
+                        // Main Thumbnail
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Thumbnail(
+                                sliderPositionProvider = { sliderPosition },
+                                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                isPlayerExpanded = state.isExpanded,
+                                onToggleLyrics = {
+                                    if (lyricsSheetState.isExpanded) {
+                                        lyricsSheetState.collapseSoft()
+                                    } else {
+                                        lyricsSheetState.expandSoft()
+                                    }
+                                }
+                            )
+                        }
+
+                        mediaMetadata?.let {
+                            controlsContent(it)
+                        }
+
+                        Spacer(Modifier.height(30.dp))
+                    }
+
+                    // 3. Top Controls (Back, Share) - Floating on top
                     // Back button at top left
                     Icon(
                         painter = painterResource(R.drawable.arrow_back),
                         contentDescription = "Close player",
-                        tint = textButtonColor,
+                        tint = Color.White, // Always white on dark immersive bg
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Start))
@@ -1270,7 +1342,7 @@ fun BottomSheetPlayer(
                     Icon(
                         painter = painterResource(R.drawable.share),
                         contentDescription = "Share",
-                        tint = textButtonColor,
+                        tint = Color.White, // Always white on dark immersive bg
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.End))
@@ -1288,38 +1360,6 @@ fun BottomSheetPlayer(
                                 context.startActivity(Intent.createChooser(intent, null))
                             }
                     )
-                    
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier =
-                    Modifier
-                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-                        .padding(bottom = queueSheetState.collapsedBound),
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Thumbnail(
-                            sliderPositionProvider = { sliderPosition },
-                            modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
-                            isPlayerExpanded = state.isExpanded,
-                            onToggleLyrics = {
-                                if (lyricsSheetState.isExpanded) {
-                                    lyricsSheetState.collapseSoft()
-                                } else {
-                                    lyricsSheetState.expandSoft()
-                                }
-                            }
-                        )
-                    }
-
-                    mediaMetadata?.let {
-                        controlsContent(it)
-                    }
-
-                    Spacer(Modifier.height(30.dp))
-                }
                 }
             }
         }

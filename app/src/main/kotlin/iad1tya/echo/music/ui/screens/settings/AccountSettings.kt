@@ -185,7 +185,7 @@ fun AccountSettings(
                     painter = painterResource(R.drawable.google),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(androidx.compose.ui.graphics.Color.White)
+                    colorFilter = null
                 )
             }
 

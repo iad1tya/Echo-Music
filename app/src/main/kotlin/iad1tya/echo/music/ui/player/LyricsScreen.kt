@@ -370,7 +370,11 @@ fun LyricsScreen(
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Lyrics(sliderPositionProvider = { sliderPosition }, isVisible = isVisible)
+                        Lyrics(
+                            sliderPositionProvider = { sliderPosition },
+                            isVisible = isVisible,
+                            palette = gradientColors
+                        )
                     }
                     Column(
                         modifier = Modifier
@@ -621,7 +625,11 @@ fun LyricsScreen(
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        Lyrics(sliderPositionProvider = { sliderPosition }, isVisible = isVisible)
+                        Lyrics(
+                            sliderPositionProvider = { sliderPosition },
+                            isVisible = isVisible,
+                            palette = gradientColors
+                        )
                     }
                     Column(
                         modifier = Modifier

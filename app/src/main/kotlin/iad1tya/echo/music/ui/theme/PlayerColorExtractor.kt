@@ -46,7 +46,7 @@ object PlayerColorExtractor {
             val bestColor = Color(bestSwatch.rgb)
             // Ensure the color is suitable for use
             if (isColorVibrant(bestColor)) {
-                enhanceColorVividness(bestColor, 1.3f)
+                enhanceColorVividness(bestColor, 1.5f)
             } else {
                 // If not vibrant, use dominant color with slight enhancement
                 enhanceColorVividness(fallbackDominant, 1.1f)
@@ -55,14 +55,15 @@ object PlayerColorExtractor {
             enhanceColorVividness(fallbackDominant, 1.1f)
         }
         
-        // Create sophisticated gradient with 2 color points (no black at bottom)
+        // Create sophisticated gradient with 3 color points for better contrast
         listOf(
             primaryColor, // Start: primary vibrant color
             primaryColor.copy(
-                red = (primaryColor.red * 0.7f).coerceAtLeast(0f),
-                green = (primaryColor.green * 0.7f).coerceAtLeast(0f),
-                blue = (primaryColor.blue * 0.7f).coerceAtLeast(0f)
-            ) // End: darker version of primary color (no black)
+                red = (primaryColor.red * 0.4f).coerceAtLeast(0f),
+                green = (primaryColor.green * 0.4f).coerceAtLeast(0f),
+                blue = (primaryColor.blue * 0.4f).coerceAtLeast(0f)
+            ), // Middle: Deep dark version of primary color (40% brightness)
+            Color.Black // End: Pure black for maximum contrast
         )
     }
 
