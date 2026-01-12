@@ -414,10 +414,10 @@ fun HomeScreen(
                                     },
                                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                        containerColor = Color.Black,
+                                        contentColor = Color.White
                                     ),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White),
                                     modifier = Modifier.height(32.dp)
                                 ) {
                                     Icon(
