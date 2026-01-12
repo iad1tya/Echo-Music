@@ -357,15 +357,19 @@ fun PlayerMenu(
                         NewAction(
                             icon = {
                                 Icon(
-                                    painter = painterResource(R.drawable.bedtime), 
+                                    painter = painterResource(R.drawable.share),
                                     contentDescription = null,
                                     modifier = Modifier.size(26.dp),
                                     tint = MaterialTheme.colorScheme.onSurface
                                 )
                             },
-                            text = "Ambient Mode",
+                            text = "Share",
                             onClick = {
-                                navController.navigate("ambient_mode")
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/watch?v=${mediaMetadata.id}")
+                                }
+                                context.startActivity(Intent.createChooser(intent, null))
                                 onDismiss()
                             }
                         )
@@ -378,6 +382,14 @@ fun PlayerMenu(
         if (artists.isNotEmpty()) {
             item {
                 MenuGroup {
+                     MenuEntry(
+                        icon = R.drawable.bedtime,
+                        text = "Ambient Mode",
+                        onClick = {
+                            navController.navigate("ambient_mode")
+                            onDismiss()
+                        }
+                    )
                      MenuEntry(
                         icon = R.drawable.radio,
                         text = stringResource(R.string.start_radio),
