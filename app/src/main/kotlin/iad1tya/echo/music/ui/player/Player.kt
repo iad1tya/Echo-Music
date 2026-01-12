@@ -588,18 +588,18 @@ fun BottomSheetPlayer(
                                 .clip(RoundedCornerShape(32.dp))
                                 .background(Color.Black.copy(alpha = 0.3f))
                                 .clickable { audioRoutingSheetState.expandSoft() }
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
                             Icon(
                                 painter = painterResource(audioIcon),
                                 contentDescription = null,
                                 tint = Color.White.copy(alpha = 0.9f),
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(20.dp)
                             )
-                            Spacer(Modifier.width(6.dp))
+                            Spacer(Modifier.width(8.dp))
                             Text(
                                 text = audioText,
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = Color.White.copy(alpha = 0.9f)
                             )
                         }
