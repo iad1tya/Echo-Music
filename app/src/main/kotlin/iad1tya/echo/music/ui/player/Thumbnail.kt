@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -95,6 +97,7 @@ fun Thumbnail(
     modifier: Modifier = Modifier,
     isPlayerExpanded: Boolean = true, // Add parameter to control swipe based on player state
     onToggleLyrics: () -> Unit = {}, // Callback to toggle lyrics
+    overlayContent: @Composable (androidx.compose.foundation.layout.BoxScope.() -> Unit)? = null,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val context = LocalContext.current
@@ -341,7 +344,8 @@ fun Thumbnail(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(containerMaxWidth - (PlayerHorizontalPadding * 2))
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
                                         .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
                                 ) {
                                     // Main image
@@ -353,10 +357,12 @@ fun Thumbnail(
                                             .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
                                             .build(),
                                         contentDescription = null,
-                                        contentScale = ContentScale.Fit,
+                                        contentScale = ContentScale.Crop,
                                         error = painterResource(R.drawable.echo_logo),
                                         modifier = Modifier.fillMaxSize()
                                     )
+                                    
+                                    overlayContent?.invoke(this)
                                 }
                             }
                         }
