@@ -1233,18 +1233,7 @@ fun BottomSheetPlayer(
                             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                             .padding(bottom = queueSheetState.collapsedBound),
                     ) {
-                        // Top Bar alignment handling
-                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                                .height(48.dp) // Approximate height for top bar area
-                        ) {
-                             // Back and Share buttons will be placed here by the Box below, 
-                             // but we reserve space in the column if needed or just let them float.
-                             // Actually, the Back and Share buttons are floating in the outer Box. 
-                             // We just need the Column to start below them or have padding.
-                        }
+
                         
                         // Main Thumbnail
                         Box(
@@ -1299,44 +1288,7 @@ fun BottomSheetPlayer(
                         Spacer(Modifier.height(30.dp))
                     }
 
-                    // 3. Top Controls (Back, Share, Audio Output)
-                    // Back button at top left
-                    Icon(
-                        painter = painterResource(R.drawable.arrow_back),
-                        contentDescription = "Close player",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Start))
-                            .padding(16.dp)
-                            .size(24.dp)
-                            .clickable { state.collapseSoft() }
-                    )
 
-
-                    
-                    // Share button at top right
-                    Icon(
-                        painter = painterResource(R.drawable.share),
-                        contentDescription = "Share",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.End))
-                            .padding(16.dp)
-                            .size(24.dp)
-                            .clickable {
-                                val intent = Intent().apply {
-                                    action = Intent.ACTION_SEND
-                                    type = "text/plain"
-                                    putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        "https://music.youtube.com/watch?v=${mediaMetadata?.id}"
-                                    )
-                                }
-                                context.startActivity(Intent.createChooser(intent, null))
-                            }
-                    )
                 }
             }
         }
