@@ -106,6 +106,7 @@ import iad1tya.echo.music.ui.component.LocalBottomSheetPageState
 import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.NavigationTitle
 import iad1tya.echo.music.ui.component.SongGridItem
+import iad1tya.echo.music.ui.component.QuickPickGridItem
 import iad1tya.echo.music.ui.component.SongListItem
 import iad1tya.echo.music.ui.component.YouTubeGridItem
 import iad1tya.echo.music.ui.component.YouTubeListItem
@@ -389,7 +390,9 @@ fun HomeScreen(
         ) {
             item {
                 ChipsRow(
-                    chips = homePage?.chips?.map { it to it.title } ?: emptyList(),
+                    chips = homePage?.chips
+                        ?.filter { !it.title.contains("Podcast", ignoreCase = true) }
+                        ?.map { it to it.title } ?: emptyList(),
                     currentValue = selectedChip,
                     onValueUpdate = {
                         viewModel.toggleChip(it)
@@ -407,8 +410,9 @@ fun HomeScreen(
                                     onClick = {
                                         playerConnection.playQueue(
                                             ListQueue(
-                                                title = "Quick Picks",
+                                                title = "Quick picks",
                                                 items = quickPicks.map { it.toMediaItem() },
+                                                startIndex = 0
                                             )
                                         )
                                     },
@@ -439,16 +443,16 @@ fun HomeScreen(
                     item(key = "quick_picks_list") {
                         LazyHorizontalGrid(
                             state = quickPicksLazyGridState,
-                            rows = GridCells.Fixed(2),
+                            rows = GridCells.Fixed(1),
                             flingBehavior = rememberSnapFlingBehavior(quickPicksSnapLayoutInfoProvider),
                             contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
                                 .asPaddingValues(),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height((GridThumbnailHeight + with(LocalDensity.current) {
+                                .height(GridThumbnailHeight + with(LocalDensity.current) {
                                     MaterialTheme.typography.bodyLarge.lineHeight.toDp() * 2 +
                                             MaterialTheme.typography.bodyMedium.lineHeight.toDp() * 2
-                                }) * 2)
+                                })
                                 .animateItem()
                         ) {
                             items(
