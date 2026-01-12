@@ -1555,7 +1555,8 @@ class MainActivity : ComponentActivity() {
                         if (!isAmbientMode) {
                             BottomSheetMenu(
                                 state = LocalMenuState.current,
-                                modifier = Modifier.align(Alignment.BottomCenter)
+                                modifier = Modifier.align(Alignment.BottomCenter),
+                                background = Color.Black
                             )
 
                             BottomSheetPage(
