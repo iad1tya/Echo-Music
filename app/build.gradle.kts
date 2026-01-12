@@ -237,9 +237,8 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     
     // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
+    
+
     
     // Music Recognition
     implementation("com.github.f4b6a3:uuid-creator:6.1.1")
