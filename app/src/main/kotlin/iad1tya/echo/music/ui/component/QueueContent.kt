@@ -187,28 +187,36 @@ fun QueueContent(
             .background(Color.Transparent),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header with controls
+            // Queue Title at top left
+            Text(
+                text = "Queue",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 24.dp, top = 60.dp, bottom = 16.dp),
+                color = onBackgroundColor
+            )
+            
+            // Header with controls - individual pills for each button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .padding(top = 48.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Shuffle button
-                IconButton(
-                    onClick = {
-                        playerConnection.player.shuffleModeEnabled =
-                            !playerConnection.player.shuffleModeEnabled
-                    },
+                // Shuffle button with individual pill
+                Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(56.dp)
                         .clip(CircleShape)
                         .background(
-                            if (shuffleModeEnabled) MaterialTheme.colorScheme.primaryContainer
-                            else Color.Transparent
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                         )
+                        .clickable {
+                            playerConnection.player.shuffleModeEnabled =
+                                !playerConnection.player.shuffleModeEnabled
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.shuffle),
@@ -216,21 +224,23 @@ fun QueueContent(
                         modifier = Modifier
                             .size(24.dp)
                             .alpha(if (shuffleModeEnabled) 1f else 0.5f),
-                        tint = if (shuffleModeEnabled) MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = if (shuffleModeEnabled) MaterialTheme.colorScheme.primary
                         else onBackgroundColor
                     )
                 }
 
-                // Repeat button
-                IconButton(
-                    onClick = { playerConnection.player.toggleRepeatMode() },
+                // Repeat button with individual pill
+                Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(56.dp)
                         .clip(CircleShape)
                         .background(
-                            if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primaryContainer
-                            else Color.Transparent
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                         )
+                        .clickable {
+                            playerConnection.player.toggleRepeatMode()
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(
@@ -244,21 +254,23 @@ fun QueueContent(
                         modifier = Modifier
                             .size(24.dp)
                             .alpha(if (repeatMode == Player.REPEAT_MODE_OFF) 0.5f else 1f),
-                        tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary
                         else onBackgroundColor
                     )
                 }
 
-                // Lock button
-                IconButton(
-                    onClick = { locked = !locked },
+                // Lock button with individual pill
+                Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(56.dp)
                         .clip(CircleShape)
                         .background(
-                            if (locked) MaterialTheme.colorScheme.primaryContainer
-                            else Color.Transparent
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                         )
+                        .clickable {
+                            locked = !locked
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(
@@ -266,18 +278,18 @@ fun QueueContent(
                         ),
                         contentDescription = "Lock Queue",
                         modifier = Modifier.size(24.dp),
-                        tint = if (locked) MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = if (locked) MaterialTheme.colorScheme.primary
                         else onBackgroundColor
                     )
                 }
             }
 
-            // Queue title
+            // "Continue Playing" text WITHOUT background
             Text(
                 text = "Continue Playing",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                modifier = Modifier.padding(start = 24.dp, top = 20.dp, bottom = 12.dp),
                 color = onBackgroundColor
             )
 
@@ -422,6 +434,38 @@ fun QueueContent(
             modifier = Modifier
                 .padding(bottom = 80.dp)
                 .align(Alignment.BottomCenter),
+        )
+        
+        // Top fade edge
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .align(Alignment.TopCenter)
+                .background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.4f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        
+        // Bottom fade edge
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.4f)
+                        )
+                    )
+                )
         )
     }
 }

@@ -462,6 +462,12 @@ fun BottomSheetPlayer(
     var showLyrics by rememberSaveable { mutableStateOf(false) }
     var showQueue by rememberSaveable { mutableStateOf(false) }
 
+    // Collapse the old queue bottom sheet when showing queue overlay
+    LaunchedEffect(showQueue) {
+        if (showQueue) {
+            queueSheetState.collapseSoft()
+        }
+    }
 
     val bottomSheetBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.GRADIENT -> 
@@ -1317,6 +1323,9 @@ fun BottomSheetPlayer(
             }
         }
 
+
+        // Old Queue bottom sheet removed - now using QueueContent overlay instead
+        /*
         Queue(
             state = queueSheetState,
             playerBottomSheetState = state,
@@ -1341,6 +1350,8 @@ fun BottomSheetPlayer(
             },
             pureBlack = pureBlack,
         )
+        */
+
 
         // Lyrics BottomSheet removed
 
@@ -1673,6 +1684,98 @@ fun BottomSheetPlayer(
                 }
             }
         }
+        }
+        
+        // Bottom Navigation Bar - fixed at bottom
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(Color.Transparent)
+                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 48.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Queue Button
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            showQueue = !showQueue
+                            showLyrics = false
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.queue_music),
+                        contentDescription = "Queue",
+                        modifier = Modifier.size(24.dp),
+                        tint = if (showQueue) MaterialTheme.colorScheme.primary
+                        else onBackgroundColor.copy(alpha = 0.7f)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Queue",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (showQueue) MaterialTheme.colorScheme.primary
+                        else onBackgroundColor.copy(alpha = 0.7f)
+                    )
+                }
+                
+                // Sleep Timer Button
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            // Open sleep timer sheet
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.bedtime),
+                        contentDescription = "Sleep timer",
+                        modifier = Modifier.size(24.dp),
+                        tint = onBackgroundColor.copy(alpha = 0.7f)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Sleep timer",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = onBackgroundColor.copy(alpha = 0.7f)
+                    )
+                }
+                
+                // Lyrics Button
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            showLyrics = !showLyrics
+                            showQueue = false
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.lyrics),
+                        contentDescription = "Lyrics",
+                        modifier = Modifier.size(24.dp),
+                        tint = if (showLyrics) MaterialTheme.colorScheme.primary
+                        else onBackgroundColor.copy(alpha = 0.7f)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Lyrics",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (showLyrics) MaterialTheme.colorScheme.primary
+                        else onBackgroundColor.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
     }
-}
 }
