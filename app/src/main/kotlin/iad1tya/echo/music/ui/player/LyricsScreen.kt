@@ -151,12 +151,12 @@ fun LyricsScreen(
                         iad1tya.echo.music.di.LyricsHelperEntryPoint::class.java
                     )
                     val lyricsHelper = entryPoint.lyricsHelper()
-                    val lyrics = lyricsHelper.getLyrics(mediaMetadata)
+                    val result = lyricsHelper.getLyrics(mediaMetadata)
                     
                     // Check if lyrics were added manually while we were fetching
                     if (database.lyrics(mediaMetadata.id).first() == null) {
                         database.query {
-                            upsert(LyricsEntity(mediaMetadata.id, lyrics))
+                            upsert(LyricsEntity(mediaMetadata.id, result.lyrics, result.providerName))
                         }
                     }
                 } catch (e: Exception) {

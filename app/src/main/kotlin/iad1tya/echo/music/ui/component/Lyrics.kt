@@ -38,6 +38,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -660,67 +662,69 @@ fun Lyrics(
                 // Sticky Header (Main Layout)
                 Column(modifier = Modifier.fillMaxSize()) {
                  // Header
-                Box(
+                // Header - Row Layout
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
-                        .padding(top = 48.dp, bottom = 16.dp) // Adjusted top padding down
-                        .zIndex(1f) // Ensure it stays on top
+                        .padding(top = 72.dp, bottom = 16.dp) // Moved down
+                        .zIndex(1f),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Left: Album Art
-                    Row(
-                        modifier = Modifier.align(Alignment.CenterStart),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Album Art
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                        modifier = Modifier.size(80.dp)
                     ) {
-                        Card(
-                            shape = RoundedCornerShape(8.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                            modifier = Modifier.size(56.dp)
+                         mediaMetadata?.thumbnailUrl?.let { url ->
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(url)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } ?: Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                            contentAlignment = Alignment.Center
                         ) {
-                             mediaMetadata?.thumbnailUrl?.let { url ->
-                                AsyncImage(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(url)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } ?: Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.music_note),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            Icon(
+                                painter = painterResource(R.drawable.music_note),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
-                        
-                    // Center: Provider Info
-                    Text(
-                         text = "Lyrics by ${
-                            when (preferredLyricsProvider) {
+
+                    Spacer(Modifier.width(16.dp))
+
+                    // Provider Info (Left Aligned)
+                    Column(modifier = Modifier.weight(1f)) {
+                        val providerName = lyricsEntity?.provider?.takeIf { it != "Unknown" }
+                            ?: when (preferredLyricsProvider) {
                                 PreferredLyricsProvider.LRCLIB -> "LrcLib"
                                 PreferredLyricsProvider.SIMPMUSIC -> "SimpMusic"
                                 PreferredLyricsProvider.KUGOU -> "KuGou"
                             }
-                        }",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = textColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                        
+                        Text(
+                             text = "Lyrics by $providerName",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = textColor.copy(alpha = 0.9f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Start
+                        )
+                    }
 
-                    // Right: Menu/Lyrics Button
-                    Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                    // Menu Button
+                    Box {
                         FilledTonalIconButton(
                             onClick = { showMenu = true },
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
@@ -730,7 +734,7 @@ fun Lyrics(
                             modifier = Modifier.size(36.dp)
                         ) {
                              Icon(
-                                painter = painterResource(R.drawable.lyrics),
+                                painter = painterResource(R.drawable.more_vert),
                                 contentDescription = "Lyrics Options",
                                 modifier = Modifier.size(20.dp)
                             )
@@ -738,23 +742,40 @@ fun Lyrics(
                         
                         DropdownMenu(
                             expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                            onDismissRequest = { showMenu = false },
+                            shape = RoundedCornerShape(16.dp),
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
+                            tonalElevation = 8.dp
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Refetch Lyrics") },
+                                text = { 
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(painterResource(R.drawable.sync), null, Modifier.size(20.dp))
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Refetch Lyrics", fontSize = 16.sp)
+                                    }
+                                },
                                 onClick = { 
                                     showMenu = false
                                     mediaMetadata?.let {
                                         viewModel.refetchLyrics(it, lyricsEntity)
                                     }
-                                }
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
                             )
                             DropdownMenuItem(
-                                text = { Text("Search Lyrics") },
+                                text = { 
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(painterResource(R.drawable.search), null, Modifier.size(20.dp))
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Search Lyrics", fontSize = 16.sp)
+                                    }
+                                },
                                 onClick = { 
                                     showMenu = false
                                     showSearchDialog = true
-                                }
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
                             )
                         }
                     }
@@ -987,20 +1008,31 @@ fun Lyrics(
                         // Active color is always White for the glow effect
                         val currentTextColor = if (isActive) Color.White else textColor
                         
+                        // Smoother glow animation
+                        val glowBlur by animateFloatAsState(
+                            targetValue = if (isActive) 60f else 0f,
+                            animationSpec = tween(durationMillis = 800)
+                        )
+                        val glowAlpha by animateFloatAsState(
+                            targetValue = if (isActive) 0.9f else 0f,
+                            animationSpec = tween(durationMillis = 800)
+                        )
+
                         Text(
                             text = displayText ?: item.text,
-                            fontSize = 24.sp,
+                            fontSize = if (isActive) 34.sp else 26.sp,
+                            lineHeight = if (isActive) 40.sp else 32.sp,
                             color = if (isActive) {
                                 currentTextColor
                             } else {
-                                textColor.copy(alpha = 0.5f) // Dim inactive lyrics more for contrast
+                                textColor.copy(alpha = 0.5f)
                             },
                             style = TextStyle(
-                                shadow = if (isActive) Shadow(
-                                    color = Color.White.copy(alpha = 0.8f), // Bright white glow
-                                    blurRadius = 40f, // Strong glow
+                                shadow = Shadow(
+                                    color = Color.White.copy(alpha = glowAlpha),
+                                    blurRadius = glowBlur,
                                     offset = Offset(0f, 0f)
-                                ) else Shadow.None
+                                )
                             ),
                             textAlign = when (lyricsTextPosition) {
                                 LyricsPosition.LEFT -> TextAlign.Left
@@ -1109,44 +1141,80 @@ fun Lyrics(
 
     }
     if (showSearchDialog) {
-        DefaultDialog(
-            onDismiss = { showSearchDialog = false },
-            icon = { Icon(painterResource(R.drawable.search), null) },
-            title = { Text("Search Lyrics") },
-            buttons = {
-                TextButton(onClick = { showSearchDialog = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
-                Spacer(Modifier.width(8.dp))
-                TextButton(
-                    onClick = {
-                        showSearchDialog = false
-                        showSearchResultDialog = true
-                        viewModel.search(
-                            searchMediaMetadata.id, // Use Media ID from metadata
-                            titleField.text,
-                            artistField.text,
-                            searchMediaMetadata.duration
-                        )
-                    }
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showSearchDialog = false },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { showSearchDialog = false } // Click outside to dismiss
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f), // Match Menu Color
+                    tonalElevation = 6.dp,
+                    modifier = Modifier
+                        .fillMaxWidth() // Width limit
+                        .clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null) {} // Intercept clicks
                 ) {
-                    Text("Search")
+                    Column(Modifier.padding(24.dp)) {
+                        Text(
+                            "Search Lyrics",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+
+                        OutlinedTextField(
+                            value = titleField,
+                            onValueChange = onTitleFieldChange,
+                            label = { Text("Title") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = artistField,
+                            onValueChange = onArtistFieldChange,
+                            label = { Text("Artist") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        Spacer(Modifier.height(32.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(
+                                onClick = { showSearchDialog = false },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Cancel", style = MaterialTheme.typography.bodyLarge)
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    showSearchDialog = false
+                                    showSearchResultDialog = true
+                                    viewModel.search(
+                                        searchMediaMetadata.id,
+                                        titleField.text,
+                                        artistField.text,
+                                        searchMediaMetadata.duration
+                                    )
+                                },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Search", style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
+                    }
                 }
             }
-        ) {
-             OutlinedTextField(
-                 value = titleField,
-                 onValueChange = onTitleFieldChange,
-                 label = { Text("Title") },
-                 modifier = Modifier.fillMaxWidth()
-             )
-             Spacer(Modifier.height(8.dp))
-             OutlinedTextField(
-                 value = artistField,
-                 onValueChange = onArtistFieldChange,
-                 label = { Text("Artist") },
-                 modifier = Modifier.fillMaxWidth()
-             )
         }
     }
 
@@ -1173,7 +1241,7 @@ fun Lyrics(
                              viewModel.cancelSearch()
                              scope.launch(Dispatchers.IO) {
                                  database.query {
-                                     upsert(iad1tya.echo.music.db.entities.LyricsEntity(currentSong?.id ?: "", result.lyrics))
+                                     upsert(iad1tya.echo.music.db.entities.LyricsEntity(currentSong?.id ?: "", result.lyrics, result.providerName))
                                  }
                              }
                          }
