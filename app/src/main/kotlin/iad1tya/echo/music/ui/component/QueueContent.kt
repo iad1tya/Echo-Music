@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -55,16 +56,22 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import androidx.navigation.NavController
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import iad1tya.echo.music.LocalPlayerConnection
 import iad1tya.echo.music.R
 import iad1tya.echo.music.constants.ListItemHeight
@@ -187,109 +194,143 @@ fun QueueContent(
             .background(Color.Transparent),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Queue Title at top left
-            Text(
-                text = "Queue",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 24.dp, top = 60.dp, bottom = 16.dp),
-                color = onBackgroundColor
-            )
-            
-            // Header with controls - individual pills for each button
+            // Header - Row Layout (matching Lyrics header)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 72.dp, bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Shuffle button with individual pill
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                // Album Art (from current playing song)
+                val currentMediaMetadata = queueWindows.getOrNull(currentWindowIndex)?.mediaItem?.metadata
+                androidx.compose.material3.Card(
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 12.dp),
+                    modifier = Modifier.size(80.dp)
+                ) {
+                    currentMediaMetadata?.thumbnailUrl?.let { url ->
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(url)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
                         )
-                        .clickable {
+                    } ?: Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.music_note),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(16.dp))
+
+                // Queue Title (Center)
+                Text(
+                    text = "Queue",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = onBackgroundColor.copy(alpha = 0.9f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Control Buttons (Right Side)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Shuffle button
+                    androidx.compose.material3.FilledTonalIconButton(
+                        onClick = {
                             playerConnection.player.shuffleModeEnabled =
                                 !playerConnection.player.shuffleModeEnabled
                         },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.shuffle),
-                        contentDescription = "Shuffle",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .alpha(if (shuffleModeEnabled) 1f else 0.5f),
-                        tint = if (shuffleModeEnabled) MaterialTheme.colorScheme.primary
-                        else onBackgroundColor
-                    )
-                }
-
-                // Repeat button with individual pill
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                        )
-                        .clickable {
-                            playerConnection.player.toggleRepeatMode()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            when (repeatMode) {
-                                Player.REPEAT_MODE_OFF, Player.REPEAT_MODE_ALL -> R.drawable.repeat
-                                Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
-                                else -> R.drawable.repeat
-                            }
+                        colors = androidx.compose.material3.IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = if (shuffleModeEnabled) 
+                                MaterialTheme.colorScheme.primaryContainer
+                            else Color.White.copy(alpha = 0.15f),
+                            contentColor = if (shuffleModeEnabled)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else Color.White
                         ),
-                        contentDescription = "Repeat",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .alpha(if (repeatMode == Player.REPEAT_MODE_OFF) 0.5f else 1f),
-                        tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary
-                        else onBackgroundColor
-                    )
-                }
-
-                // Lock button with individual pill
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.shuffle),
+                            contentDescription = "Shuffle",
+                            modifier = Modifier.size(20.dp)
                         )
-                        .clickable {
-                            locked = !locked
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            if (locked) R.drawable.lock else R.drawable.lock_open
+                    }
+
+                    // Repeat button
+                    androidx.compose.material3.FilledTonalIconButton(
+                        onClick = { playerConnection.player.toggleRepeatMode() },
+                        colors = androidx.compose.material3.IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = if (repeatMode != Player.REPEAT_MODE_OFF)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else Color.White.copy(alpha = 0.15f),
+                            contentColor = if (repeatMode != Player.REPEAT_MODE_OFF)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else Color.White
                         ),
-                        contentDescription = "Lock Queue",
-                        modifier = Modifier.size(24.dp),
-                        tint = if (locked) MaterialTheme.colorScheme.primary
-                        else onBackgroundColor
-                    )
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                when (repeatMode) {
+                                    Player.REPEAT_MODE_OFF, Player.REPEAT_MODE_ALL -> R.drawable.repeat
+                                    Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                    else -> R.drawable.repeat
+                                }
+                            ),
+                            contentDescription = "Repeat",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Lock button
+                    androidx.compose.material3.FilledTonalIconButton(
+                        onClick = { locked = !locked },
+                        colors = androidx.compose.material3.IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = if (locked)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else Color.White.copy(alpha = 0.15f),
+                            contentColor = if (locked)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else Color.White
+                        ),
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                if (locked) R.drawable.lock else R.drawable.lock_open
+                            ),
+                            contentDescription = "Lock Queue",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
-            // "Continue Playing" text WITHOUT background
+            // \"Continue Playing\" text
             Text(
                 text = "Continue Playing",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 24.dp, top = 20.dp, bottom = 12.dp),
+                modifier = Modifier.padding(start = 24.dp, top = 8.dp, bottom = 12.dp),
                 color = onBackgroundColor
             )
 
