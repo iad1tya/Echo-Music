@@ -20,9 +20,16 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 
@@ -63,7 +70,7 @@ fun BottomSheetMenu(
                 focusManager.clearFocus()
                 state.isVisible = false
             },
-            containerColor = background.copy(alpha = if (background == Color.Transparent) 1f else 0.95f),
+            containerColor = Color(0xE6000000), // Semi-transparent black (90% opacity)
             contentColor = MaterialTheme.colorScheme.onSurface,
             dragHandle = {
                 Box(
