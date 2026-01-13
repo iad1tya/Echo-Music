@@ -229,7 +229,7 @@ fun PlayerMenu(
 
     LazyColumn(
         contentPadding = PaddingValues(
-            bottom = 8.dp + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding(),
+            bottom = 89.dp + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding(),
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
