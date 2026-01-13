@@ -908,6 +908,7 @@ class MainActivity : ComponentActivity() {
                     val insetBg = if (playerBottomSheetState.progress > 0f) Color.Transparent else baseBg
 
                     val backdrop = rememberBackdrop()
+                    val menuBackdrop = rememberBackdrop()
                     val layer = rememberGraphicsLayer()
                     val luminanceAnimation = remember { Animatable(0f) }
 
@@ -1445,7 +1446,7 @@ class MainActivity : ComponentActivity() {
                             },
 
                             modifier = Modifier
-                                // Removed layerBackdrop to avoid recursion
+                                .layerBackdrop(menuBackdrop)
                                 .fillMaxSize()
                                 .nestedScroll(searchBarScrollBehavior.nestedScrollConnection)
                         ) {
@@ -1639,11 +1640,15 @@ class MainActivity : ComponentActivity() {
                         }
 
                         if (!isAmbientMode) {
-                            BottomSheetMenu(
-                                state = LocalMenuState.current,
-                                modifier = Modifier.align(Alignment.BottomCenter),
-                                background = Color.Black
-                            )
+                            CompositionLocalProvider(
+                                LocalBackdrop provides menuBackdrop
+                            ) {
+                                BottomSheetMenu(
+                                    state = LocalMenuState.current,
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                    background = Color.Black
+                                )
+                            }
 
                             BottomSheetPage(
                                 state = LocalBottomSheetPageState.current,

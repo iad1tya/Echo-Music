@@ -36,7 +36,9 @@ fun Modifier.drawBackdropCustomShape(
     backdrop: PlatformBackdrop,
     layer: GraphicsLayer,
     luminanceAnimation: Float,
-    shape: Shape
+    shape: Shape,
+    surfaceAlpha: Float = 0.1f,
+    useLens: Boolean = true,
 ): Modifier {
     return this.drawBackdrop(
         backdrop = backdrop,
@@ -65,13 +67,15 @@ fun Modifier.drawBackdropCustomShape(
                     lerp(8f.dp.toPx(), 2f.dp.toPx(), -l)
                 },
             )
-            lens(24f.dp.toPx(), size.minDimension / 2f, true)
+            if (useLens) {
+                lens(24f.dp.toPx(), size.minDimension / 2f, true)
+            }
         },
         onDrawBackdrop = { drawBackdrop ->
             drawBackdrop()
             layer.record { drawBackdrop() }
         },
         shape = { shape },
-        onDrawSurface = { drawRect(Color.Black.copy(alpha = 0.4f)) }
+        onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
     )
 }

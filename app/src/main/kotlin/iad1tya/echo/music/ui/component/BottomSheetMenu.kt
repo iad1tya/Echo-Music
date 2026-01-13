@@ -63,6 +63,9 @@ fun BottomSheetMenu(
     background: Color = MaterialTheme.colorScheme.surface,
 ) {
     val focusManager = LocalFocusManager.current
+    val backdrop = LocalBackdrop.current
+    val layer = LocalLayer.current
+    val luminance = LocalLuminance.current
 
     if (state.isVisible) {
         ModalBottomSheet(
@@ -70,25 +73,50 @@ fun BottomSheetMenu(
                 focusManager.clearFocus()
                 state.isVisible = false
             },
-            containerColor = Color(0xE6000000), // Semi-transparent black (90% opacity)
+            containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onSurface,
-            dragHandle = {
-                Box(
-                    modifier = Modifier
-                        .padding(vertical = 12.dp)
-                        .size(width = 36.dp, height = 5.dp)
-                        .clip(androidx.compose.foundation.shape.CircleShape)
-                        .background(Color.White.copy(alpha = 0.4f))
-                )
-            },
+            dragHandle = null,
             modifier = modifier
         ) {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .then(
+                        if (backdrop != null && layer != null) {
+                            Modifier.drawBackdropCustomShape(
+                                backdrop = backdrop,
+                                layer = layer,
+                                luminanceAnimation = luminance,
+                                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                                surfaceAlpha = 0.6f,
+                                useLens = false
+                            )
+                        } else {
+                            Modifier.background(Color(0xE6000000))
+                        }
+                    )
             ) {
-                state.content(this)
+                Column(
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(vertical = 12.dp)
+                            .size(width = 36.dp, height = 5.dp)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .background(Color.White.copy(alpha = 0.4f))
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        state.content(this)
+                    }
+                    // Add bottom padding to account for navigation bar if needed, 
+                    // though ModalBottomSheet usually handles it.
+                }
             }
         }
     }
