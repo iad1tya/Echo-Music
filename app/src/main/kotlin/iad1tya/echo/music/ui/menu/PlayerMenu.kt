@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +30,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -253,17 +256,17 @@ fun PlayerMenu(
                         .padding(top = 16.dp)
                 ) {
                     // Volume Control Container
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                        ),
-                        shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier.fillMaxWidth()
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
-                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                        Box(
+                            modifier = Modifier
+                                .border(BorderStroke(1.dp, Color.White), CircleShape)
+                                .padding(12.dp)
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.volume_up),
@@ -271,15 +274,15 @@ fun PlayerMenu(
                                 modifier = Modifier.size(24.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
-
-                            BigSeekBar(
-                                progressProvider = playerVolume::value,
-                                onProgressChange = { playerConnection.service.playerVolume.value = it },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(36.dp),
-                            )
                         }
+
+                        BigSeekBar(
+                            progressProvider = playerVolume::value,
+                            onProgressChange = { playerConnection.service.playerVolume.value = it },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(36.dp),
+                        )
                     }
                 }
             }
@@ -287,107 +290,100 @@ fun PlayerMenu(
         
         item {
              // Quick Actions Container
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+             // Quick Actions Container
+             NewActionGrid(
+                actions = listOf(
+                    NewAction(
+                        icon = {
+                            when (download?.state) {
+                                Download.STATE_COMPLETED -> Icon(
+                                    painter = painterResource(R.drawable.offline),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(26.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> CircularProgressIndicator(
+                                    modifier = Modifier.size(26.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                else -> Icon(
+                                    painter = painterResource(R.drawable.download),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(26.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        },
+                        text = when (download?.state) {
+                            Download.STATE_COMPLETED -> stringResource(R.string.remove_download)
+                            Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> stringResource(R.string.downloading)
+                            else -> stringResource(R.string.action_download)
+                        },
+                        onClick = {
+                            when (download?.state) {
+                                Download.STATE_COMPLETED, Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> {
+                                    DownloadService.sendRemoveDownload(
+                                        context,
+                                        ExoDownloadService::class.java,
+                                        mediaMetadata.id,
+                                        false,
+                                    )
+                                }
+                                else -> {
+                                    database.transaction {
+                                        insert(mediaMetadata)
+                                    }
+                                    val downloadRequest = DownloadRequest
+                                        .Builder(mediaMetadata.id, mediaMetadata.id.toUri())
+                                        .setCustomCacheKey(mediaMetadata.id)
+                                        .setData(mediaMetadata.title.toByteArray())
+                                        .build()
+                                    DownloadService.sendAddDownload(
+                                        context,
+                                        ExoDownloadService::class.java,
+                                        downloadRequest,
+                                        false,
+                                    )
+                                }
+                            }
+                        }
+                    ),
+                    NewAction(
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.playlist_add),
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        text = stringResource(R.string.add_to_playlist),
+                        onClick = { showChoosePlaylistDialog = true }
+                    ),
+                    NewAction(
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.share),
+                                contentDescription = null,
+                                modifier = Modifier.size(26.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        text = "Share",
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/watch?v=${mediaMetadata.id}")
+                            }
+                            context.startActivity(Intent.createChooser(intent, null))
+                            onDismiss()
+                        }
+                    )
                 ),
-                shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-            ) {
-                 NewActionGrid(
-                    actions = listOf(
-                        NewAction(
-                            icon = {
-                                when (download?.state) {
-                                    Download.STATE_COMPLETED -> Icon(
-                                        painter = painterResource(R.drawable.offline),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(26.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> CircularProgressIndicator(
-                                        modifier = Modifier.size(26.dp),
-                                        strokeWidth = 2.dp
-                                    )
-                                    else -> Icon(
-                                        painter = painterResource(R.drawable.download),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(26.dp),
-                                        tint = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            },
-                            text = when (download?.state) {
-                                Download.STATE_COMPLETED -> stringResource(R.string.remove_download)
-                                Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> stringResource(R.string.downloading)
-                                else -> stringResource(R.string.action_download)
-                            },
-                            onClick = {
-                                when (download?.state) {
-                                    Download.STATE_COMPLETED, Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> {
-                                        DownloadService.sendRemoveDownload(
-                                            context,
-                                            ExoDownloadService::class.java,
-                                            mediaMetadata.id,
-                                            false,
-                                        )
-                                    }
-                                    else -> {
-                                        database.transaction {
-                                            insert(mediaMetadata)
-                                        }
-                                        val downloadRequest = DownloadRequest
-                                            .Builder(mediaMetadata.id, mediaMetadata.id.toUri())
-                                            .setCustomCacheKey(mediaMetadata.id)
-                                            .setData(mediaMetadata.title.toByteArray())
-                                            .build()
-                                        DownloadService.sendAddDownload(
-                                            context,
-                                            ExoDownloadService::class.java,
-                                            downloadRequest,
-                                            false,
-                                        )
-                                    }
-                                }
-                            }
-                        ),
-                        NewAction(
-                            icon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.playlist_add),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(26.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            text = stringResource(R.string.add_to_playlist),
-                            onClick = { showChoosePlaylistDialog = true }
-                        ),
-                        NewAction(
-                            icon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.share),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(26.dp),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            text = "Share",
-                            onClick = {
-                                val intent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/watch?v=${mediaMetadata.id}")
-                                }
-                                context.startActivity(Intent.createChooser(intent, null))
-                                onDismiss()
-                            }
-                        )
-                    ),
-                    modifier = Modifier.padding(12.dp)
-                )
-            }
+            )
         }
 
         if (artists.isNotEmpty()) {
@@ -401,6 +397,7 @@ fun PlayerMenu(
                             onDismiss()
                         }
                     )
+                    MenuDivider()
                      MenuEntry(
                         icon = R.drawable.radio,
                         text = stringResource(R.string.start_radio),
@@ -409,6 +406,7 @@ fun PlayerMenu(
                             onDismiss()
                         }
                     )
+                    MenuDivider()
                      MenuEntry(
                         icon = R.drawable.artist,
                         text = stringResource(R.string.view_artist),
@@ -423,6 +421,7 @@ fun PlayerMenu(
                         }
                     )
                      if (mediaMetadata.album != null) {
+                         MenuDivider()
                         MenuEntry(
                             icon = R.drawable.album,
                             text = stringResource(R.string.view_album),
@@ -447,6 +446,7 @@ fun PlayerMenu(
                         onDismiss()
                     }
                 )
+                MenuDivider()
                  MenuEntry(
                     icon = R.drawable.download,
                     text = "Advance Download",
@@ -479,6 +479,7 @@ fun PlayerMenu(
                             onDismiss()
                         }
                     )
+                    MenuDivider()
                     MenuEntry(
                         icon = R.drawable.tune,
                         text = stringResource(R.string.advanced),
@@ -496,19 +497,21 @@ fun PlayerMenu(
 private fun MenuGroup(
     content: @Composable () -> Unit
 ) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        ),
-        shape = RoundedCornerShape(24.dp),
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        Column {
-            content()
-        }
+        content()
     }
+}
+
+@Composable
+private fun MenuDivider() {
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+        modifier = Modifier.padding(horizontal = 20.dp)
+    )
 }
 
 @Composable
