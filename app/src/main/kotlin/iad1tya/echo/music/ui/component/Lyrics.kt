@@ -640,10 +640,7 @@ fun Lyrics(
                     Spacer(Modifier.height(24.dp))
                     Button(
                         onClick = { 
-                             // Trigger refresh by clearing cache/re-fetching if possible, 
-                             // for now just a UI action or maybe open search
-                             // Currently just a visual retry
-                             // Ideally we'd trigger a reload here
+                             showSearchDialog = true
                         },
                         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -1234,17 +1231,41 @@ fun Lyrics(
             } else {
                 items(results) { result ->
                      ListItem(
-                         headlineContent = { Text(result.providerName) },
-                         supportingContent = { Text(result.lyrics, maxLines = 2) },
-                         modifier = Modifier.clickable {
-                             showSearchResultDialog = false
-                             viewModel.cancelSearch()
-                             scope.launch(Dispatchers.IO) {
-                                 database.query {
-                                     upsert(iad1tya.echo.music.db.entities.LyricsEntity(currentSong?.id ?: "", result.lyrics, result.providerName))
+                         headlineContent = { 
+                             Text(
+                                 text = result.providerName,
+                                 style = MaterialTheme.typography.titleMedium,
+                                 fontWeight = FontWeight.Bold,
+                                 color = MaterialTheme.colorScheme.primary
+                             ) 
+                         },
+                         supportingContent = { 
+                             Text(
+                                 text = result.lyrics, 
+                                 maxLines = 3,
+                                 overflow = TextOverflow.Ellipsis,
+                                 style = MaterialTheme.typography.bodyMedium,
+                                 color = MaterialTheme.colorScheme.onSurfaceVariant
+                             ) 
+                         },
+                         leadingContent = {
+                             Icon(
+                                 painter = painterResource(R.drawable.lyrics),
+                                 contentDescription = null,
+                                 tint = MaterialTheme.colorScheme.secondary
+                             )
+                         },
+                         modifier = Modifier
+                            .clickable {
+                                 showSearchResultDialog = false
+                                 viewModel.cancelSearch()
+                                 scope.launch(Dispatchers.IO) {
+                                     database.query {
+                                         upsert(iad1tya.echo.music.db.entities.LyricsEntity(currentSong?.id ?: "", result.lyrics, result.providerName))
+                                     }
                                  }
                              }
-                         }
+                             .padding(vertical = 4.dp)
                      )
                 }
             }
