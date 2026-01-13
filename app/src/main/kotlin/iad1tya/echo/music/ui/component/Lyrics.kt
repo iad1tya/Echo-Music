@@ -664,7 +664,7 @@ fun Lyrics(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
-                        .padding(top = 72.dp, bottom = 16.dp) // Moved down
+                        .padding(top = 16.dp, bottom = 16.dp) // Moved down
                         .zIndex(1f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

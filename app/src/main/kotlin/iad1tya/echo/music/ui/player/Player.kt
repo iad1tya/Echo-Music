@@ -57,7 +57,11 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import iad1tya.echo.music.ui.component.DefaultDialog
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -378,62 +382,78 @@ fun BottomSheetPlayer(
         mutableFloatStateOf(30f)
     }
     if (showSleepTimerDialog) {
-        AlertDialog(
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            onDismissRequest = { showSleepTimerDialog = false },
+        val sleepTimerValueInt = sleepTimerValue.roundToInt()
+        iad1tya.echo.music.ui.component.DefaultDialog(
+            onDismiss = { showSleepTimerDialog = false },
             icon = {
                 Icon(
                     painter = painterResource(R.drawable.bedtime),
-                    contentDescription = null
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp)
                 )
             },
-            title = { Text(stringResource(R.string.sleep_timer)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showSleepTimerDialog = false
-                        playerConnection.service.sleepTimer.start(sleepTimerValue.roundToInt())
-                    },
-                ) {
-                    Text(stringResource(android.R.string.ok))
-                }
+            title = {
+                Text(
+                    text = stringResource(R.string.sleep_timer),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
             },
-            dismissButton = {
+            buttons = {
                 TextButton(
-                    onClick = { showSleepTimerDialog = false },
+                    onClick = { showSleepTimerDialog = false }
                 ) {
                     Text(stringResource(android.R.string.cancel))
                 }
-            },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = pluralStringResource(
-                            R.plurals.minute,
-                            sleepTimerValue.roundToInt(),
-                            sleepTimerValue.roundToInt()
-                        ),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-
-                    Slider(
-                        value = sleepTimerValue,
-                        onValueChange = { sleepTimerValue = it },
-                        valueRange = 5f..120f,
-                        steps = (120 - 5) / 5 - 1,
-                    )
-
-                    OutlinedIconButton(
-                        onClick = {
-                            showSleepTimerDialog = false
-                            playerConnection.service.sleepTimer.start(-1)
-                        },
-                    ) {
-                        Text(stringResource(R.string.end_of_song))
+                Spacer(Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        showSleepTimerDialog = false
+                        playerConnection.service.sleepTimer.start(sleepTimerValueInt)
                     }
+                ) {
+                    Text("Set")
                 }
-            },
-        )
+            }
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = pluralStringResource(
+                        R.plurals.minute,
+                        sleepTimerValueInt,
+                        sleepTimerValueInt
+                    ),
+                    style = MaterialTheme.typography.displayMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                
+                Spacer(Modifier.height(16.dp))
+
+                Slider(
+                    value = sleepTimerValue,
+                    onValueChange = { sleepTimerValue = it },
+                    valueRange = 5f..120f,
+                    steps = (120 - 5) / 5 - 1,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        showSleepTimerDialog = false
+                        playerConnection.service.sleepTimer.start(-1)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.end_of_song))
+                }
+            }
+        }
     }
 
     var showChoosePlaylistDialog by rememberSaveable {
@@ -1234,11 +1254,27 @@ fun BottomSheetPlayer(
                             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                             .padding(bottom = queueSheetState.collapsedBound),
                     ) {
+                        // Global Drag Handle (Apple Music style)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                                .padding(vertical = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                             Box(
+                                modifier = Modifier
+                                    .width(36.dp)
+                                    .height(5.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.4f))
+                             )
+                        }
 
                         
                         // Main Thumbnail
                         Box(
-                            contentAlignment = Alignment.Center,
+                            contentAlignment = Alignment.TopCenter,
                             modifier = Modifier.weight(1f),
                         ) {
                             AnimatedContent(
@@ -1733,7 +1769,7 @@ fun BottomSheetPlayer(
                     modifier = Modifier
                         .weight(1f)
                         .clickable {
-                            // Open sleep timer sheet
+                            showSleepTimerDialog = true
                         }
                 ) {
                     Icon(

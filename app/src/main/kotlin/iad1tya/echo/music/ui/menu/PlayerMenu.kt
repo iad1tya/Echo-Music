@@ -278,7 +278,7 @@ fun PlayerMenu(
              // Quick Actions Container
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
@@ -487,7 +487,7 @@ private fun MenuGroup(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ),
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier
