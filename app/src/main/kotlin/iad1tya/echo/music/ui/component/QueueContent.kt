@@ -54,7 +54,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -337,6 +342,35 @@ fun QueueContent(
             // Queue list
             LazyColumn(
                 state = lazyListState,
+                modifier = Modifier
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        val fadeHeight = 100.dp.toPx()
+                        
+                        // Top Fade
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black),
+                                startY = 0f,
+                                endY = fadeHeight
+                            ),
+                            blendMode = BlendMode.DstIn,
+                            size = size.copy(height = fadeHeight)
+                        )
+
+                        // Bottom Fade
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Black, Color.Transparent),
+                                startY = size.height - fadeHeight,
+                                endY = size.height
+                            ),
+                            blendMode = BlendMode.DstIn,
+                            topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - fadeHeight),
+                            size = size.copy(height = fadeHeight)
+                        )
+                    },
                 contentPadding = WindowInsets.systemBars.add(
                     WindowInsets(
                         bottom = ListItemHeight + 8.dp,
@@ -475,38 +509,6 @@ fun QueueContent(
             modifier = Modifier
                 .padding(bottom = 80.dp)
                 .align(Alignment.BottomCenter),
-        )
-        
-        // Top fade edge
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .align(Alignment.TopCenter)
-                .background(
-                    androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.4f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
-        
-        // Bottom fade edge
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .align(Alignment.BottomCenter)
-                .background(
-                    androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.4f)
-                        )
-                    )
-                )
         )
     }
 }
