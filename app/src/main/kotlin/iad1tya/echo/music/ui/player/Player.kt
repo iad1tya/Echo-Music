@@ -16,6 +16,8 @@ import android.provider.Settings
 import android.os.Build
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import iad1tya.echo.music.ui.component.PlatformBackdrop
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.mediarouter.media.MediaRouter
 import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaControlIntent
@@ -175,7 +177,11 @@ fun BottomSheetPlayer(
     navController: NavController,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
+    backdrop: iad1tya.echo.music.ui.component.PlatformBackdrop? = null,
+    layer: androidx.compose.ui.graphics.layer.GraphicsLayer? = null,
+    luminance: Float = 0f,
 ) {
+
     val context = LocalContext.current
     val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val menuState = LocalMenuState.current
@@ -543,6 +549,9 @@ fun BottomSheetPlayer(
                 position = position,
                 duration = duration,
                 pureBlack = pureBlack,
+                backdrop = backdrop,
+                layer = layer,
+                luminance = luminance,
             )
         },
     ) {
