@@ -972,6 +972,20 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 },
                                                 actions = {
+                                                    // Find icon button
+                                                    IconButton(
+                                                        onClick = {
+                                                            navController.navigate(Screens.Find.route) {
+                                                                launchSingleTop = true
+                                                            }
+                                                        }
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.graphic_eq),
+                                                            contentDescription = stringResource(R.string.find_song),
+                                                            modifier = Modifier.size(24.dp)
+                                                        )
+                                                    }
 
                                                     IconButton(onClick = { showAccountDialog = true }) {
                                                         if (accountImageUrl != null) {
