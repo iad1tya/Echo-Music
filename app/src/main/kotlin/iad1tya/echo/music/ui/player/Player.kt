@@ -143,6 +143,7 @@ import iad1tya.echo.music.models.MediaMetadata
 import iad1tya.echo.music.ui.component.BottomSheet
 import iad1tya.echo.music.ui.component.BottomSheetState
 import iad1tya.echo.music.ui.component.AnimatedGradientBackground
+import iad1tya.echo.music.ui.component.Lyrics
 import iad1tya.echo.music.ui.component.LocalBottomSheetPageState
 import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.PlayerSliderTrack
@@ -457,12 +458,7 @@ fun BottomSheetPlayer(
         initialAnchor = 1
     )
 
-    val lyricsSheetState = rememberBottomSheetState(
-        dismissedBound = 0.dp,
-        expandedBound = state.expandedBound,
-        collapsedBound = 0.dp,
-        initialAnchor = 1
-    )
+    var showLyrics by rememberSaveable { mutableStateOf(false) }
 
     val bottomSheetBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.GRADIENT -> 
@@ -1152,11 +1148,7 @@ fun BottomSheetPlayer(
                             modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
                             isPlayerExpanded = state.isExpanded,
                             onToggleLyrics = {
-                                if (lyricsSheetState.isExpanded) {
-                                    lyricsSheetState.collapseSoft()
-                                } else {
-                                    lyricsSheetState.expandSoft()
-                                }
+                                showLyrics = !showLyrics
                             },
                             overlayContent = {
                                 if (mediaMetadata?.id?.isNotEmpty() == true && isRectangularThumbnail) {
@@ -1240,45 +1232,62 @@ fun BottomSheetPlayer(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.weight(1f),
                         ) {
-                            Thumbnail(
-                                sliderPositionProvider = { sliderPosition },
-                                modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
-                                isPlayerExpanded = state.isExpanded,
-                            onToggleLyrics = {
-                                if (lyricsSheetState.isExpanded) {
-                                    lyricsSheetState.collapseSoft()
-                                } else {
-                                    lyricsSheetState.expandSoft()
-                                }
-                            },
-                            overlayContent = {
-                                if (mediaMetadata?.id?.isNotEmpty() == true && isRectangularThumbnail) {
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .size(64.dp)
-                                            .clip(RoundedCornerShape(50))
-                                            .background(Color.Black.copy(alpha = 0.5f))
-                                            .clickable {
-                                                playerConnection.player.pause()
-                                                val intent = Intent(context, VideoPlayerActivity::class.java).apply {
-                                                    putExtra("VIDEO_ID", mediaMetadata?.id)
-                                                    putExtra("START_POSITION", playerConnection.player.currentPosition)
-                                                }
-                                                context.startActivity(intent)
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.play),
-                                            contentDescription = "Switch to Video",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(32.dp)
-                                        )
+                            AnimatedContent(
+                                targetState = showLyrics,
+                                transitionSpec = {
+                                    if (targetState) {
+                                        fadeIn(animationSpec = tween(400)).togetherWith(fadeOut(animationSpec = tween(400)))
+                                    } else {
+                                        fadeIn(animationSpec = tween(400)).togetherWith(fadeOut(animationSpec = tween(400)))
                                     }
+                                },
+                                label = "LyricsTransition"
+                            ) { showLyricsState ->
+                                if (showLyricsState) {
+                                    Lyrics(
+                                        sliderPositionProvider = { sliderPosition },
+                                        isVisible = true,
+                                        palette = gradientColors,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    Thumbnail(
+                                        sliderPositionProvider = { sliderPosition },
+                                        modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                        isPlayerExpanded = state.isExpanded,
+                                        onToggleLyrics = {
+                                            showLyrics = !showLyrics
+                                        },
+                                        overlayContent = {
+                                            if (mediaMetadata?.id?.isNotEmpty() == true && isRectangularThumbnail) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .align(Alignment.Center)
+                                                        .size(64.dp)
+                                                        .clip(RoundedCornerShape(50))
+                                                        .background(Color.Black.copy(alpha = 0.5f))
+                                                        .clickable {
+                                                            playerConnection.player.pause()
+                                                            val intent = Intent(context, VideoPlayerActivity::class.java).apply {
+                                                                putExtra("VIDEO_ID", mediaMetadata?.id)
+                                                                putExtra("START_POSITION", playerConnection.player.currentPosition)
+                                                            }
+                                                            context.startActivity(intent)
+                                                        },
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.play),
+                                                        contentDescription = "Switch to Video",
+                                                        tint = Color.White,
+                                                        modifier = Modifier.size(32.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    )
                                 }
                             }
-                        )
                         }
 
                         mediaMetadata?.let {
@@ -1307,33 +1316,12 @@ fun BottomSheetPlayer(
             TextBackgroundColor = TextBackgroundColor,
             textButtonColor = textButtonColor,
             iconButtonColor = iconButtonColor,
-            onShowLyrics = { lyricsSheetState.expandSoft() },
+            onShowLyrics = { showLyrics = !showLyrics },
             pureBlack = pureBlack,
         )
 
-        mediaMetadata?.let { metadata ->
-            BottomSheet(
-                state = lyricsSheetState,
-                background = { Box(Modifier.fillMaxSize().background(Color.Unspecified)) },
-                onDismiss = { },
-                collapsedContent = {
-                }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Transparent)
-                ) {
-                    LyricsScreen(
-                        mediaMetadata = metadata,
-                        onBackClick = { lyricsSheetState.collapseSoft() },
-                        navController = navController,
-                        backgroundAlpha = lyricsSheetState.progress.coerceIn(0f, 1f),
-                        isVisible = lyricsSheetState.progress > 0.01f
-                    )
-                }
-            }
-        }
+        // Lyrics BottomSheet removed
+
         
         // Audio Routing Bottom Sheet
         BottomSheet(
