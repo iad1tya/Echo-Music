@@ -972,19 +972,7 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 },
                                                 actions = {
-                                                    IconButton(onClick = { navController.navigate("history") }) {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.history),
-                                                            contentDescription = stringResource(R.string.history)
-                                                        )
-                                                    }
-                                                    IconButton(onClick = { navController.navigate("stats") }) {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.stats),
-                                                            contentDescription = stringResource(R.string.stats),
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                    }
+
                                                     IconButton(onClick = { showAccountDialog = true }) {
                                                         if (accountImageUrl != null) {
                                                             AsyncImage(
