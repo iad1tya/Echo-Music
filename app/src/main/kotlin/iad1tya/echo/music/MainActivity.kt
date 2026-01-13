@@ -1031,19 +1031,7 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 actions = {
                                                     // Find icon button
-                                                    IconButton(
-                                                        onClick = {
-                                                            navController.navigate(Screens.Find.route) {
-                                                                launchSingleTop = true
-                                                            }
-                                                        }
-                                                    ) {
-                                                        Icon(
-                                                            painter = painterResource(R.drawable.graphic_eq),
-                                                            contentDescription = stringResource(R.string.find_song),
-                                                            modifier = Modifier.size(24.dp)
-                                                        )
-                                                    }
+
 
                                                     IconButton(onClick = { showAccountDialog = true }) {
                                                         if (accountImageUrl != null) {
@@ -1303,7 +1291,7 @@ class MainActivity : ComponentActivity() {
                                                 modifier = Modifier
                                                     .align(Alignment.BottomCenter)
                                                     .padding(bottom = bottomInset + 16.dp)
-                                                    .padding(horizontal = 48.dp) // Make it pill shaped not full width
+                                                    .padding(horizontal = 24.dp) // Adjusted padding to match MiniPlayer width
                                                     .fillMaxWidth() // Ensure row has width to distribute items
                                                     .offset {
                                                         if (navigationBarHeight == 0.dp) {

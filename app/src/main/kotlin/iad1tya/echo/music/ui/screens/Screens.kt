@@ -48,6 +48,6 @@ sealed class Screens(
     )
 
     companion object {
-        val MainScreens = listOf(Home, Search, Library)
+        val MainScreens = listOf(Home, Search, Find, Library)
     }
 }
