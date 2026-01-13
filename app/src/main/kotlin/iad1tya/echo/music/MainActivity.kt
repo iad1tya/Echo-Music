@@ -141,6 +141,9 @@ import androidx.lifecycle.lifecycleScope
 import iad1tya.echo.music.ui.component.rememberBackdrop
 import iad1tya.echo.music.ui.component.layerBackdrop
 import iad1tya.echo.music.ui.component.drawBackdropCustomShape
+import iad1tya.echo.music.ui.component.LocalBackdrop
+import iad1tya.echo.music.ui.component.LocalLayer
+import iad1tya.echo.music.ui.component.LocalLuminance
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import android.graphics.Bitmap
 import androidx.compose.animation.core.Animatable
@@ -904,6 +907,10 @@ class MainActivity : ComponentActivity() {
                     val baseBg = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
                     val insetBg = if (playerBottomSheetState.progress > 0f) Color.Transparent else baseBg
 
+                    val backdrop = rememberBackdrop()
+                    val layer = rememberGraphicsLayer()
+                    val luminanceAnimation = remember { Animatable(0f) }
+
                     CompositionLocalProvider(
                         LocalDatabase provides database,
                         LocalContentColor provides if (pureBlack) Color.White else contentColorFor(MaterialTheme.colorScheme.surface),
@@ -912,10 +919,11 @@ class MainActivity : ComponentActivity() {
                         LocalDownloadUtil provides downloadUtil,
                         LocalShimmerTheme provides ShimmerTheme,
                         LocalSyncUtils provides syncUtils,
+                        LocalBackdrop provides backdrop,
+                        LocalLayer provides layer,
+                        LocalLuminance provides luminanceAnimation.value,
                     ) {
-                        val backdrop = rememberBackdrop()
-                        val layer = rememberGraphicsLayer()
-                        val luminanceAnimation = remember { Animatable(0f) }
+
 
                         LaunchedEffect(layer) {
                             val buffer = IntBuffer.allocate(25)
@@ -1322,7 +1330,7 @@ class MainActivity : ComponentActivity() {
 
                                                 Box(
                                                     modifier = Modifier
-                                                        .height(80.dp)
+                                                        .height(NavigationBarHeight)
                                                         // Shadow needs to be applied before clipping or drawing if we want it outside, 
                                                         // but usually shadow requires a surface or manual drawing. 
                                                         // drawBackdropCustomShape effectively draws a surface.

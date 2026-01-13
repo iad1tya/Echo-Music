@@ -16,8 +16,13 @@ import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 import kotlin.math.sign
 import com.kyant.backdrop.backdrops.layerBackdrop as nativeBackdrop
+import androidx.compose.runtime.staticCompositionLocalOf
 
 typealias PlatformBackdrop = LayerBackdrop
+
+val LocalBackdrop = staticCompositionLocalOf<PlatformBackdrop?> { null }
+val LocalLayer = staticCompositionLocalOf<GraphicsLayer?> { null }
+val LocalLuminance = staticCompositionLocalOf<Float> { 0f }
 
 @Composable
 fun rememberBackdrop(): PlatformBackdrop = rememberLayerBackdrop {
