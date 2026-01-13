@@ -144,6 +144,7 @@ import iad1tya.echo.music.ui.component.BottomSheet
 import iad1tya.echo.music.ui.component.BottomSheetState
 import iad1tya.echo.music.ui.component.AnimatedGradientBackground
 import iad1tya.echo.music.ui.component.Lyrics
+import iad1tya.echo.music.ui.component.QueueContent
 import iad1tya.echo.music.ui.component.LocalBottomSheetPageState
 import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.PlayerSliderTrack
@@ -459,6 +460,8 @@ fun BottomSheetPlayer(
     )
 
     var showLyrics by rememberSaveable { mutableStateOf(false) }
+    var showQueue by rememberSaveable { mutableStateOf(false) }
+
 
     val bottomSheetBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.GRADIENT -> 
@@ -1233,59 +1236,71 @@ fun BottomSheetPlayer(
                             modifier = Modifier.weight(1f),
                         ) {
                             AnimatedContent(
-                                targetState = showLyrics,
-                                transitionSpec = {
-                                    if (targetState) {
-                                        fadeIn(animationSpec = tween(400)).togetherWith(fadeOut(animationSpec = tween(400)))
-                                    } else {
-                                        fadeIn(animationSpec = tween(400)).togetherWith(fadeOut(animationSpec = tween(400)))
-                                    }
+                                targetState = when {
+                                    showQueue -> "queue"
+                                    showLyrics -> "lyrics"
+                                    else -> "thumbnail"
                                 },
-                                label = "LyricsTransition"
-                            ) { showLyricsState ->
-                                if (showLyricsState) {
-                                    Lyrics(
-                                        sliderPositionProvider = { sliderPosition },
-                                        isVisible = true,
-                                        palette = gradientColors,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                } else {
-                                    Thumbnail(
-                                        sliderPositionProvider = { sliderPosition },
-                                        modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
-                                        isPlayerExpanded = state.isExpanded,
-                                        onToggleLyrics = {
-                                            showLyrics = !showLyrics
-                                        },
-                                        overlayContent = {
-                                            if (mediaMetadata?.id?.isNotEmpty() == true && isRectangularThumbnail) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .align(Alignment.Center)
-                                                        .size(64.dp)
-                                                        .clip(RoundedCornerShape(50))
-                                                        .background(Color.Black.copy(alpha = 0.5f))
-                                                        .clickable {
-                                                            playerConnection.player.pause()
-                                                            val intent = Intent(context, VideoPlayerActivity::class.java).apply {
-                                                                putExtra("VIDEO_ID", mediaMetadata?.id)
-                                                                putExtra("START_POSITION", playerConnection.player.currentPosition)
-                                                            }
-                                                            context.startActivity(intent)
-                                                        },
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    Icon(
-                                                        painter = painterResource(R.drawable.play),
-                                                        contentDescription = "Switch to Video",
-                                                        tint = Color.White,
-                                                        modifier = Modifier.size(32.dp)
-                                                    )
+                                transitionSpec = {
+                                    fadeIn(animationSpec = tween(400)).togetherWith(fadeOut(animationSpec = tween(400)))
+                                },
+                                label = "PlayerViewTransition"
+                            ) { viewMode ->
+                                when (viewMode) {
+                                    "lyrics" -> {
+                                        Lyrics(
+                                            sliderPositionProvider = { sliderPosition },
+                                            isVisible = true,
+                                            palette = gradientColors,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+                                    "queue" -> {
+                                        QueueContent(
+                                            navController = navController,
+                                            modifier = Modifier.fillMaxSize(),
+                                            background = bottomSheetBackgroundColor,
+                                            onBackgroundColor = onBackgroundColor
+                                        )
+                                    }
+                                    else -> {
+                                        Thumbnail(
+                                            sliderPositionProvider = { sliderPosition },
+                                            modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                            isPlayerExpanded = state.isExpanded,
+                                            onToggleLyrics = {
+                                                showLyrics = !showLyrics
+                                                showQueue = false
+                                            },
+                                            overlayContent = {
+                                                if (mediaMetadata?.id?.isNotEmpty() == true && isRectangularThumbnail) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .align(Alignment.Center)
+                                                            .size(64.dp)
+                                                            .clip(RoundedCornerShape(50))
+                                                            .background(Color.Black.copy(alpha = 0.5f))
+                                                            .clickable {
+                                                                playerConnection.player.pause()
+                                                                val intent = Intent(context, VideoPlayerActivity::class.java).apply {
+                                                                    putExtra("VIDEO_ID", mediaMetadata?.id)
+                                                                    putExtra("START_POSITION", playerConnection.player.currentPosition)
+                                                                }
+                                                                context.startActivity(intent)
+                                                            },
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.play),
+                                                            contentDescription = "Switch to Video",
+                                                            tint = Color.White,
+                                                            modifier = Modifier.size(32.dp)
+                                                        )
+                                                    }
                                                 }
                                             }
-                                        }
-                                    )
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -1316,7 +1331,14 @@ fun BottomSheetPlayer(
             TextBackgroundColor = TextBackgroundColor,
             textButtonColor = textButtonColor,
             iconButtonColor = iconButtonColor,
-            onShowLyrics = { showLyrics = !showLyrics },
+            onShowLyrics = { 
+                showLyrics = !showLyrics
+                showQueue = false
+            },
+            onShowQueue = {
+                showQueue = !showQueue
+                showLyrics = false
+            },
             pureBlack = pureBlack,
         )
 

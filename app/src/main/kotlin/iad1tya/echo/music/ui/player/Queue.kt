@@ -146,6 +146,7 @@ fun Queue(
     textButtonColor: Color,
     iconButtonColor: Color,
     onShowLyrics: () -> Unit = {},
+    onShowQueue: () -> Unit = {},
     pureBlack: Boolean,
 ) {
     val context = LocalContext.current
@@ -252,7 +253,7 @@ fun Queue(
                                     bottomEnd = 5.dp
                                 )
                             )
-                            .clickable { state.expandSoft() },
+                            .clickable { onShowQueue() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -412,7 +413,7 @@ fun Queue(
                         ),
                 ) {
                     TextButton(
-                        onClick = { state.expandSoft() },
+                        onClick = { onShowQueue() },
                         modifier = Modifier.weight(1f)
                     ) {
                         Row(
