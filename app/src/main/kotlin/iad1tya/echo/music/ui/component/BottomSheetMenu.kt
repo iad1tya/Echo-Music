@@ -63,18 +63,18 @@ fun BottomSheetMenu(
                 focusManager.clearFocus()
                 state.isVisible = false
             },
-            containerColor = background,
+            containerColor = background.copy(alpha = if (background == Color.Transparent) 1f else 0.95f),
             contentColor = MaterialTheme.colorScheme.onSurface,
             dragHandle = {
                 Box(
                     modifier = Modifier
                         .padding(vertical = 12.dp)
-                        .size(width = 40.dp, height = 4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                        .size(width = 36.dp, height = 5.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(Color.White.copy(alpha = 0.4f))
                 )
             },
-            modifier = modifier.fillMaxHeight()
+            modifier = modifier
         ) {
             Column(
                 modifier = Modifier

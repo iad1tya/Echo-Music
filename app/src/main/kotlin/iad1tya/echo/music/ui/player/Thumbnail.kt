@@ -241,8 +241,7 @@ fun Thumbnail(
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
+                .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
