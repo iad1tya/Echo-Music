@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -80,11 +81,16 @@ import coil3.request.crossfade
 import iad1tya.echo.music.LocalPlayerConnection
 import iad1tya.echo.music.R
 import iad1tya.echo.music.constants.ListItemHeight
+import iad1tya.echo.music.constants.ListThumbnailSize
 import iad1tya.echo.music.constants.QueueEditLockKey
+import iad1tya.echo.music.constants.ThumbnailCornerRadius
 import iad1tya.echo.music.extensions.metadata
 import iad1tya.echo.music.extensions.move
 import iad1tya.echo.music.extensions.togglePlayPause
 import iad1tya.echo.music.extensions.toggleRepeatMode
+import iad1tya.echo.music.models.MediaMetadata
+import iad1tya.echo.music.utils.joinByBullet
+import iad1tya.echo.music.utils.makeTimeString
 import iad1tya.echo.music.utils.rememberPreference
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -331,8 +337,9 @@ fun QueueContent(
             }
 
             // \"Continue Playing\" text
+            // "Continue Playing" text
             Text(
-                text = "Continue Playing",
+                text = "Currently Playing",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 24.dp, top = 8.dp, bottom = 12.dp),
@@ -430,7 +437,7 @@ fun QueueContent(
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier.animateItem(),
                             ) {
-                                MediaMetadataListItem(
+                                QueueMediaListItem(
                                     mediaMetadata = window.mediaItem.metadata!!,
                                     isSelected = selection && window.mediaItem.metadata!! in selectedSongs,
                                     isActive = index == currentWindowIndex,
@@ -452,7 +459,7 @@ fun QueueContent(
                                         .fillMaxWidth()
                                         .background(
                                             if (index == currentWindowIndex)
-                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                                Color.White.copy(alpha = 0.1f)
                                             else Color.Transparent
                                         )
                                         .combinedClickable(
@@ -511,4 +518,36 @@ fun QueueContent(
                 .align(Alignment.BottomCenter),
         )
     }
+}
+
+@Composable
+private fun QueueMediaListItem(
+    mediaMetadata: MediaMetadata,
+    modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
+    isActive: Boolean = false,
+    isPlaying: Boolean = false,
+    trailingContent: @Composable RowScope.() -> Unit = {},
+) {
+    ListItem(
+        title = mediaMetadata.title,
+        subtitle = joinByBullet(
+            mediaMetadata.artists.joinToString { it.name },
+            makeTimeString(mediaMetadata.duration * 1000L)
+        ),
+        thumbnailContent = {
+            ItemThumbnail(
+                thumbnailUrl = mediaMetadata.thumbnailUrl,
+                albumIndex = null,
+                isSelected = isSelected,
+                isActive = isActive,
+                isPlaying = isPlaying,
+                shape = RoundedCornerShape(ThumbnailCornerRadius),
+                modifier = Modifier.size(ListThumbnailSize)
+            )
+        },
+        trailingContent = trailingContent,
+        modifier = modifier,
+        isActive = false // FORCE FALSE TO DISABLE ROW BACKGROUND
+    )
 }
