@@ -72,6 +72,6 @@ fun Modifier.drawBackdropCustomShape(
             layer.record { drawBackdrop() }
         },
         shape = { shape },
-        onDrawSurface = { drawRect(Color.Black.copy(alpha = 0.1f)) }
+        onDrawSurface = { drawRect(Color.Black.copy(alpha = 0.4f)) }
     )
 }
