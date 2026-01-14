@@ -247,16 +247,23 @@ fun QueueContent(
                 Spacer(Modifier.width(16.dp))
 
                 // Queue Title (Center)
-                Text(
-                    text = "Queue",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = onBackgroundColor.copy(alpha = 0.9f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.weight(1f)
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = currentMediaMetadata?.title ?: "Queue",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = onBackgroundColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = currentMediaMetadata?.artists?.joinToString { it.name } ?: "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = onBackgroundColor.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 // Control Buttons (Right Side)
                 Row(

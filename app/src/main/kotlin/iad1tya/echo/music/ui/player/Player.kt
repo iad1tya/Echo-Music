@@ -571,8 +571,9 @@ fun BottomSheetPlayer(
                     }
                     Spacer(Modifier.height(8.dp))
                     
-                    AnimatedContent(
-                        targetState = mediaMetadata.title,
+                    if (!showQueue && !showLyrics) {
+                        AnimatedContent(
+                            targetState = mediaMetadata.title,
                         transitionSpec = { fadeIn() togetherWith fadeOut() },
                         label = "",
                     ) { title ->
@@ -685,6 +686,7 @@ fun BottomSheetPlayer(
                                     )
                             )
                         }
+                    }
                     }
                 }
 

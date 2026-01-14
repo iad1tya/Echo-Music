@@ -700,23 +700,22 @@ fun Lyrics(
 
                     Spacer(Modifier.width(16.dp))
 
-                    // Provider Info (Left Aligned)
+                    // Title and Artist Info (Left Aligned)
                     Column(modifier = Modifier.weight(1f)) {
-                        val providerName = lyricsEntity?.provider?.takeIf { it != "Unknown" }
-                            ?: when (preferredLyricsProvider) {
-                                PreferredLyricsProvider.LRCLIB -> "LrcLib"
-                                PreferredLyricsProvider.SIMPMUSIC -> "SimpMusic"
-                                PreferredLyricsProvider.KUGOU -> "KuGou"
-                            }
-                        
                         Text(
-                             text = "Lyrics by $providerName",
-                            style = MaterialTheme.typography.headlineSmall,
+                            text = mediaMetadata?.title ?: "Lyrics",
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = textColor.copy(alpha = 0.9f),
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Start
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = mediaMetadata?.artists?.joinToString { it.name } ?: "",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = textColor.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
