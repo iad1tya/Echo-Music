@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.lazy.LazyColumn
@@ -60,6 +61,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -1167,74 +1169,123 @@ fun Lyrics(
     if (showSearchDialog) {
         androidx.compose.ui.window.Dialog(
             onDismissRequest = { showSearchDialog = false },
-            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+            properties = androidx.compose.ui.window.DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { showSearchDialog = false } // Click outside to dismiss
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
+            val sheetBackgroundColor = if (useDarkTheme) Color.Black else MaterialTheme.colorScheme.surfaceContainerLow
+            val sheetContentColor = MaterialTheme.colorScheme.onSurface
+
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = sheetBackgroundColor,
+                contentColor = sheetContentColor
             ) {
-                Surface(
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f), // Match Menu Color
-                    tonalElevation = 6.dp,
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth() // Width limit
-                        .clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null) {} // Intercept clicks
+                        .fillMaxSize()
+                        .padding(24.dp)
+                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
                 ) {
-                    Column(Modifier.padding(24.dp)) {
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             "Search Lyrics",
-                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = sheetContentColor
                         )
+                        FilledTonalIconButton(
+                            onClick = { showSearchDialog = false },
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = sheetContentColor
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.close),
+                                contentDescription = "Close",
+                            )
+                        }
+                    }
 
+                    Spacer(Modifier.height(32.dp))
+
+                    Text(
+                        "MANUAL SEARCH",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = sheetContentColor.copy(alpha = 0.6f),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         OutlinedTextField(
                             value = titleField,
                             onValueChange = onTitleFieldChange,
                             label = { Text("Title") },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            singleLine = true
                         )
-                        Spacer(Modifier.height(16.dp))
+                        
                         OutlinedTextField(
                             value = artistField,
                             onValueChange = onArtistFieldChange,
                             label = { Text("Artist") },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            singleLine = true
                         )
+                    }
 
-                        Spacer(Modifier.height(32.dp))
+                    Spacer(Modifier.height(32.dp))
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        FilledTonalButton(
+                            onClick = { showSearchDialog = false },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = sheetContentColor
+                            )
                         ) {
-                            TextButton(
-                                onClick = { showSearchDialog = false },
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("Cancel", style = MaterialTheme.typography.bodyLarge)
-                            }
-                            Spacer(Modifier.width(8.dp))
-                            Button(
-                                onClick = {
-                                    showSearchDialog = false
-                                    showSearchResultDialog = true
-                                    viewModel.search(
-                                        searchMediaMetadata.id,
-                                        titleField.text,
-                                        artistField.text,
-                                        searchMediaMetadata.duration
-                                    )
-                                },
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("Search", style = MaterialTheme.typography.bodyLarge)
-                            }
+                            Text("Cancel")
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Button(
+                            onClick = {
+                                showSearchDialog = false
+                                showSearchResultDialog = true
+                                viewModel.search(
+                                    searchMediaMetadata.id,
+                                    titleField.text,
+                                    artistField.text,
+                                    searchMediaMetadata.duration
+                                )
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Search")
                         }
                     }
                 }
@@ -1246,54 +1297,131 @@ fun Lyrics(
         val results by viewModel.results.collectAsState()
         val isLoading by viewModel.isLoading.collectAsState()
 
-        ListDialog(
-            onDismiss = { showSearchResultDialog = false },
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { showSearchResultDialog = false },
+            properties = androidx.compose.ui.window.DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
         ) {
-            if (isLoading) {
-                item {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+            val sheetBackgroundColor = if (useDarkTheme) Color.Black else MaterialTheme.colorScheme.surfaceContainerLow
+            val sheetContentColor = MaterialTheme.colorScheme.onSurface
+
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = sheetBackgroundColor,
+                contentColor = sheetContentColor
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Search Results",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = sheetContentColor
+                        )
+                        FilledTonalIconButton(
+                            onClick = { showSearchResultDialog = false },
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = sheetContentColor
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.close),
+                                contentDescription = "Close",
+                            )
+                        }
                     }
-                }
-            } else {
-                items(results) { result ->
-                     ListItem(
-                         headlineContent = { 
-                             Text(
-                                 text = result.providerName,
-                                 style = MaterialTheme.typography.titleMedium,
-                                 fontWeight = FontWeight.Bold,
-                                 color = MaterialTheme.colorScheme.primary
-                             ) 
-                         },
-                         supportingContent = { 
-                             Text(
-                                 text = result.lyrics, 
-                                 maxLines = 3,
-                                 overflow = TextOverflow.Ellipsis,
-                                 style = MaterialTheme.typography.bodyMedium,
-                                 color = MaterialTheme.colorScheme.onSurfaceVariant
-                             ) 
-                         },
-                         leadingContent = {
-                             Icon(
-                                 painter = painterResource(R.drawable.lyrics),
-                                 contentDescription = null,
-                                 tint = MaterialTheme.colorScheme.secondary
-                             )
-                         },
-                         modifier = Modifier
-                            .clickable {
-                                 showSearchResultDialog = false
-                                 viewModel.cancelSearch()
-                                 scope.launch(Dispatchers.IO) {
-                                     database.query {
-                                         upsert(iad1tya.echo.music.db.entities.LyricsEntity(currentSong?.id ?: "", result.lyrics, result.providerName))
-                                     }
-                                 }
-                             }
-                             .padding(vertical = 4.dp)
-                     )
+
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(results) { result ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                                        .clickable {
+                                            showSearchResultDialog = false
+                                            viewModel.cancelSearch()
+                                            scope.launch(Dispatchers.IO) {
+                                                database.query {
+                                                    upsert(
+                                                        iad1tya.echo.music.db.entities.LyricsEntity(
+                                                            currentSong?.id ?: "",
+                                                            result.lyrics,
+                                                            result.providerName
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        .padding(20.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.lyrics),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                        tint = sheetContentColor
+                                    )
+                                    Spacer(Modifier.width(16.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = result.providerName,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = sheetContentColor
+                                        )
+                                        Text(
+                                            text = result.lyrics.lines().firstOrNull() ?: "",
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = sheetContentColor.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                    Icon(
+                                        painter = painterResource(R.drawable.download),
+                                        contentDescription = null,
+                                        tint = sheetContentColor.copy(alpha = 0.5f),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                            
+                            item {
+                                Spacer(Modifier.height(100.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
