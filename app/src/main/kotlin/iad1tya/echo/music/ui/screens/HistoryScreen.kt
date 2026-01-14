@@ -4,12 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -201,7 +196,6 @@ fun HistoryScreen(
             state = lazyListState,
             contentPadding = LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
                 .asPaddingValues(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.windowInsetsPadding(
                 LocalPlayerAwareWindowInsets.current.only(
                     WindowInsetsSides.Top
@@ -243,7 +237,7 @@ fun HistoryScreen(
                     ) { song ->
                         YouTubeListItem(
                             item = song,
-                            isActive = false,
+                            isActive = song.id == mediaMetadata?.id,
                             isPlaying = isPlaying,
                             trailingContent = {
                                 IconButton(
@@ -268,9 +262,6 @@ fun HistoryScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (song.id == mediaMetadata?.id) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) else Color.Transparent)
                                 .combinedClickable(
                                     onClick = {
                                         if (song.id == mediaMetadata?.id) {
@@ -318,7 +309,7 @@ fun HistoryScreen(
                         val event = wrappedItem.item
                         SongListItem(
                             song = event.song,
-                            isActive = false,
+                            isActive = event.song.id == mediaMetadata?.id,
                             isPlaying = isPlaying,
                             showInLibraryIcon = true,
                             isSelected = wrappedItem.isSelected && selection,
@@ -346,9 +337,6 @@ fun HistoryScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (event.song.id == mediaMetadata?.id) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f) else Color.Transparent)
                                 .combinedClickable(
                                     onClick = {
                                         if (!selection) {

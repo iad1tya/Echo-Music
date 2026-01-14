@@ -1332,9 +1332,7 @@ class MainActivity : ComponentActivity() {
                                                             backdrop = backdrop,
                                                             layer = layer,
                                                             luminanceAnimation = luminanceAnimation.value,
-                                                            shape = RoundedCornerShape(percent = 50),
-                                                            surfaceAlpha = 0.6f,
-                                                            blurRadius = 32.dp
+                                                            shape = RoundedCornerShape(percent = 50)
                                                         )
                                                         .border(
                                                             width = 1.dp,
@@ -1671,10 +1669,7 @@ class MainActivity : ComponentActivity() {
                                     showAccountDialog = false
                                     homeViewModel.refresh()
                                 },
-                                latestVersionName = latestVersionName,
-                                backdrop = backdrop,
-                                layer = layer,
-                                luminance = luminanceAnimation.value
+                                latestVersionName = latestVersionName
                             )
                         }
 

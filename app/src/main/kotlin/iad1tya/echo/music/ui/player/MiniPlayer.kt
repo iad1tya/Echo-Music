@@ -341,9 +341,7 @@ private fun NewMiniPlayer(
                             backdrop = backdrop,
                             layer = layer,
                             luminanceAnimation = luminance,
-                            shape = RoundedCornerShape(32.dp),
-                            surfaceAlpha = 0.6f,
-                            blurRadius = 32.dp
+                            shape = RoundedCornerShape(32.dp)
                         )
                     } else if (gradientColors.isNotEmpty()) {
                         Modifier.background(
