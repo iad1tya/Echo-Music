@@ -1,8 +1,10 @@
 package iad1tya.echo.music.ui.component
 
+
 import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,14 +45,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.documentfile.provider.DocumentFile
 import com.echo.innertube.YouTube
 import com.echo.innertube.models.YouTubeClient
@@ -95,6 +102,14 @@ fun AdvancedDownloadDialog(
     
     val sheetBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow
     val sheetContentColor = MaterialTheme.colorScheme.onSurface
+    val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    // Header Background Animation
+    val isScrolled by remember { androidx.compose.runtime.derivedStateOf { scrollState.canScrollBackward } }
+    val headerAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isScrolled) 1f else 0f, 
+        label = "headerAlpha"
+    )
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -108,45 +123,12 @@ fun AdvancedDownloadDialog(
             color = sheetBackgroundColor,
             contentColor = sheetContentColor
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(WindowInsets.systemBars.asPaddingValues())
-                    .padding(24.dp)
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Advance Download",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = sheetContentColor
-                    )
-                    FilledTonalIconButton(
-                        onClick = onDismiss,
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            contentColor = sheetContentColor
-                        )
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.close),
-                            contentDescription = "Close",
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(24.dp))
-
+            Box(modifier = Modifier.fillMaxSize()) {
                 if (isLoading) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                            .fillMaxSize()
+                            .padding(WindowInsets.systemBars.asPaddingValues()),
                         contentAlignment = Alignment.Center
                     ) {
                          CircularProgressIndicator(
@@ -162,9 +144,14 @@ fun AdvancedDownloadDialog(
                         ?.sortedByDescending { it.bitrate }
 
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                        state = scrollState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 80.dp,
+                            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 24.dp,
+                            start = 24.dp,
+                            end = 24.dp
+                        ),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         // Song Info
@@ -362,6 +349,71 @@ fun AdvancedDownloadDialog(
                         item {
                             Spacer(Modifier.height(32.dp))
                         }
+                    }
+                }
+
+                // Header Background (New "Foggy" Blur)
+                if (headerAlpha > 0f) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp) // Adjusted height to cover status bar + header
+                            .align(Alignment.TopCenter)
+                            .alpha(headerAlpha)
+                            .zIndex(1f)
+                            .then(
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    Modifier.graphicsLayer {
+                                        renderEffect = android.graphics.RenderEffect.createBlurEffect(
+                                            25f,
+                                            25f,
+                                            android.graphics.Shader.TileMode.CLAMP
+                                        ).asComposeRenderEffect()
+                                    }
+                                } else {
+                                    Modifier
+                                }
+                            )
+                            .background(
+                                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                    colors = listOf(
+                                        sheetBackgroundColor.copy(alpha = 0.98f),
+                                        sheetBackgroundColor.copy(alpha = 0.95f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                    )
+                }
+
+                // Header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(WindowInsets.systemBars.asPaddingValues())
+                        .padding(horizontal = 24.dp, vertical = 24.dp)
+                        .align(Alignment.TopCenter)
+                        .zIndex(2f),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Advance Download",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = sheetContentColor
+                    )
+                    FilledTonalIconButton(
+                        onClick = onDismiss,
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = sheetContentColor
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.close),
+                            contentDescription = "Close",
+                        )
                     }
                 }
             }
