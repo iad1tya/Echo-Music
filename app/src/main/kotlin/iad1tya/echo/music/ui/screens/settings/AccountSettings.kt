@@ -166,22 +166,10 @@ fun AccountSettings(
                 modifier = Modifier
                     .size(96.dp)
                     .clip(CircleShape)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                            )
-                        )
-                    )
+                    .background(Color.White.copy(alpha = 0.1f))
                     .border(
-                        width = 3.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.5f),
-                                Color.White.copy(alpha = 0.1f)
-                            )
-                        ),
+                        width = 2.dp,
+                        color = Color.White.copy(alpha = 0.3f),
                         shape = CircleShape
                     )
                     .clickable(
@@ -203,7 +191,7 @@ fun AccountSettings(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(90.dp)
+                            .size(92.dp)
                             .clip(CircleShape)
                     )
                 } else {

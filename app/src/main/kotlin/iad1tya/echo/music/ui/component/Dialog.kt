@@ -189,7 +189,8 @@ fun AccountSettingsDialog(
                                 layer = layer,
                                 luminanceAnimation = luminance,
                                 shape = RoundedCornerShape(28.dp),
-                                surfaceAlpha = 0.6f // Much less transparency
+                                surfaceAlpha = 0.7f, // Bit transparent with blur
+                                useLens = false // Disable glass lens effect
                             )
                         } else {
                             Modifier.background(MaterialTheme.colorScheme.surface)
