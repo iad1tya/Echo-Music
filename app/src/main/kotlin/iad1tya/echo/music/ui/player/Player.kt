@@ -487,6 +487,67 @@ fun BottomSheetPlayer(
         },
     ) {
         val controlsContent: @Composable ColumnScope.(MediaMetadata) -> Unit = { mediaMetadata ->
+            @Composable
+            fun AudioOutputWidget() {
+                val audioManager = try {
+                    context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                } catch (e: Exception) {
+                    null
+                }
+                val devices = try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && audioManager != null) {
+                        audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).toList()
+                    } else {
+                        emptyList()
+                    }
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                val hasBluetoothDevice = devices.any { 
+                    it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP || 
+                    it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO 
+                }
+                val hasWiredHeadset = devices.any { 
+                    it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET || 
+                    it.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES 
+                }
+                
+                val audioIcon = when {
+                    hasBluetoothDevice -> R.drawable.audio_bluetooth
+                    hasWiredHeadset -> R.drawable.audio_earphone
+                    else -> R.drawable.audio_device
+                }
+
+                val audioText = when {
+                    hasBluetoothDevice -> "Bluetooth Device"
+                    hasWiredHeadset -> "Wired Headset"
+                    else -> "Phone Speaker"
+                }
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable { audioRoutingSheetState.expandSoft() }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(audioIcon),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = audioText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                }
+            }
+
             val playPauseRoundness by animateDpAsState(
                 targetValue = 36.dp,
                 animationSpec = tween(durationMillis = 90, easing = LinearEasing),
@@ -506,11 +567,9 @@ fun BottomSheetPlayer(
                 ) {
 
 
-                    // Audio Output Label (Above video/song name)
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
+
+                    @Composable
+                    fun AudioOutputWidget() {
                         val audioManager = try {
                             context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
                         } catch (e: Exception) {
@@ -567,6 +626,16 @@ fun BottomSheetPlayer(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Color.White.copy(alpha = 0.9f)
                             )
+                        }
+                    }
+
+                    // Audio Output Label (Above video/song name)
+                    if (!showQueue && !showLyrics) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            AudioOutputWidget()
                         }
                     }
                     Spacer(Modifier.height(8.dp))
@@ -724,42 +793,79 @@ fun BottomSheetPlayer(
                     }
                 } else {
                      // Audio button moved to top. Just Menu button here.
-                     // The original code had Audio Box -> Spacer -> Menu Box.
-                     // Using empty Box to maintain structure if needed, or better, just the Menu Box.
-                
+                     
+                    if (showQueue || showLyrics) {
+                         Row(
+                             modifier = Modifier
+                                 .fillMaxWidth()
+                                 .padding(top = 8.dp),
+                             horizontalArrangement = Arrangement.SpaceBetween,
+                             verticalAlignment = Alignment.CenterVertically
+                         ) {
+                             AudioOutputWidget()
 
-
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier =
-                        Modifier
-                            .padding(top = if (mediaMetadata.id.isNotEmpty()) 48.dp else 8.dp)
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .clickable {
-                                menuState.show {
-                                    PlayerMenu(
-                                        mediaMetadata = mediaMetadata,
-                                        navController = navController,
-                                        playerBottomSheetState = state,
-                                        onShowDetailsDialog = {
-                                            mediaMetadata.id.let {
-                                                bottomSheetPageState.show {
-                                                    ShowMediaInfo(it)
+                             Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .clickable {
+                                        menuState.show {
+                                            PlayerMenu(
+                                                mediaMetadata = mediaMetadata,
+                                                navController = navController,
+                                                playerBottomSheetState = state,
+                                                onShowDetailsDialog = {
+                                                    mediaMetadata.id.let {
+                                                        bottomSheetPageState.show {
+                                                            ShowMediaInfo(it)
+                                                        }
+                                                    }
+                                                },
+                                                onDismiss = menuState::dismiss,
+                                            )
+                                        }
+                                    },
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.more_vert),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(Color.White),
+                                )
+                            }
+                         }
+                    } else {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier =
+                            Modifier
+                                .padding(top = if (mediaMetadata.id.isNotEmpty()) 48.dp else 8.dp)
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(24.dp))
+                                .clickable {
+                                    menuState.show {
+                                        PlayerMenu(
+                                            mediaMetadata = mediaMetadata,
+                                            navController = navController,
+                                            playerBottomSheetState = state,
+                                            onShowDetailsDialog = {
+                                                mediaMetadata.id.let {
+                                                    bottomSheetPageState.show {
+                                                        ShowMediaInfo(it)
+                                                    }
                                                 }
-                                            }
-                                        },
-                                        onDismiss = menuState::dismiss,
-                                    )
-                                }
-                            },
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.more_vert),
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(Color.White),
-                        )
+                                            },
+                                            onDismiss = menuState::dismiss,
+                                        )
+                                    }
+                                },
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.more_vert),
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(Color.White),
+                            )
+                        }
                     }
                 }
             }
