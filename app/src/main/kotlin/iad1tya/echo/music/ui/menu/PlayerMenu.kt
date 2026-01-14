@@ -40,6 +40,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ListItem
@@ -100,6 +101,25 @@ import kotlinx.coroutines.launch
 import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.round
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButtonDefaults
+import android.os.Build
+import androidx.compose.foundation.layout.fillMaxHeight
 
 @Composable
 fun PlayerMenu(
@@ -558,107 +578,339 @@ fun TempoPitchDialog(onDismiss: () -> Unit) {
             PlaybackParameters(tempo, 2f.pow(transposeValue.toFloat() / 12))
     }
 
-    AlertDialog(
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        onDismissRequest = onDismiss,
-        title = {
-            Text(stringResource(R.string.tempo_and_pitch))
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    tempo = 1f
-                    transposeValue = 0
-                    updatePlaybackParameters()
-                },
-            ) {
-                Text(stringResource(R.string.reset))
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onDismiss,
-            ) {
-                Text(stringResource(android.R.string.ok))
-            }
-        },
-        text = {
-            Column {
-                ValueAdjuster(
-                    icon = R.drawable.speed,
-                    currentValue = tempo,
-                    values = (0..35).map { round((0.25f + it * 0.05f) * 100) / 100 },
-                    onValueUpdate = {
-                        tempo = it
-                        updatePlaybackParameters()
-                    },
-                    valueText = { "x$it" },
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                ValueAdjuster(
-                    icon = R.drawable.discover_tune,
-                    currentValue = transposeValue,
-                    values = (-12..12).toList(),
-                    onValueUpdate = {
-                        transposeValue = it
-                        updatePlaybackParameters()
-                    },
-                    valueText = { "${if (it > 0) "+" else ""}$it" },
-                )
-            }
-        },
+    val sheetBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow
+    val sheetContentColor = MaterialTheme.colorScheme.onSurface
+    val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    // Header Background Animation
+    val isScrolled by remember { androidx.compose.runtime.derivedStateOf { scrollState.canScrollBackward } }
+    val headerAlpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isScrolled) 1f else 0f, 
+        label = "headerAlpha"
     )
+
+    var isControlsVisible by remember { mutableStateOf(true) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y < -5f) { 
+                    isControlsVisible = false
+                } else if (available.y > 5f) { 
+                    isControlsVisible = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = sheetBackgroundColor,
+            contentColor = sheetContentColor
+        ) {
+            Box(modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
+                
+                LazyColumn(
+                    state = scrollState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 80.dp,
+                        bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 80.dp, // Space for bottom buttons
+                        start = 24.dp,
+                        end = 24.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .padding(24.dp)
+                        ) {
+                            Text(
+                                text = "TEMPO",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = sheetContentColor.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                            
+                            ValueAdjuster(
+                                icon = R.drawable.speed,
+                                title = "Tempo",
+                                currentValue = tempo,
+                                values = (0..35).map { round((0.25f + it * 0.05f) * 100) / 100 },
+                                onValueUpdate = {
+                                    tempo = it
+                                    updatePlaybackParameters()
+                                },
+                                valueText = { "x$it" }
+                            )
+                        }
+                    }
+
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .padding(24.dp)
+                        ) {
+                            Text(
+                                text = "PITCH",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = sheetContentColor.copy(alpha = 0.6f),
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+
+                            ValueAdjuster(
+                                icon = R.drawable.discover_tune,
+                                title = "Pitch",
+                                currentValue = transposeValue,
+                                values = (-12..12).toList(),
+                                onValueUpdate = {
+                                    transposeValue = it
+                                    updatePlaybackParameters()
+                                },
+                                valueText = { "${if (it > 0) "+" else ""}$it" },
+                            )
+                        }
+                    }
+
+                    
+                    item {
+                        Spacer(Modifier.height(100.dp))
+                    }
+                }
+
+                // Header Background (Foggy Blur)
+                AnimatedVisibility(
+                    visible = isControlsVisible,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                    modifier = Modifier.align(Alignment.TopCenter).zIndex(1f)
+                ) {
+                    if (headerAlpha > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .alpha(headerAlpha)
+                                .then(
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        Modifier.graphicsLayer {
+                                            renderEffect = android.graphics.RenderEffect.createBlurEffect(
+                                                25f,
+                                                25f,
+                                                android.graphics.Shader.TileMode.CLAMP
+                                            ).asComposeRenderEffect()
+                                        }
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                                .background(
+                                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        colors = listOf(
+                                            sheetBackgroundColor.copy(alpha = 0.98f),
+                                            sheetBackgroundColor.copy(alpha = 0.95f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+                    }
+                }
+
+                // Header
+                AnimatedVisibility(
+                    visible = isControlsVisible,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                    modifier = Modifier.align(Alignment.TopCenter).zIndex(2f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(WindowInsets.systemBars.asPaddingValues())
+                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            stringResource(R.string.tempo_and_pitch),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = sheetContentColor
+                        )
+                        FilledTonalIconButton(
+                            onClick = onDismiss,
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = sheetContentColor
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.close),
+                                contentDescription = "Close",
+                            )
+                        }
+                    }
+                }
+                
+                // Bottom Buttons
+                AnimatedVisibility(
+                    visible = isControlsVisible,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 24.dp)
+                        .padding(horizontal = 24.dp)
+                ) {
+                     Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                tempo = 1f
+                                transposeValue = 0
+                                updatePlaybackParameters()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp),
+                            shape = RoundedCornerShape(32.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = sheetContentColor
+                            )
+                        ) {
+                            Text(
+                                stringResource(R.string.reset),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        
+                        Button(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp),
+                            shape = RoundedCornerShape(32.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text(
+                                "Done",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
 fun <T> ValueAdjuster(
     @DrawableRes icon: Int,
+    title: String,
     currentValue: T,
     values: List<T>,
     onValueUpdate: (T) -> Unit,
     valueText: (T) -> String,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier,
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-        )
-
-        IconButton(
-            enabled = currentValue != values.first(),
-            onClick = {
-                onValueUpdate(values[values.indexOf(currentValue) - 1])
-            },
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 12.dp)
         ) {
-            Icon(
-                painter = painterResource(R.drawable.remove),
-                contentDescription = null,
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                     text = valueText(currentValue),
+                     style = MaterialTheme.typography.bodyMedium,
+                     color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
-
-        Text(
-            text = valueText(currentValue),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(80.dp),
-        )
-
-        IconButton(
-            enabled = currentValue != values.last(),
-            onClick = {
-                onValueUpdate(values[values.indexOf(currentValue) + 1])
-            },
+        
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape).padding(4.dp),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.add),
-                contentDescription = null,
+            IconButton(
+                enabled = currentValue != values.first(),
+                onClick = {
+                    onValueUpdate(values[values.indexOf(currentValue) - 1])
+                },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface, CircleShape)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.remove),
+                    contentDescription = null,
+                )
+            }
+
+            Text(
+                text = valueText(currentValue),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(80.dp),
+                fontWeight = FontWeight.Bold
             )
+
+            IconButton(
+                enabled = currentValue != values.last(),
+                onClick = {
+                    onValueUpdate(values[values.indexOf(currentValue) + 1])
+                },
+                 modifier = Modifier.background(MaterialTheme.colorScheme.surface, CircleShape)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.add),
+                    contentDescription = null,
+                )
+            }
         }
     }
 }
