@@ -1332,7 +1332,9 @@ class MainActivity : ComponentActivity() {
                                                             backdrop = backdrop,
                                                             layer = layer,
                                                             luminanceAnimation = luminanceAnimation.value,
-                                                            shape = RoundedCornerShape(percent = 50)
+                                                            shape = RoundedCornerShape(percent = 50),
+                                                            surfaceAlpha = 0.6f,
+                                                            blurRadius = 32.dp
                                                         )
                                                         .border(
                                                             width = 1.dp,

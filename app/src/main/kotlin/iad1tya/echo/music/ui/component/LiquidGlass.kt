@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -39,6 +40,7 @@ fun Modifier.drawBackdropCustomShape(
     shape: Shape,
     surfaceAlpha: Float = 0.1f,
     useLens: Boolean = true,
+    blurRadius: Dp = 16.dp,
 ): Modifier {
     return this.drawBackdrop(
         backdrop = backdrop,
@@ -62,7 +64,7 @@ fun Modifier.drawBackdropCustomShape(
             )
             blur(
                 if (l > 0f) {
-                    lerp(8f.dp.toPx(), 16f.dp.toPx(), l)
+                    lerp(8f.dp.toPx(), blurRadius.toPx(), l)
                 } else {
                     lerp(8f.dp.toPx(), 2f.dp.toPx(), -l)
                 },

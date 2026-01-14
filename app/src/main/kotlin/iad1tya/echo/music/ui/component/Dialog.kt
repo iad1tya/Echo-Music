@@ -189,7 +189,7 @@ fun AccountSettingsDialog(
                                 layer = layer,
                                 luminanceAnimation = luminance,
                                 shape = RoundedCornerShape(28.dp),
-                                surfaceAlpha = 0.85f, // Less transparency
+                                surfaceAlpha = 0.5f,
                                 useLens = false // Disable glass lens effect
                             )
                         } else {
