@@ -173,63 +173,176 @@ fun PlayerMenu(
     }
 
     if (showSelectArtistDialog) {
-        ListDialog(
-            onDismiss = { showSelectArtistDialog = false },
-        ) {
-            item {
-                Text(
-                    text = "Select Artist",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
-                )
-            }
-            
-            items(artists) { artist ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                navController.navigate("artist/${artist.id}")
-                                showSelectArtistDialog = false
-                                playerBottomSheetState.collapseSoft()
-                                onDismiss()
-                            }
-                            .padding(12.dp)
-                    ) {
-                        Text(
-                            text = artist.name,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
-                        )
-                        
-                        Icon(
-                            painter = painterResource(R.drawable.navigate_next),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
+        val sheetBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow
+        val sheetContentColor = MaterialTheme.colorScheme.onSurface
+        val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+        val isScrolled by remember { androidx.compose.runtime.derivedStateOf { scrollState.canScrollBackward } }
+        val headerAlpha by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = if (isScrolled) 1f else 0f, 
+            label = "headerAlpha"
+        )
+
+        var isControlsVisible by remember { mutableStateOf(true) }
+        val nestedScrollConnection = remember {
+            object : NestedScrollConnection {
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    if (available.y < -5f) { 
+                        isControlsVisible = false
+                    } else if (available.y > 5f) { 
+                        isControlsVisible = true
                     }
+                    return Offset.Zero
                 }
             }
-            
-            item {
-                Spacer(Modifier.height(8.dp))
+        }
+
+        Dialog(
+            onDismissRequest = { showSelectArtistDialog = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = sheetBackgroundColor,
+                contentColor = sheetContentColor
+            ) {
+                 Box(modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
+                    LazyColumn(
+                        state = scrollState,
+                        modifier = Modifier.fillMaxSize(),
+                         contentPadding = PaddingValues(
+                            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 80.dp,
+                            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 24.dp,
+                            start = 24.dp,
+                            end = 24.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(artists) { artist ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainer) // Use container for card look without actual Card elevation issues in Dialog
+                                    .clickable {
+                                        navController.navigate("artist/${artist.id}")
+                                        showSelectArtistDialog = false
+                                        playerBottomSheetState.collapseSoft()
+                                        onDismiss()
+                                    }
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.artist),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = artist.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = sheetContentColor,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Icon(
+                                    painter = painterResource(R.drawable.navigate_next),
+                                    contentDescription = null,
+                                    tint = sheetContentColor.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    // Header Background (Foggy Blur)
+                    AnimatedVisibility(
+                        visible = isControlsVisible,
+                        enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                        modifier = Modifier.align(Alignment.TopCenter).zIndex(1f)
+                    ) {
+                        if (headerAlpha > 0f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp) // Adjusted height
+                                    .alpha(headerAlpha)
+                                    .then(
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            Modifier.graphicsLayer {
+                                                renderEffect = android.graphics.RenderEffect.createBlurEffect(
+                                                    25f,
+                                                    25f,
+                                                    android.graphics.Shader.TileMode.CLAMP
+                                                ).asComposeRenderEffect()
+                                            }
+                                        } else {
+                                            Modifier
+                                        }
+                                    )
+                                    .background(
+                                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                            colors = listOf(
+                                                sheetBackgroundColor.copy(alpha = 0.98f),
+                                                sheetBackgroundColor.copy(alpha = 0.95f),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    )
+                            )
+                        }
+                    }
+
+                    // Header
+                    AnimatedVisibility(
+                        visible = isControlsVisible,
+                        enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                        modifier = Modifier.align(Alignment.TopCenter).zIndex(2f)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(WindowInsets.systemBars.asPaddingValues())
+                                .padding(horizontal = 24.dp, vertical = 24.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Select Artist",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = sheetContentColor
+                            )
+                            FilledTonalIconButton(
+                                onClick = { showSelectArtistDialog = false },
+                                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    contentColor = sheetContentColor
+                                )
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.close),
+                                    contentDescription = "Close",
+                                )
+                            }
+                        }
+                    }
+                 }
             }
         }
     }
