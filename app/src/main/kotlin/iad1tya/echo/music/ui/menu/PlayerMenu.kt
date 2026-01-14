@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.border
+import iad1tya.echo.music.ui.utils.DetailsDialog
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -368,6 +369,17 @@ fun PlayerMenu(
         )
     }
 
+    var showDetailsDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    if (showDetailsDialog) {
+        DetailsDialog(
+            mediaMetadata = mediaMetadata,
+            onDismiss = { showDetailsDialog = false }
+        )
+    }
+
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
@@ -575,8 +587,7 @@ fun PlayerMenu(
                     icon = R.drawable.info,
                     text = stringResource(R.string.details),
                     onClick = {
-                        onShowDetailsDialog()
-                        onDismiss()
+                        showDetailsDialog = true
                     }
                 )
                 MenuDivider()
