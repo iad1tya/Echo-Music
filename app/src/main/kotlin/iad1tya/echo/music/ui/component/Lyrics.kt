@@ -740,15 +740,33 @@ fun Lyrics(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
                             shape = RoundedCornerShape(16.dp),
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
-                            tonalElevation = 8.dp
+                            containerColor = Color.Black.copy(alpha = 0.4f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                            tonalElevation = 0.dp,
+                            modifier = Modifier.width(200.dp)
                         ) {
+                             Text(
+                                text = "Lyrics Options",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.5f),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                            
                             DropdownMenuItem(
                                 text = { 
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(painterResource(R.drawable.sync), null, Modifier.size(20.dp))
+                                        Icon(
+                                            painter = painterResource(R.drawable.sync),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp),
+                                            tint = Color.White
+                                        )
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Refetch Lyrics", fontSize = 16.sp)
+                                        Text(
+                                            text = "Refetch Lyrics",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = Color.White
+                                        )
                                     }
                                 },
                                 onClick = { 
@@ -759,12 +777,22 @@ fun Lyrics(
                                 },
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
                             )
+                            
                             DropdownMenuItem(
                                 text = { 
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(painterResource(R.drawable.search), null, Modifier.size(20.dp))
+                                        Icon(
+                                            painter = painterResource(R.drawable.search),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(20.dp),
+                                            tint = Color.White
+                                        )
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Search Lyrics", fontSize = 16.sp)
+                                        Text(
+                                            text = "Search Lyrics",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = Color.White
+                                        )
                                     }
                                 },
                                 onClick = { 
