@@ -1408,12 +1408,7 @@ fun Lyrics(
                                             color = sheetContentColor.copy(alpha = 0.6f)
                                         )
                                     }
-                                    Icon(
-                                        painter = painterResource(R.drawable.download),
-                                        contentDescription = null,
-                                        tint = sheetContentColor.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(24.dp)
-                                    )
+
                                 }
                             }
                             
