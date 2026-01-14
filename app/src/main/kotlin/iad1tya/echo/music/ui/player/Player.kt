@@ -388,78 +388,9 @@ fun BottomSheetPlayer(
         mutableFloatStateOf(30f)
     }
     if (showSleepTimerDialog) {
-        val sleepTimerValueInt = sleepTimerValue.roundToInt()
-        iad1tya.echo.music.ui.component.DefaultDialog(
-            onDismiss = { showSleepTimerDialog = false },
-            icon = {
-                Icon(
-                    painter = painterResource(R.drawable.bedtime),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
-                )
-            },
-            title = {
-                Text(
-                    text = stringResource(R.string.sleep_timer),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            buttons = {
-                TextButton(
-                    onClick = { showSleepTimerDialog = false }
-                ) {
-                    Text(stringResource(android.R.string.cancel))
-                }
-                Spacer(Modifier.width(8.dp))
-                Button(
-                    onClick = {
-                        showSleepTimerDialog = false
-                        playerConnection.service.sleepTimer.start(sleepTimerValueInt)
-                    }
-                ) {
-                    Text("Set")
-                }
-            }
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = pluralStringResource(
-                        R.plurals.minute,
-                        sleepTimerValueInt,
-                        sleepTimerValueInt
-                    ),
-                    style = MaterialTheme.typography.displayMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                
-                Spacer(Modifier.height(16.dp))
-
-                Slider(
-                    value = sleepTimerValue,
-                    onValueChange = { sleepTimerValue = it },
-                    valueRange = 5f..120f,
-                    steps = (120 - 5) / 5 - 1,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                Spacer(Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = {
-                        showSleepTimerDialog = false
-                        playerConnection.service.sleepTimer.start(-1)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.end_of_song))
-                }
-            }
-        }
+        iad1tya.echo.music.ui.component.SleepTimerDialog(
+            onDismiss = { showSleepTimerDialog = false }
+        )
     }
 
     var showChoosePlaylistDialog by rememberSaveable {
