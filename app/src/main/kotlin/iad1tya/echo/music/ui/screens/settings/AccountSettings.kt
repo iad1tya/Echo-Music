@@ -7,6 +7,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -119,43 +120,70 @@ fun AccountSettings(
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(16.dp)
+            .background(Color.Transparent)
+            .padding(20.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        // Header with close button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp),
+                .padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.account),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 4.dp)
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White
             )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = onClose) {
-                Icon(painterResource(R.drawable.close), contentDescription = null)
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.1f))
+            ) {
+                Icon(
+                    painterResource(R.drawable.close),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
 
-        Spacer(Modifier.height(12.dp))
-
+        // Account Profile Section
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            // Profile Image
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(
-                        if (showAccountSwitcher) 
-                            RoundedCornerShape(topStart = 50.dp, topEnd = 50.dp)
-                        else 
-                            RoundedCornerShape(50.dp)
+                    .size(96.dp)
+                    .clip(CircleShape)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            )
+                        )
                     )
-                    .background(MaterialTheme.colorScheme.surface)
+                    .border(
+                        width = 3.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.5f),
+                                Color.White.copy(alpha = 0.1f)
+                            )
+                        ),
+                        shape = CircleShape
+                    )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = androidx.compose.material3.ripple(),
@@ -168,45 +196,51 @@ fun AccountSettings(
                             }
                         }
                     )
-                    .padding(horizontal = 18.dp, vertical = 12.dp)
             ) {
-            if (isLoggedIn && accountImageUrl != null) {
-                AsyncImage(
-                    model = accountImageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(40.dp).clip(CircleShape)
-                )
-            } else {
-                Image(
-                    painter = painterResource(R.drawable.google),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    colorFilter = null
-                )
-            }
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = if (isLoggedIn) accountName else "Google Login",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(start = 5.dp)
-                )
-                // Show account count if multiple accounts
-                if (isLoggedIn && allAccounts.size > 1) {
-                    Text(
-                        text = stringResource(R.string.accounts_count, allAccounts.size),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 5.dp)
+                if (isLoggedIn && accountImageUrl != null) {
+                    AsyncImage(
+                        model = accountImageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(90.dp)
+                            .clip(CircleShape)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.google),
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White.copy(alpha = 0.9f))
                     )
                 }
             }
 
+            Spacer(Modifier.height(20.dp))
+
+            // Account Name
+            Text(
+                text = if (isLoggedIn) accountName else "Sign in with Google",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+
+            // Account count
+            if (isLoggedIn && allAccounts.size > 1) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.accounts_count, allAccounts.size),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+
+            // Logout button
             if (isLoggedIn) {
+                Spacer(Modifier.height(20.dp))
                 OutlinedButton(
                     onClick = {
                         coroutineScope.launch {
@@ -220,16 +254,26 @@ fun AccountSettings(
                         }
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
+                        containerColor = Color.White.copy(alpha = 0.15f),
+                        contentColor = Color.White
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.5.dp,
+                        Color.White.copy(alpha = 0.4f)
+                    ),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.height(44.dp)
                 ) {
-                    Text(stringResource(R.string.action_logout))
+                    Text(
+                        stringResource(R.string.action_logout),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
                 }
             }
-        }
 
-            // Account Switcher Dropdown - appears directly below the account section
+            // Account Switcher Dropdown
             AccountSwitcherDropdown(
                 expanded = showAccountSwitcher,
                 accounts = allAccounts,
@@ -253,7 +297,7 @@ fun AccountSettings(
             )
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(32.dp))
 
         if (showTokenEditor) {
             val text = """
@@ -291,174 +335,133 @@ fun AccountSettings(
             )
         }
 
-        // History button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable {
+        // Quick Actions
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // History
+            QuickActionButton(
+                icon = R.drawable.history,
+                title = stringResource(R.string.history),
+                onClick = {
                     onClose()
                     navController.navigate("history")
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.history),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+            )
 
-                Spacer(Modifier.width(16.dp))
-
-                Text(
-                    text = stringResource(R.string.history),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        Spacer(Modifier.height(4.dp))
-
-        // Stats button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable {
+            // Stats
+            QuickActionButton(
+                icon = R.drawable.stats,
+                title = stringResource(R.string.stats),
+                onClick = {
                     onClose()
                     navController.navigate("stats")
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.stats),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+            )
 
-                Spacer(Modifier.width(16.dp))
-
-                Text(
-                    text = stringResource(R.string.stats),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        Spacer(Modifier.height(4.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable {
+            // Advanced Login / Token
+            QuickActionButton(
+                icon = R.drawable.key,
+                title = when {
+                    !isLoggedIn -> stringResource(R.string.advanced_login)
+                    showToken -> stringResource(R.string.token_shown)
+                    else -> stringResource(R.string.token_hidden)
+                },
+                onClick = {
                     if (!isLoggedIn) showTokenEditor = true
                     else if (!showToken) showToken = true
                     else showTokenEditor = true
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.key),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+            )
 
-                Spacer(Modifier.width(16.dp))
-
-                Text(
-                    text = when {
-                        !isLoggedIn -> stringResource(R.string.advanced_login)
-                        showToken -> stringResource(R.string.token_shown)
-                        else -> stringResource(R.string.token_hidden)
-                    },
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        Spacer(Modifier.height(4.dp))
-
-        // Settings button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable {
+            // Settings
+            QuickActionButton(
+                icon = R.drawable.settings_outlined,
+                title = stringResource(R.string.settings),
+                onClick = {
                     onClose()
                     navController.navigate("settings")
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        if (isLoggedIn) {
+            Spacer(Modifier.height(24.dp))
+
+            // Preferences
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.settings_outlined),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.more_content), color = Color.White) },
+                    description = null,
+                    icon = { Icon(painterResource(R.drawable.add_circle), null, tint = Color.White.copy(alpha = 0.7f)) },
+                    checked = useLoginForBrowse,
+                    onCheckedChange = {
+                        YouTube.useLoginForBrowse = it
+                        onUseLoginForBrowseChange(it)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
                 )
 
-                Spacer(Modifier.width(16.dp))
-
-                Text(
-                    text = stringResource(R.string.settings),
-                    style = MaterialTheme.typography.titleMedium
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.yt_sync), color = Color.White) },
+                    icon = { Icon(painterResource(R.drawable.cached), null, tint = Color.White.copy(alpha = 0.7f)) },
+                    checked = ytmSync,
+                    onCheckedChange = onYtmSyncChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
                 )
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(16.dp))
+    }
+}
 
-
-
-        if (isLoggedIn) {
-            SwitchPreference(
-                title = { Text(stringResource(R.string.more_content)) },
-                description = null,
-                icon = { Icon(painterResource(R.drawable.add_circle), null) },
-                checked = useLoginForBrowse,
-                onCheckedChange = {
-                    YouTube.useLoginForBrowse = it
-                    onUseLoginForBrowseChange(it)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surface)
+@Composable
+private fun QuickActionButton(
+    icon: Int,
+    title: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.08f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.9f),
+                modifier = Modifier.size(24.dp)
             )
-  
-            Spacer(Modifier.height(4.dp))
 
-            SwitchPreference(
-                title = { Text(stringResource(R.string.yt_sync)) },
-                icon = { Icon(painterResource(R.drawable.cached), null) },
-                checked = ytmSync,
-                onCheckedChange = onYtmSyncChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surface)
+            Spacer(Modifier.width(16.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium
+                ),
+                color = Color.White
             )
         }
-
-        Spacer(Modifier.height(12.dp))
     }
 }

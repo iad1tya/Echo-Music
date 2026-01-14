@@ -70,6 +70,11 @@ import androidx.navigation.NavController
 import iad1tya.echo.music.R
 import iad1tya.echo.music.ui.screens.settings.AccountSettings
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.TileMode
 
 @Composable
 fun DefaultDialog(
@@ -148,7 +153,10 @@ fun DefaultDialog(
 fun AccountSettingsDialog(
     navController: NavController,
     onDismiss: () -> Unit,
-    latestVersionName: String
+    latestVersionName: String,
+    backdrop: iad1tya.echo.music.ui.component.PlatformBackdrop? = null,
+    layer: androidx.compose.ui.graphics.layer.GraphicsLayer? = null,
+    luminance: Float = 0f,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -168,15 +176,35 @@ fun AccountSettingsDialog(
                 },
             contentAlignment = Alignment.TopCenter
         ) {
-            Surface(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.92f) // Use 92% width on phones
-                    .widthIn(max = 500.dp) // Max width for tablets
+                    .fillMaxWidth(0.92f)
+                    .widthIn(max = 500.dp)
                     .padding(top = 72.dp, start = 16.dp, end = 16.dp)
-                    .clip(RoundedCornerShape(28.dp)),
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 8.dp
+                    .clip(RoundedCornerShape(28.dp))
+                    .then(
+                        if (backdrop != null && layer != null) {
+                            Modifier.drawBackdropCustomShape(
+                                backdrop = backdrop,
+                                layer = layer,
+                                luminanceAnimation = luminance,
+                                shape = RoundedCornerShape(28.dp),
+                                surfaceAlpha = 0.6f // Much less transparency
+                            )
+                        } else {
+                            Modifier.background(MaterialTheme.colorScheme.surface)
+                        }
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.3f),
+                                Color.White.copy(alpha = 0.05f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(28.dp)
+                    )
             ) {
                 AccountSettings(
                     navController = navController,

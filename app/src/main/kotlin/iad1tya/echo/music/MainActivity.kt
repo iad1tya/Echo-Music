@@ -1669,7 +1669,10 @@ class MainActivity : ComponentActivity() {
                                     showAccountDialog = false
                                     homeViewModel.refresh()
                                 },
-                                latestVersionName = latestVersionName
+                                latestVersionName = latestVersionName,
+                                backdrop = backdrop,
+                                layer = layer,
+                                luminance = luminanceAnimation.value
                             )
                         }
 
