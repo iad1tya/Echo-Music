@@ -15,6 +15,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -136,6 +145,20 @@ fun AdvancedPlaylistDownloadDialog(
         label = "headerAlpha"
     )
 
+    var isControlsVisible by remember { mutableStateOf(true) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y < -5f) { // Scrolling Data Up -> Finger Drag Up -> Hide
+                    isControlsVisible = false
+                } else if (available.y > 5f) { // Scrolling Data Down -> Finger Drag Down -> Show
+                    isControlsVisible = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Dialog(
         onDismissRequest = {
              if (!isDownloading && !isFetchingSongs) onDismiss()
@@ -150,7 +173,7 @@ fun AdvancedPlaylistDownloadDialog(
             color = sheetBackgroundColor,
             contentColor = sheetContentColor
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection)) {
                 if (isFetchingSongs) {
                     Box(
                         modifier = Modifier
@@ -344,82 +367,98 @@ fun AdvancedPlaylistDownloadDialog(
                 }
 
                 // Header Background (New "Foggy" Blur)
-                if (headerAlpha > 0f) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .align(Alignment.TopCenter)
-                            .alpha(headerAlpha)
-                            .zIndex(1f)
-                            .then(
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    Modifier.graphicsLayer {
-                                        renderEffect = android.graphics.RenderEffect.createBlurEffect(
-                                            25f,
-                                            25f,
-                                            android.graphics.Shader.TileMode.CLAMP
-                                        ).asComposeRenderEffect()
+                AnimatedVisibility(
+                    visible = isControlsVisible,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                    modifier = Modifier.align(Alignment.TopCenter).zIndex(1f)
+                ) {
+                    if (headerAlpha > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .alpha(headerAlpha)
+                                .then(
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        Modifier.graphicsLayer {
+                                            renderEffect = android.graphics.RenderEffect.createBlurEffect(
+                                                25f,
+                                                25f,
+                                                android.graphics.Shader.TileMode.CLAMP
+                                            ).asComposeRenderEffect()
+                                        }
+                                    } else {
+                                        Modifier
                                     }
-                                } else {
-                                    Modifier
-                                }
-                            )
-                            .background(
-                                brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                                    colors = listOf(
-                                        sheetBackgroundColor.copy(alpha = 0.98f),
-                                        sheetBackgroundColor.copy(alpha = 0.95f),
-                                        Color.Transparent
+                                )
+                                .background(
+                                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        colors = listOf(
+                                            sheetBackgroundColor.copy(alpha = 0.98f),
+                                            sheetBackgroundColor.copy(alpha = 0.95f),
+                                            Color.Transparent
+                                        )
                                     )
                                 )
-                            )
-                    )
+                        )
+                    }
                 }
 
                 // Header
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(WindowInsets.systemBars.asPaddingValues())
-                        .padding(horizontal = 24.dp, vertical = 24.dp)
-                        .align(Alignment.TopCenter)
-                        .zIndex(2f),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                AnimatedVisibility(
+                    visible = isControlsVisible,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
+                    modifier = Modifier.align(Alignment.TopCenter).zIndex(2f)
                 ) {
-                    Text(
-                        "Playlist Download",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = sheetContentColor
-                    )
-                    FilledTonalIconButton(
-                        onClick = { 
-                            if (!isDownloading) onDismiss() 
-                        },
-                        enabled = !isDownloading,
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            contentColor = sheetContentColor
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(WindowInsets.systemBars.asPaddingValues())
+                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.close),
-                            contentDescription = "Close",
+                        Text(
+                            "Playlist Download",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = sheetContentColor
                         )
+                        FilledTonalIconButton(
+                            onClick = { 
+                                if (!isDownloading) onDismiss() 
+                            },
+                            enabled = !isDownloading,
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                contentColor = sheetContentColor
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.close),
+                                contentDescription = "Close",
+                            )
+                        }
                     }
                 }
                 
                 // Start Button (Fixed at bottom)
                  if (!isDownloading && songsToDownload.isNotEmpty() && !isFetchingSongs) {
-                    Box(
+                    AnimatedVisibility(
+                        visible = isControlsVisible,
+                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .padding(bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 24.dp)
                             .padding(horizontal = 24.dp)
                     ) {
-                        Button(
+                        Box(
+                           // Modifier moved to AnimatedVisibility for alignment/padding, but we need to keep the content structure
+                        ) {
+                            Button(
                             onClick = {
                                 isDownloading = true
                                 coroutineScope.launch(Dispatchers.IO) {
@@ -482,6 +521,7 @@ fun AdvancedPlaylistDownloadDialog(
                         }
                     }
                 }
+            }
             }
         }
     }
