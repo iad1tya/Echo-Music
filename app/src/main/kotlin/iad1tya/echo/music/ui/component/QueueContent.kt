@@ -464,6 +464,8 @@ fun QueueContent(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .padding(horizontal = 8.dp)
+                                        .clip(RoundedCornerShape(12.dp))
                                         .background(
                                             if (index == currentWindowIndex)
                                                 Color.White.copy(alpha = 0.1f)
