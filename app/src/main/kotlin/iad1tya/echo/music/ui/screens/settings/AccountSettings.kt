@@ -121,20 +121,20 @@ fun AccountSettings(
     Column(
         modifier = Modifier
             .background(Color.Transparent)
-            .padding(20.dp)
+            .padding(24.dp)
             .verticalScroll(rememberScrollState())
     ) {
         // Header with close button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp),
+                .padding(bottom = 32.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(R.string.account),
-                style = MaterialTheme.typography.headlineSmall.copy(
+                style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
                 color = Color.White
@@ -142,15 +142,15 @@ fun AccountSettings(
             IconButton(
                 onClick = onClose,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
+                    .background(Color.White.copy(alpha = 0.12f))
             ) {
                 Icon(
                     painterResource(R.drawable.close),
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -164,12 +164,12 @@ fun AccountSettings(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(96.dp)
+                    .size(88.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
+                    .background(Color.White.copy(alpha = 0.12f))
                     .border(
-                        width = 2.dp,
-                        color = Color.White.copy(alpha = 0.3f),
+                        width = 1.5.dp,
+                        color = Color.White.copy(alpha = 0.25f),
                         shape = CircleShape
                     )
                     .clickable(
@@ -191,25 +191,25 @@ fun AccountSettings(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .size(92.dp)
+                            .size(85.dp)
                             .clip(CircleShape)
                     )
                 } else {
                     Image(
                         painter = painterResource(R.drawable.google),
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White.copy(alpha = 0.9f))
+                        modifier = Modifier.size(44.dp),
+                        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.White.copy(alpha = 0.95f))
                     )
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(18.dp))
 
             // Account Name
             Text(
                 text = if (isLoggedIn) accountName else "Sign in with Google",
-                style = MaterialTheme.typography.headlineSmall.copy(
+                style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
                 color = Color.White,
@@ -222,13 +222,13 @@ fun AccountSettings(
                 Text(
                     text = stringResource(R.string.accounts_count, allAccounts.size),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.65f)
                 )
             }
 
             // Logout button
             if (isLoggedIn) {
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(18.dp))
                 OutlinedButton(
                     onClick = {
                         coroutineScope.launch {
@@ -242,20 +242,20 @@ fun AccountSettings(
                         }
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.15f),
+                        containerColor = Color.White.copy(alpha = 0.12f),
                         contentColor = Color.White
                     ),
                     border = androidx.compose.foundation.BorderStroke(
-                        1.5.dp,
-                        Color.White.copy(alpha = 0.4f)
+                        1.dp,
+                        Color.White.copy(alpha = 0.3f)
                     ),
                     shape = RoundedCornerShape(50),
-                    modifier = Modifier.height(44.dp)
+                    modifier = Modifier.height(42.dp)
                 ) {
                     Text(
                         stringResource(R.string.action_logout),
                         style = MaterialTheme.typography.labelLarge.copy(
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Medium
                         )
                     )
                 }
@@ -285,7 +285,7 @@ fun AccountSettings(
             )
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(28.dp))
 
         if (showTokenEditor) {
             val text = """
