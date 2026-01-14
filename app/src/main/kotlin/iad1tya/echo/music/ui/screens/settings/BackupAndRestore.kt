@@ -198,8 +198,6 @@ fun BackupAndRestore(
                 Text(
                     text = stringResource(R.string.backup_restore),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                        fontWeight = FontWeight.Bold
                     )
                 )
             },

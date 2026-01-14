@@ -446,10 +446,7 @@ fun AboutScreen(
             title = { 
                 Text(
                     text = stringResource(R.string.about),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                        fontWeight = FontWeight.Bold
-                    )
+                    style = MaterialTheme.typography.titleLarge
                 )
             },
             navigationIcon = {

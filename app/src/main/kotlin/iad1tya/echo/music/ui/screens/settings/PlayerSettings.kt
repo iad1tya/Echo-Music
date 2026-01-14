@@ -330,8 +330,6 @@ fun PlayerSettings(
                 Text(
                     text = stringResource(R.string.player_and_audio),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                        fontWeight = FontWeight.Bold
                     )
                 )
             },

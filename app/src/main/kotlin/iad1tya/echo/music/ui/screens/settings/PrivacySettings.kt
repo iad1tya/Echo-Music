@@ -366,8 +366,6 @@ fun PrivacySettings(
                 Text(
                     text = stringResource(R.string.privacy),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                        fontWeight = FontWeight.Bold
                     )
                 )
             },

@@ -129,8 +129,6 @@ fun UpdaterScreen(
                 Text(
                     text = stringResource(R.string.updater),
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                        fontWeight = FontWeight.Bold
                     )
                 )
             },

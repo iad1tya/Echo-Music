@@ -1023,11 +1023,14 @@ class MainActivity : ComponentActivity() {
                                                         } else {
                                                             currentTitleRes?.let { stringResource(it) } ?: ""
                                                         },
-                                                        style = MaterialTheme.typography.titleLarge.copy(
-                                                            fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                                                            fontWeight = FontWeight.Bold,
-                                                            fontSize = if (navBackStackEntry?.destination?.route == Screens.Home.route) 28.sp else MaterialTheme.typography.titleLarge.fontSize
-                                                        ),
+                                                        style = if (navBackStackEntry?.destination?.route == Screens.Home.route) {
+                                                            MaterialTheme.typography.titleLarge.copy(
+                                                                fontWeight = FontWeight.ExtraBold,
+                                                                fontSize = 32.sp
+                                                            )
+                                                        } else {
+                                                            MaterialTheme.typography.titleLarge
+                                                        },
                                                     )
                                                 },
                                                 actions = {
@@ -1040,14 +1043,14 @@ class MainActivity : ComponentActivity() {
                                                                 model = accountImageUrl,
                                                                 contentDescription = stringResource(R.string.account),
                                                                 modifier = Modifier
-                                                                    .size(24.dp)
+                                                                    .size(32.dp)
                                                                     .clip(CircleShape)
                                                             )
                                                         } else {
                                                             Icon(
                                                                 painter = painterResource(R.drawable.account),
                                                                 contentDescription = stringResource(R.string.account),
-                                                                modifier = Modifier.size(24.dp)
+                                                                modifier = Modifier.size(32.dp)
                                                             )
                                                         }
                                                     }

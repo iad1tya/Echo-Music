@@ -131,10 +131,7 @@ fun AccountSettings(
         ) {
             Text(
                 text = stringResource(R.string.account),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                    fontWeight = FontWeight.Bold
-                ),
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 4.dp)
             )
             Spacer(modifier = Modifier.weight(1f))

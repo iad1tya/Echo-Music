@@ -143,11 +143,7 @@ fun FindSongScreen(
                 title = {
                     Text(
                         text = "Echo Find",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 28.sp
-                        ),
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                 },
