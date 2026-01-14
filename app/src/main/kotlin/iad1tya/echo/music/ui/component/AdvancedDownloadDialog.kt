@@ -10,28 +10,30 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,10 +43,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.documentfile.provider.DocumentFile
 import com.echo.innertube.YouTube
@@ -87,33 +92,67 @@ fun AdvancedDownloadDialog(
             defaultDownloadPath = documentFile?.name ?: "Selected Folder"
         }
     }
+    
+    val sheetBackgroundColor = MaterialTheme.colorScheme.surfaceContainerLow
+    val sheetContentColor = MaterialTheme.colorScheme.onSurface
 
-    AlertDialog(
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+    Dialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Advance Download",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = sheetBackgroundColor,
+            contentColor = sheetContentColor
+        ) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(WindowInsets.systemBars.asPaddingValues())
+                    .padding(24.dp)
             ) {
-                Text(
-                    text = mediaMetadata.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Advance Download",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = sheetContentColor
+                    )
+                    FilledTonalIconButton(
+                        onClick = onDismiss,
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            contentColor = sheetContentColor
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.close),
+                            contentDescription = "Close",
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
 
                 if (isLoading) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                         CircularProgressIndicator(
+                             modifier = Modifier.size(48.dp),
+                             color = MaterialTheme.colorScheme.primary
+                         )
                     }
                 } else {
                     val formats = playerResponse?.streamingData?.adaptiveFormats
@@ -125,128 +164,209 @@ fun AdvancedDownloadDialog(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(300.dp) // Limit height
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Download Location
-                        item {
-                             Card(
+                        // Song Info
+                         item {
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                                    .padding(20.dp)
+                            ) {
+                                Text(
+                                    text = "SELECTED MEDIA",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = sheetContentColor.copy(alpha = 0.6f),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(bottom = 12.dp)
                                 )
+                                Text(
+                                    text = mediaMetadata.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = sheetContentColor
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = mediaMetadata.artists.joinToString { it.name },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = sheetContentColor.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+
+                        // Download Location
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainer)
                             ) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable { folderPickerLauncher.launch(null) }
-                                        .padding(12.dp),
+                                        .padding(20.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.storage),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp)
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.secondaryContainer),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.storage),
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "Save to",
-                                            style = MaterialTheme.typography.labelSmall
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = sheetContentColor.copy(alpha = 0.7f)
                                         )
                                         Text(
                                             text = defaultDownloadPath,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Medium
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = sheetContentColor
                                         )
                                     }
+                                    Icon(
+                                        painter = painterResource(R.drawable.arrow_forward),
+                                        contentDescription = null,
+                                        tint = sheetContentColor.copy(alpha = 0.5f)
+                                    )
                                 }
                             }
-                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
                         // Thumbnail
                         item {
-                            DownloadOptionItem(
-                                icon = R.drawable.insert_photo,
-                                title = "Thumbnail",
-                                subtitle = "High Quality",
-                                onClick = {
-                                    downloadFile(
-                                        context,
-                                        mediaMetadata.thumbnailUrl ?: "",
-                                        "${mediaMetadata.title}_thumbnail.jpg",
-                                        downloadLocation
-                                    )
-                                    onDismiss()
-                                }
-                            )
+                             Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                                    .padding(8.dp)
+                            ) {
+                                DownloadOptionItem(
+                                    icon = R.drawable.insert_photo,
+                                    title = "Thumbnail",
+                                    subtitle = "High Quality",
+                                    onClick = {
+                                        downloadFile(
+                                            context,
+                                            mediaMetadata.thumbnailUrl ?: "",
+                                            "${mediaMetadata.title}_thumbnail.jpg",
+                                            downloadLocation
+                                        )
+                                        onDismiss()
+                                    },
+                                    sheetContentColor = sheetContentColor
+                                )
+                            }
                         }
 
-                        // Audio
+                        // Audio Formats
                         if (!audioFormats.isNullOrEmpty()) {
                             item {
                                 Text(
-                                    text = "Audio",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(vertical = 8.dp)
+                                    text = "AUDIO",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = sheetContentColor.copy(alpha = 0.6f),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 12.dp, top = 8.dp)
                                 )
                             }
-                            items(audioFormats) { format ->
-                                DownloadOptionItem(
-                                    icon = R.drawable.music_note,
-                                    title = "Audio (${format.bitrate / 1000}kbps)",
-                                    subtitle = format.mimeType.split(";")[0],
-                                    onClick = {
-                                        downloadFile(
-                                            context,
-                                            format.url ?: "",
-                                            "${mediaMetadata.title}_audio.${if (format.mimeType.contains("mp4")) "m4a" else "webm"}",
-                                            downloadLocation
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                                        .padding(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    audioFormats.forEach { format ->
+                                        DownloadOptionItem(
+                                            icon = R.drawable.music_note,
+                                            title = "Audio (${format.bitrate / 1000}kbps)",
+                                            subtitle = format.mimeType.split(";")[0],
+                                            onClick = {
+                                                downloadFile(
+                                                    context,
+                                                    format.url ?: "",
+                                                    "${mediaMetadata.title}_audio.${if (format.mimeType.contains("mp4")) "m4a" else "webm"}",
+                                                    downloadLocation
+                                                )
+                                                onDismiss()
+                                            },
+                                            sheetContentColor = sheetContentColor
                                         )
-                                        onDismiss()
                                     }
-                                )
+                                }
                             }
                         }
 
-                        // Video
+                        // Video Formats
                         if (!videoFormats.isNullOrEmpty()) {
-                             item {
+                            item {
                                 Text(
-                                    text = "Video",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(vertical = 8.dp)
+                                    text = "VIDEO",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = sheetContentColor.copy(alpha = 0.6f),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 12.dp, top = 8.dp)
                                 )
                             }
-                            items(videoFormats) { format ->
-                                DownloadOptionItem(
-                                    icon = R.drawable.video, 
-                                    title = "Video ${format.height}p",
-                                    subtitle = format.mimeType.split(";")[0],
-                                    onClick = {
-                                        downloadFile(
-                                            context,
-                                            format.url ?: "",
-                                            "${mediaMetadata.title}_${format.height}p.mp4",
-                                            downloadLocation
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                                        .padding(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    videoFormats.forEach { format ->
+                                        DownloadOptionItem(
+                                            icon = R.drawable.video,
+                                            title = "Video ${format.height}p",
+                                            subtitle = format.mimeType.split(";")[0],
+                                            onClick = {
+                                                downloadFile(
+                                                    context,
+                                                    format.url ?: "",
+                                                    "${mediaMetadata.title}_${format.height}p.mp4",
+                                                    downloadLocation
+                                                )
+                                                onDismiss()
+                                            },
+                                            sheetContentColor = sheetContentColor
                                         )
-                                        onDismiss()
                                     }
-                                )
+                                }
                             }
+                        }
+                        
+                        item {
+                            Spacer(Modifier.height(32.dp))
                         }
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
         }
-    )
+    }
 }
 
 @Composable
@@ -254,48 +374,51 @@ fun DownloadOptionItem(
     icon: Int,
     title: String,
     subtitle: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    sheetContentColor: Color
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        shape = RoundedCornerShape(12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = painterResource(R.drawable.download),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
         }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = sheetContentColor
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = sheetContentColor.copy(alpha = 0.6f)
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.download),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = sheetContentColor.copy(alpha = 0.5f)
+        )
     }
 }
 
