@@ -305,10 +305,7 @@ fun LocalMediaSettings(
             title = { 
                 Text(
                     text = stringResource(R.string.local_media),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.zalando_sans_expanded)),
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                    )
+                    style = MaterialTheme.typography.titleLarge
                 )
             },
             navigationIcon = {

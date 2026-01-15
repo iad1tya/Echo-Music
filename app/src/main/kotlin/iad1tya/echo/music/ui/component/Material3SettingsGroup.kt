@@ -44,7 +44,7 @@ fun Material3SettingsGroup(
                 .animateContentSize(),
             shape = RoundedCornerShape(50),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF0d0d0d)
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {

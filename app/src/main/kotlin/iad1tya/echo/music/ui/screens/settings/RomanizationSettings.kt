@@ -168,8 +168,6 @@ fun RomanizationSettings(
             Text(
                 text = stringResource(R.string.lyrics_romanize_title),
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                    fontWeight = FontWeight.Bold
                 )
             )
         },

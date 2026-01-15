@@ -395,23 +395,19 @@ class MusicService :
             updateNotification()
         }
 
-        combine(
-            currentMediaMetadata.distinctUntilChangedBy { it?.id },
-            dataStore.data.map { it[ShowLyricsKey] ?: false }.distinctUntilChanged(),
-        ) { mediaMetadata, showLyrics ->
-            mediaMetadata to showLyrics
-        }.collectLatest(scope) { (mediaMetadata, showLyrics) ->
-            if (showLyrics && mediaMetadata != null && database.lyrics(mediaMetadata.id)
+        currentMediaMetadata.distinctUntilChangedBy { it?.id }.collectLatest(scope) { mediaMetadata ->
+            if (mediaMetadata != null && database.lyrics(mediaMetadata.id)
                     .first() == null
             ) {
-                val lyrics = lyricsHelper.getLyrics(mediaMetadata)
+                val result = lyricsHelper.getLyrics(mediaMetadata)
                 // Check again if lyrics were added manually during the fetch duration
                 if (database.lyrics(mediaMetadata.id).first() == null) {
                     database.query {
                         upsert(
                             LyricsEntity(
                                 id = mediaMetadata.id,
-                                lyrics = lyrics,
+                                lyrics = result.lyrics,
+                                provider = result.providerName
                             ),
                         )
                     }

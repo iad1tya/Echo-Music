@@ -109,8 +109,6 @@ fun SupporterScreen(
             Text(
                 text = "Hall of Fame",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                    fontWeight = FontWeight.Bold
                 )
             )
 
@@ -274,8 +272,6 @@ fun SupporterScreen(
             Text(
                 text = "Ways to Support",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                    fontWeight = FontWeight.Bold
                 )
             )
         }
@@ -431,8 +427,6 @@ fun SupporterScreen(
                 Text(
                     text = "Supporter",
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
-                        fontWeight = FontWeight.Bold
                     )
                 )
             },

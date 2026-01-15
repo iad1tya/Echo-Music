@@ -81,6 +81,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import kotlin.math.abs
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AmbientModeScreen(
@@ -134,16 +136,20 @@ fun AmbientModeScreen(
     LaunchedEffect(mediaMetadata?.id, currentLyrics) {
         if (mediaMetadata != null && currentLyrics == null) {
             delay(500)
-            scope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 try {
                     val entryPoint = EntryPointAccessors.fromApplication(
                         context.applicationContext,
                         LyricsHelperEntryPoint::class.java
                     )
                     val lyricsHelper = entryPoint.lyricsHelper()
-                    val lyrics = lyricsHelper.getLyrics(mediaMetadata!!)
-                    database.query {
-                        upsert(LyricsEntity(mediaMetadata!!.id, lyrics))
+                    val result = lyricsHelper.getLyrics(mediaMetadata!!)
+                    
+                    // Check if lyrics were added manually while we were fetching
+                    if (database.lyrics(mediaMetadata!!.id).first() == null) {
+                        database.query {
+                            upsert(LyricsEntity(mediaMetadata!!.id, result.lyrics, result.providerName))
+                        }
                     }
                 } catch (e: Exception) {
                     // Handle error
