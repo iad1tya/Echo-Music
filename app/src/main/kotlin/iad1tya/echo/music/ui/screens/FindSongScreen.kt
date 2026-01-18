@@ -157,6 +157,7 @@ fun FindSongScreen(
                     }
                 },
                 actions = {
+                    iad1tya.echo.music.ui.component.CastButton()
                     val currentState = state
                     if (currentState is RecognitionState.Success) {
                         val scope = rememberCoroutineScope()
