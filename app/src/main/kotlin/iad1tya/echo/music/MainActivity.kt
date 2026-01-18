@@ -696,8 +696,13 @@ class MainActivity : ComponentActivity() {
                                 (active && !isFindScreen) 
                     }
 
-                    val shouldShowNavigationBar = remember(navBackStackEntry, active, isAmbientMode, isFindScreen, isWrappedScreen) {
-                        !isAmbientMode && !isFindScreen && !isWrappedScreen
+
+                    val isSearchPage = remember(inSearchScreen, active) {
+                        inSearchScreen || active
+                    }
+
+                    val shouldShowNavigationBar = remember(navBackStackEntry, active, isAmbientMode, isFindScreen, isWrappedScreen, isSearchPage) {
+                        !isAmbientMode && !isFindScreen && !isWrappedScreen && !isSearchPage
                     }
 
                     val isLandscape = remember(configuration) {
@@ -729,11 +734,11 @@ class MainActivity : ComponentActivity() {
                     val playerBottomSheetState =
                         rememberBottomSheetState(
                             dismissedBound = 0.dp,
-                            collapsedBound = bottomInset +
+                            collapsedBound = if (isSearchPage) 0.dp else (bottomInset +
                                 (if (!showRail && shouldShowNavigationBar) getNavPadding() else 0.dp) +
                                 (if (useNewMiniPlayerDesign) MiniPlayerBottomSpacing else 0.dp) +
                                 MiniPlayerHeight +
-                                (if (disableGlassEffect) miniPlayerBottomPadding.dp else 0.dp),
+                                (if (disableGlassEffect) miniPlayerBottomPadding.dp else 0.dp)),
                             expandedBound = maxHeight,
                         )
 
