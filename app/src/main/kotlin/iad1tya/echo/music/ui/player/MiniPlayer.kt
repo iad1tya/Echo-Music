@@ -78,6 +78,7 @@ import iad1tya.echo.music.constants.MiniPlayerHeight
 import iad1tya.echo.music.constants.SwipeSensitivityKey
 import iad1tya.echo.music.constants.ThumbnailCornerRadius
 import iad1tya.echo.music.constants.UseNewMiniPlayerDesignKey
+import iad1tya.echo.music.constants.DisableGlassEffectKey
 import iad1tya.echo.music.db.entities.ArtistEntity
 import iad1tya.echo.music.extensions.togglePlayPause
 import iad1tya.echo.music.models.MediaMetadata
@@ -111,6 +112,7 @@ fun MiniPlayer(
     luminance: Float = 0f,
 ) {
     val useNewMiniPlayerDesign by rememberPreference(UseNewMiniPlayerDesignKey, true)
+    val disableGlassEffect by rememberPreference(DisableGlassEffectKey, false)
 
     if (useNewMiniPlayerDesign) {
         NewMiniPlayer(
@@ -118,13 +120,15 @@ fun MiniPlayer(
             duration = duration,
             modifier = modifier,
             pureBlack = pureBlack,
-            backdrop = backdrop,
-            layer = layer,
+            // Disable glass effect (blur) if the setting is enabled, but keep the Pill design
+            backdrop = if (disableGlassEffect) null else backdrop,
+            layer = if (disableGlassEffect) null else layer,
             luminance = luminance
         )
     } else {
         // NEW: Wrap LegacyMiniPlayer in a Box to allow alignment on tablet landscape.
         // The outer Box fills the width, providing a container for the inner player to be aligned within.
+        // Also applying the height offset (bottom padding) here for the classic design.
         Box(modifier = modifier.fillMaxWidth()) {
             LegacyMiniPlayer(
                 position = position,

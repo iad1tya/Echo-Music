@@ -71,6 +71,8 @@ import iad1tya.echo.music.constants.LyricsScrollKey
 import iad1tya.echo.music.constants.LyricsTextPositionKey
 import iad1tya.echo.music.constants.UseNewPlayerDesignKey
 import iad1tya.echo.music.constants.UseNewMiniPlayerDesignKey
+import iad1tya.echo.music.constants.DisableGlassEffectKey
+import iad1tya.echo.music.constants.MiniPlayerBottomPaddingKey
 import iad1tya.echo.music.constants.PlayerBackgroundStyle
 import iad1tya.echo.music.constants.PlayerBackgroundStyleKey
 import iad1tya.echo.music.constants.PureBlackKey
@@ -123,6 +125,10 @@ fun AppearanceSettings(
     // Dark mode forced on - removed theme settings
     // New player design removed - always use old design
     // New mini player design removed - always use old design
+    // New mini player design removed - always use old design
+    val (disableGlassEffect, onDisableGlassEffectChange) = rememberPreference(DisableGlassEffectKey, defaultValue = false)
+    val (miniPlayerBottomPadding, onMiniPlayerBottomPaddingChange) = rememberPreference(MiniPlayerBottomPaddingKey, defaultValue = 0)
+
     val (playerBackground, onPlayerBackgroundChange) =
         rememberEnumPreference(
             PlayerBackgroundStyleKey,
@@ -414,7 +420,87 @@ fun AppearanceSettings(
             },
         )
 
-        // Player button colors option hidden per user request
+        SwitchPreference(
+            title = { Text("Disable Glass Effect") },
+            description = "Reverts to the classic bottom navigation and miniplayer design",
+            icon = { Icon(painterResource(R.drawable.palette), null) },
+            checked = disableGlassEffect,
+            onCheckedChange = onDisableGlassEffectChange,
+        )
+
+        AnimatedVisibility(visible = disableGlassEffect) {
+            var showPaddingDialog by rememberSaveable { mutableStateOf(false) }
+
+            if (showPaddingDialog) {
+                var tempPadding by remember { mutableFloatStateOf(miniPlayerBottomPadding.toFloat()) }
+
+                DefaultDialog(
+                    onDismiss = {
+                        showPaddingDialog = false
+                    },
+                    buttons = {
+                        TextButton(
+                            onClick = {
+                                tempPadding = 0f
+                            }
+                        ) {
+                            Text(stringResource(R.string.reset))
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        TextButton(
+                            onClick = {
+                                showPaddingDialog = false
+                            }
+                        ) {
+                            Text(stringResource(android.R.string.cancel))
+                        }
+                        TextButton(
+                            onClick = {
+                                onMiniPlayerBottomPaddingChange(tempPadding.roundToInt())
+                                showPaddingDialog = false
+                            }
+                        ) {
+                            Text(stringResource(android.R.string.ok))
+                        }
+                    }
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "MiniPlayer Height Offset",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        Text(
+                            text = "${tempPadding.roundToInt()} dp",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        Slider(
+                            value = tempPadding,
+                            onValueChange = { tempPadding = it },
+                            valueRange = -50f..100f, // -50dp to 100dp range
+                            steps = 149, // 1dp steps
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
+            PreferenceEntry(
+                title = { Text("MiniPlayer Height Offset") },
+                description = "${miniPlayerBottomPadding} dp",
+                icon = { Icon(painterResource(R.drawable.expand_less), null) }, // Using expand_less as "up/down" indicator
+                onClick = { showPaddingDialog = true }
+            )
+        }
+
         /*
         EnumListPreference(
             title = { Text(stringResource(R.string.player_buttons_style)) },
