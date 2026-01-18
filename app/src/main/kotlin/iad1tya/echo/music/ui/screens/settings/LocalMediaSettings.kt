@@ -257,7 +257,7 @@ fun LocalMediaSettings(
 
         SwitchPreference(
             title = { Text("Strict Extensions") },
-            description = "Only scan .mp3, .flac, .m4a, .wav, .ogg",
+            description = "Only scan supported audio formats (mp3, flac, wav, etc.)",
             checked = strictExt,
             onCheckedChange = onStrictExtChange
         )

@@ -68,7 +68,7 @@ class LocalMediaScanner(val context: Context, val database: MusicDatabase) {
         )
 
         val tempSongs = ArrayList<SongTempData>()
-        val supportedExtensions = setOf("mp3", "flac", "m4a", "wav", "ogg", "opus", "aac")
+        val supportedExtensions = setOf("mp3", "flac", "m4a", "wav", "ogg", "opus", "aac", "wma", "amr", "3gp", "mka", "mid", "midi")
 
         cursor?.use { c ->
             val titleCol = c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
