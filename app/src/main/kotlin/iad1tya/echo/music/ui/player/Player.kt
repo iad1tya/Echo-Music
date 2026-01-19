@@ -1809,86 +1809,88 @@ fun BottomSheetPlayer(
                 .background(Color.Transparent)
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Queue Button
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
+            if (!audioRoutingSheetState.isExpanded) {
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            showQueue = !showQueue
-                            showLyrics = false
-                        }
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.queue_music),
-                        contentDescription = "Queue",
-                        modifier = Modifier.size(24.dp),
-                        tint = if (showQueue) MaterialTheme.colorScheme.primary
-                        else onBackgroundColor.copy(alpha = 0.7f)
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Queue",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (showQueue) MaterialTheme.colorScheme.primary
-                        else onBackgroundColor.copy(alpha = 0.7f)
-                    )
-                }
-                
-                // Sleep Timer Button
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            showSleepTimerDialog = true
-                        }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.bedtime),
-                        contentDescription = "Sleep timer",
-                        modifier = Modifier.size(24.dp),
-                        tint = onBackgroundColor.copy(alpha = 0.7f)
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Sleep timer",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = onBackgroundColor.copy(alpha = 0.7f)
-                    )
-                }
-                
-                // Lyrics Button
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            showLyrics = !showLyrics
-                            showQueue = false
-                        }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.lyrics),
-                        contentDescription = "Lyrics",
-                        modifier = Modifier.size(24.dp),
-                        tint = if (showLyrics) MaterialTheme.colorScheme.primary
-                        else onBackgroundColor.copy(alpha = 0.7f)
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Lyrics",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (showLyrics) MaterialTheme.colorScheme.primary
-                        else onBackgroundColor.copy(alpha = 0.7f)
-                    )
+                    // Queue Button
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                showQueue = !showQueue
+                                showLyrics = false
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.queue_music),
+                            contentDescription = "Queue",
+                            modifier = Modifier.size(24.dp),
+                            tint = if (showQueue) MaterialTheme.colorScheme.primary
+                            else onBackgroundColor.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "Queue",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (showQueue) MaterialTheme.colorScheme.primary
+                            else onBackgroundColor.copy(alpha = 0.7f)
+                        )
+                    }
+                    
+                    // Sleep Timer Button
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                showSleepTimerDialog = true
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.bedtime),
+                            contentDescription = "Sleep timer",
+                            modifier = Modifier.size(24.dp),
+                            tint = onBackgroundColor.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "Sleep timer",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = onBackgroundColor.copy(alpha = 0.7f)
+                        )
+                    }
+                    
+                    // Lyrics Button
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                showLyrics = !showLyrics
+                                showQueue = false
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.lyrics),
+                            contentDescription = "Lyrics",
+                            modifier = Modifier.size(24.dp),
+                            tint = if (showLyrics) MaterialTheme.colorScheme.primary
+                            else onBackgroundColor.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "Lyrics",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (showLyrics) MaterialTheme.colorScheme.primary
+                            else onBackgroundColor.copy(alpha = 0.7f)
+                        )
+                    }
                 }
             }
         }
