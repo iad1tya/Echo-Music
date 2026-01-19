@@ -449,11 +449,19 @@ fun AccountSettings(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.settings_outlined),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+                BadgedBox(
+                    badge = {
+                        if (latestVersionName != BuildConfig.VERSION_NAME) {
+                            Badge()
+                        }
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.settings_outlined),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
 
                 Spacer(Modifier.width(16.dp))
 
