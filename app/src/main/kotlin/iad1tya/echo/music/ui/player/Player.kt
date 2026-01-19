@@ -1822,10 +1822,12 @@ fun BottomSheetPlayer(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .weight(1f)
+                            .clip(RoundedCornerShape(50))
                             .clickable {
                                 showQueue = !showQueue
                                 showLyrics = false
                             }
+                            .padding(vertical = 4.dp)
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.queue_music),
@@ -1848,9 +1850,11 @@ fun BottomSheetPlayer(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .weight(1f)
+                            .clip(RoundedCornerShape(50))
                             .clickable {
                                 showSleepTimerDialog = true
                             }
+                            .padding(vertical = 4.dp)
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.bedtime),
@@ -1871,10 +1875,12 @@ fun BottomSheetPlayer(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .weight(1f)
+                            .clip(RoundedCornerShape(50))
                             .clickable {
                                 showLyrics = !showLyrics
                                 showQueue = false
                             }
+                            .padding(vertical = 4.dp)
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.lyrics),
