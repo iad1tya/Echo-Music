@@ -888,7 +888,6 @@ fun YouTubeGridItem(
             Icon.Download(download?.state)
         }
     },
-    thumbnailRatio: Float = if (item is SongItem) 16f / 9 else 1f,
     isActive: Boolean = false,
     isPlaying: Boolean = false,
     fillMaxWidth: Boolean = false,
@@ -927,40 +926,72 @@ fun YouTubeGridItem(
         val playerConnection = LocalPlayerConnection.current ?: return@GridItem
         val scope = rememberCoroutineScope()
 
-        ItemThumbnail(
-            thumbnailUrl = item.thumbnail,
-            isActive = isActive,
-            isPlaying = isPlaying,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
-        )
-
-        if (item is SongItem && !isActive) {
-            OverlayPlayButton(
-                visible = true
-            )
+        // Check if this is a video (wide thumbnail) vs song (square thumbnail)
+        // Videos typically have ytimg.com URLs without "/release/" or have maxresdefault/sddefault
+        val isVideo = item is SongItem && item.thumbnail.let { url ->
+            url.contains("ytimg.com") && (
+                url.contains("vi/") || 
+                url.contains("maxresdefault") || 
+                url.contains("sddefault") ||
+                url.contains("hqdefault")
+            ) && !url.contains("/release/")
         }
 
-        AlbumPlayButton(
-            visible = item is AlbumItem && !isActive,
-            onClick = {
-                scope.launch(Dispatchers.IO) {
-                    var albumWithSongs = database.albumWithSongs(item.id).first()
-                    if (albumWithSongs?.songs.isNullOrEmpty()) {
-                        YouTube.album(item.id).onSuccess { albumPage ->
-                            database.transaction { insert(albumPage) }
-                            albumWithSongs = database.albumWithSongs(item.id).first()
-                        }.onFailure { reportException(it) }
-                    }
-                    albumWithSongs?.let {
-                        withContext(Dispatchers.Main) {
-                            playerConnection.playQueue(LocalAlbumRadio(it))
+        Box {
+            ItemThumbnail(
+                thumbnailUrl = item.thumbnail,
+                isActive = isActive,
+                isPlaying = isPlaying,
+                shape = RoundedCornerShape(ThumbnailCornerRadius),
+            )
+
+            // Add "Video" label ONLY for actual videos (not songs with square album art)
+            if (isVideo) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .background(Color.Black)
+                        .padding(vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Video",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            if (item is SongItem && !isActive) {
+                OverlayPlayButton(
+                    visible = true
+                )
+            }
+
+            AlbumPlayButton(
+                visible = item is AlbumItem && !isActive,
+                onClick = {
+                    scope.launch(Dispatchers.IO) {
+                        var albumWithSongs = database.albumWithSongs(item.id).first()
+                        if (albumWithSongs?.songs.isNullOrEmpty()) {
+                            YouTube.album(item.id).onSuccess { albumPage ->
+                                database.transaction { insert(albumPage) }
+                                albumWithSongs = database.albumWithSongs(item.id).first()
+                            }.onFailure { reportException(it) }
+                        }
+                        albumWithSongs?.let {
+                            withContext(Dispatchers.Main) {
+                                playerConnection.playQueue(LocalAlbumRadio(it))
+                            }
                         }
                     }
                 }
-            }
-        )
+            )
+        }
     },
-    thumbnailRatio = thumbnailRatio,
+    thumbnailRatio = 1f,  // Always use square ratio
     fillMaxWidth = fillMaxWidth,
     modifier = modifier
 )
@@ -1079,6 +1110,7 @@ fun ItemThumbnail(
                     .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .build(),
                 contentDescription = null,
+                contentScale = ContentScale.Crop,
                 error = painterResource(R.drawable.echo_logo),
                 modifier = Modifier
                     .fillMaxWidth()
