@@ -780,12 +780,14 @@ fun AppearanceSettings(
             onCheckedChange = onSwipeToRemoveSongChange
         )
 
-        SwitchPreference(
-            title = { Text(stringResource(R.string.slim_navbar)) },
-            icon = { Icon(painterResource(R.drawable.nav_bar), null) },
-            checked = slimNav,
-            onCheckedChange = onSlimNavChange
-        )
+        AnimatedVisibility(visible = disableGlassEffect) {
+            SwitchPreference(
+                title = { Text(stringResource(R.string.slim_navbar)) },
+                icon = { Icon(painterResource(R.drawable.nav_bar), null) },
+                checked = slimNav,
+                onCheckedChange = onSlimNavChange
+            )
+        }
 
         EnumListPreference(
             title = { Text(stringResource(R.string.grid_cell_size)) },
