@@ -61,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
@@ -78,15 +79,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.media3.common.MediaItem
+import androidx.palette.graphics.Palette
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
 import androidx.media3.exoplayer.offline.Download.STATE_DOWNLOADING
 import androidx.media3.exoplayer.offline.Download.STATE_QUEUED
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
+import coil3.imageLoader
 import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.toBitmap
 import com.echo.innertube.YouTube
 import com.echo.innertube.models.SongItem
 import com.echo.innertube.models.AlbumItem
@@ -925,6 +931,7 @@ fun YouTubeGridItem(
         val database = LocalDatabase.current
         val playerConnection = LocalPlayerConnection.current ?: return@GridItem
         val scope = rememberCoroutineScope()
+        val context = LocalContext.current
 
         // Check if this is a video (wide thumbnail) vs song (square thumbnail)
         // Videos typically have ytimg.com URLs without "/release/" or have maxresdefault/sddefault
@@ -935,6 +942,37 @@ fun YouTubeGridItem(
                 url.contains("sddefault") ||
                 url.contains("hqdefault")
             ) && !url.contains("/release/")
+        }
+
+        // Extract dominant color for video label gradient
+        var dominantColor by remember { mutableStateOf(Color.Black) }
+        
+        if (isVideo) {
+            LaunchedEffect(item.thumbnail) {
+                try {
+                    val request = ImageRequest.Builder(context)
+                        .data(item.thumbnail)
+                        .allowHardware(false)
+                        .build()
+                    val result = context.imageLoader.execute(request)
+                    result.image?.let { image ->
+                        val bitmap = image.toBitmap()
+                        val palette = androidx.palette.graphics.Palette.from(bitmap)
+                            .maximumColorCount(8)
+                            .generate()
+                        
+                        // Get the most vibrant or dominant color
+                        val color = palette.vibrantSwatch?.rgb
+                            ?: palette.dominantSwatch?.rgb
+                            ?: palette.mutedSwatch?.rgb
+                            ?: Color.Black.toArgb()
+                        
+                        dominantColor = Color(color)
+                    }
+                } catch (e: Exception) {
+                    dominantColor = Color.Black
+                }
+            }
         }
 
         Box {
@@ -952,12 +990,12 @@ fun YouTubeGridItem(
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .background(Color.Black)
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Video",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelLarge,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
