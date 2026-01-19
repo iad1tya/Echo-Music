@@ -112,7 +112,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import iad1tya.echo.music.constants.DisableGlassEffectKey
+import iad1tya.echo.music.constants.DisableGlassEffectKey
 import iad1tya.echo.music.constants.MiniPlayerBottomPaddingKey
+import iad1tya.echo.music.constants.MiniPlayerGlassOpacityKey
+import iad1tya.echo.music.constants.MiniPlayerGlassBlurKey
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -734,6 +737,8 @@ class MainActivity : ComponentActivity() {
 
                     val miniPlayerBottomPadding by rememberPreference(MiniPlayerBottomPaddingKey, 0)
                     val disableGlassEffect by rememberPreference(DisableGlassEffectKey, false)
+                    val miniPlayerGlassOpacity by rememberPreference(MiniPlayerGlassOpacityKey, 0.5f)
+                    val miniPlayerGlassBlur by rememberPreference(MiniPlayerGlassBlurKey, 16f)
 
                     val playerBottomSheetState =
                         rememberBottomSheetState(
@@ -1470,7 +1475,9 @@ class MainActivity : ComponentActivity() {
                                                             backdrop = backdrop,
                                                             layer = layer,
                                                             luminanceAnimation = luminanceAnimation.value,
-                                                            shape = RoundedCornerShape(percent = 50)
+                                                            shape = RoundedCornerShape(percent = 50),
+                                                            surfaceAlpha = miniPlayerGlassOpacity,
+                                                            customBlur = miniPlayerGlassBlur.dp
                                                         )
                                                         .border(
                                                             width = 1.dp,

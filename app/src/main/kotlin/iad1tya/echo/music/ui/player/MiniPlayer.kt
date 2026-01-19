@@ -79,6 +79,8 @@ import iad1tya.echo.music.constants.SwipeSensitivityKey
 import iad1tya.echo.music.constants.ThumbnailCornerRadius
 import iad1tya.echo.music.constants.UseNewMiniPlayerDesignKey
 import iad1tya.echo.music.constants.DisableGlassEffectKey
+import iad1tya.echo.music.constants.MiniPlayerGlassOpacityKey
+import iad1tya.echo.music.constants.MiniPlayerGlassBlurKey
 import iad1tya.echo.music.db.entities.ArtistEntity
 import iad1tya.echo.music.extensions.togglePlayPause
 import iad1tya.echo.music.models.MediaMetadata
@@ -173,6 +175,9 @@ private fun NewMiniPlayer(
     val coroutineScope = rememberCoroutineScope()
     val swipeSensitivity by rememberPreference(SwipeSensitivityKey, 0.73f)
     val swipeThumbnail by rememberPreference(iad1tya.echo.music.constants.SwipeThumbnailKey, true)
+    
+    val miniPlayerGlassOpacity by rememberPreference(MiniPlayerGlassOpacityKey, 0.5f)
+    val miniPlayerGlassBlur by rememberPreference(MiniPlayerGlassBlurKey, 16f)
 
     val configuration = LocalConfiguration.current
     val isTabletLandscape = configuration.screenWidthDp >= 600 &&
@@ -345,7 +350,9 @@ private fun NewMiniPlayer(
                             backdrop = backdrop,
                             layer = layer,
                             luminanceAnimation = luminance,
-                            shape = RoundedCornerShape(32.dp)
+                            shape = RoundedCornerShape(32.dp),
+                            surfaceAlpha = miniPlayerGlassOpacity,
+                            customBlur = miniPlayerGlassBlur.dp
                         )
                     } else if (gradientColors.isNotEmpty()) {
                         Modifier.background(

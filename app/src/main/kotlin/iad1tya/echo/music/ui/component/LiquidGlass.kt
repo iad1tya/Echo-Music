@@ -39,6 +39,7 @@ fun Modifier.drawBackdropCustomShape(
     shape: Shape,
     surfaceAlpha: Float = 0.1f,
     useLens: Boolean = true,
+    customBlur: androidx.compose.ui.unit.Dp? = null,
 ): Modifier {
     return this.drawBackdrop(
         backdrop = backdrop,
@@ -61,7 +62,9 @@ fun Modifier.drawBackdropCustomShape(
                 saturation = 1.5f,
             )
             blur(
-                if (l > 0f) {
+                if (customBlur != null) {
+                    customBlur.toPx()
+                } else if (l > 0f) {
                     lerp(8f.dp.toPx(), 16f.dp.toPx(), l)
                 } else {
                     lerp(8f.dp.toPx(), 2f.dp.toPx(), -l)

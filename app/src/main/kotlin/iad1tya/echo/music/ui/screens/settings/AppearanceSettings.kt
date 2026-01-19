@@ -81,6 +81,8 @@ import iad1tya.echo.music.constants.PlayerButtonsStyleKey
 import iad1tya.echo.music.constants.SliderStyle
 import iad1tya.echo.music.constants.SliderStyleKey
 import iad1tya.echo.music.constants.SlimNavBarKey
+import iad1tya.echo.music.constants.MiniPlayerGlassOpacityKey
+import iad1tya.echo.music.constants.MiniPlayerGlassBlurKey
 import iad1tya.echo.music.constants.ShowLikedPlaylistKey
 import iad1tya.echo.music.constants.ShowDownloadedPlaylistKey
 import iad1tya.echo.music.constants.ShowTopPlaylistKey
@@ -127,6 +129,8 @@ fun AppearanceSettings(
     // New mini player design removed - always use old design
     // New mini player design removed - always use old design
     val (disableGlassEffect, onDisableGlassEffectChange) = rememberPreference(DisableGlassEffectKey, defaultValue = false)
+    val (miniPlayerGlassOpacity, onMiniPlayerGlassOpacityChange) = rememberPreference(MiniPlayerGlassOpacityKey, defaultValue = 0.5f)
+    val (miniPlayerGlassBlur, onMiniPlayerGlassBlurChange) = rememberPreference(MiniPlayerGlassBlurKey, defaultValue = 16f)
     val (miniPlayerBottomPadding, onMiniPlayerBottomPaddingChange) = rememberPreference(MiniPlayerBottomPaddingKey, defaultValue = 0)
 
     val (playerBackground, onPlayerBackgroundChange) =
@@ -427,6 +431,86 @@ fun AppearanceSettings(
             checked = disableGlassEffect,
             onCheckedChange = onDisableGlassEffectChange,
         )
+
+        AnimatedVisibility(visible = !disableGlassEffect) {
+            Column {
+               var showGlassSettingsDialog by rememberSaveable { mutableStateOf(false) }
+
+               if (showGlassSettingsDialog) {
+                    var tempOpacity by remember { mutableFloatStateOf(miniPlayerGlassOpacity) }
+                    var tempBlur by remember { mutableFloatStateOf(miniPlayerGlassBlur) }
+
+                    DefaultDialog(
+                        onDismiss = { showGlassSettingsDialog = false },
+                        buttons = {
+                            TextButton(
+                                onClick = {
+                                    tempOpacity = 0.5f
+                                    tempBlur = 16f
+                                }
+                            ) {
+                                Text(stringResource(R.string.reset))
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+                            TextButton(onClick = { showGlassSettingsDialog = false }) {
+                                Text(stringResource(android.R.string.cancel))
+                            }
+                            TextButton(
+                                onClick = {
+                                    onMiniPlayerGlassOpacityChange(tempOpacity)
+                                    onMiniPlayerGlassBlurChange(tempBlur)
+                                    showGlassSettingsDialog = false
+                                }
+                            ) {
+                                Text(stringResource(android.R.string.ok))
+                            }
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "Glass Effect Settings",
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                            
+                            Column {
+                                Text(
+                                    text = "Opacity: ${(tempOpacity * 100).toInt()}%",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Slider(
+                                    value = tempOpacity,
+                                    onValueChange = { tempOpacity = it },
+                                    valueRange = 0f..1f
+                                )
+                            }
+
+                            Column {
+                                Text(
+                                    text = "Blur: ${tempBlur.toInt()} dp",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Slider(
+                                    value = tempBlur,
+                                    onValueChange = { tempBlur = it },
+                                    valueRange = 0f..100f
+                                )
+                            }
+                        }
+                    }
+               }
+
+               PreferenceEntry(
+                   title = { Text("Glass Properties") },
+                   description = "Opacity: ${(miniPlayerGlassOpacity * 100).toInt()}%, Blur: ${miniPlayerGlassBlur.toInt()} dp",
+                   icon = { Icon(painterResource(R.drawable.contrast), null) },
+                   onClick = { showGlassSettingsDialog = true }
+               )
+            }
+        }
 
         AnimatedVisibility(visible = disableGlassEffect) {
             var showPaddingDialog by rememberSaveable { mutableStateOf(false) }
