@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -80,6 +82,11 @@ import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.viewmodels.HomeViewModel
 import iad1tya.echo.music.viewmodels.AccountSettingsViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.window.Dialog
+import android.graphics.Bitmap
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.common.BitMatrix
 
 @Composable
 fun AccountSettings(
@@ -116,6 +123,7 @@ fun AccountSettings(
     var showToken by remember { mutableStateOf(false) }
     var showTokenEditor by remember { mutableStateOf(false) }
     var showAccountSwitcher by remember { mutableStateOf(false) }
+    var showQRCodeDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -182,7 +190,7 @@ fun AccountSettings(
                     painter = painterResource(R.drawable.google),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    colorFilter = null
+                    colorFilter = ColorFilter.tint(Color.White)
                 )
             }
 
@@ -428,6 +436,39 @@ fun AccountSettings(
         Spacer(Modifier.height(4.dp))
 
 
+        Spacer(Modifier.height(4.dp))
+
+        // Login to Desktop button
+        if (isLoggedIn) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { showQRCodeDialog = true }
+                    .padding(horizontal = 18.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.cast), // Using cast icon as generic device connector
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+
+                    Spacer(Modifier.width(16.dp))
+
+                    Text(
+                        text = "Login to Desktop",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+        }
+
 
         if (isLoggedIn) {
             SwitchPreference(
@@ -461,4 +502,52 @@ fun AccountSettings(
 
         Spacer(Modifier.height(12.dp))
     }
+
+    if (showQRCodeDialog) {
+        Dialog(onDismissRequest = { showQRCodeDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Text(
+                        text = "Scan to Login",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    val qrBitmap = remember(innerTubeCookie) {
+                        createQRCodeBitmap(innerTubeCookie, 512)
+                    }
+                    
+                    Image(
+                        bitmap = qrBitmap.asImageBitmap(),
+                        contentDescription = "Login QR Code",
+                        modifier = Modifier
+                            .size(250.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun createQRCodeBitmap(text: String, size: Int): Bitmap {
+    val bitMatrix: BitMatrix = MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, size, size)
+    val width = bitMatrix.width
+    val height = bitMatrix.height
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+    for (x in 0 until width) {
+        for (y in 0 until height) {
+            bitmap.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+        }
+    }
+    return bitmap
 }
