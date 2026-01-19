@@ -277,6 +277,11 @@ fun Lyrics(
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
     }
 
+    val isSynced =
+        remember(lyrics) {
+             !lyrics.isNullOrEmpty() && lyrics.trim().startsWith("[")
+        }
+
     val lines = remember(lyrics, scope) {
         if (lyrics == null || lyrics == LYRICS_NOT_FOUND) {
             emptyList()
@@ -300,6 +305,33 @@ fun Lyrics(
         }
     }
     val translationStatus by LyricsTranslationHelper.status.collectAsState()
+    val manualTrigger by LyricsTranslationHelper.manualTrigger.collectAsState(initial = Unit)
+
+    // Trigger translation when lyrics/settings change or manual trigger occurs
+    LaunchedEffect(lines, translateMode, openRouterApiKey, manualTrigger) {
+        if (openRouterApiKey.isNotBlank() && 
+            (translateMode == "Translated" || translateMode == "Romanized") &&
+            lines.isNotEmpty()
+            // isSynced check removed to allow translating unsynced lyrics too
+        ) {
+            // Filter out head entry for translation
+            val contentLyrics = lines.drop(1)
+            
+            if (contentLyrics.isNotEmpty()) {
+                LyricsTranslationHelper.translateLyrics(
+                    lyrics = contentLyrics,
+                    targetLanguage = translateLanguage,
+                    apiKey = openRouterApiKey,
+                    baseUrl = openRouterBaseUrl,
+                    model = openRouterModel,
+                    mode = translateMode,
+                    scope = scope
+                )
+            }
+        } else {
+             LyricsTranslationHelper.resetStatus()
+        }
+    }
 
     
     // Status UI
@@ -395,10 +427,7 @@ fun Lyrics(
         }
     }
 
-    val isSynced =
-        remember(lyrics) {
-            !lyrics.isNullOrEmpty() && lyrics.startsWith("[")
-        }
+
 
     val textColor = if (playerBackground == PlayerBackgroundStyle.GRADIENT) {
         Color.White
