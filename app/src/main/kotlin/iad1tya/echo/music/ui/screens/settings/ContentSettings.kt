@@ -565,6 +565,7 @@ fun ContentSettings(
             },
             onValueSelected = onQuickPicksChange,
         )
+        Spacer(Modifier.height(120.dp))
     }
 
     Box {

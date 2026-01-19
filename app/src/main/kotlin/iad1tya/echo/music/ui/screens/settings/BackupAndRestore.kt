@@ -160,6 +160,7 @@ fun BackupAndRestore(
                 importPlaylistFromCsv.launch(arrayOf("text/csv"))
             }
         )
+        Spacer(Modifier.height(120.dp))
     }
 
     Box {

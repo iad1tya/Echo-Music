@@ -496,7 +496,7 @@ fun AccountSettings(
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(120.dp))
     }
 
     if (showQRCodeDialog) {

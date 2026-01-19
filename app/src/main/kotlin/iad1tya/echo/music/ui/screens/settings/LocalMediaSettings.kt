@@ -268,6 +268,7 @@ fun LocalMediaSettings(
             checked = strictFilePaths,
             onCheckedChange = onStrictFilePathsChange
         )
+        Spacer(Modifier.height(120.dp))
     }
 
     Box {

@@ -292,6 +292,7 @@ fun PlayerSettings(
             checked = stopMusicOnTaskClear,
             onCheckedChange = onStopMusicOnTaskClearChange
         )
+        Spacer(Modifier.height(120.dp))
     }
 
     Box {

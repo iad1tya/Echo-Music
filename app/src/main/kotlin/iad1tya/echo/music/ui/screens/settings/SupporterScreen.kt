@@ -365,7 +365,7 @@ fun SupporterScreen(
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(120.dp))
     }
 
     // Crypto dialogs

@@ -807,6 +807,8 @@ fun AppearanceSettings(
             checked = showFindInNavbar,
             onCheckedChange = onShowFindInNavbarChange
         )
+        
+        Spacer(modifier = Modifier.height(120.dp))
     }
 
     Box {

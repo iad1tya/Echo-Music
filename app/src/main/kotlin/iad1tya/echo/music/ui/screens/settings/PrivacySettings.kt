@@ -328,6 +328,7 @@ fun PrivacySettings(
             checked = disableScreenshot,
             onCheckedChange = onDisableScreenshotChange,
         )
+        Spacer(Modifier.height(120.dp))
     }
 
     Box {

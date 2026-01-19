@@ -337,6 +337,7 @@ fun StorageSettings(
                 }
             )
         }
+        Spacer(Modifier.height(120.dp))
     }
 
     Box {
