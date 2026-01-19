@@ -402,6 +402,37 @@ fun AccountSettings(
 
         Spacer(Modifier.height(4.dp))
 
+        // Login to Desktop button
+        if (isLoggedIn) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { showQRCodeDialog = true }
+                    .padding(horizontal = 18.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.desktop),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+
+                    Spacer(Modifier.width(16.dp))
+
+                    Text(
+                        text = "Login to Desktop",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+        }
+
         // Settings button
         Box(
             modifier = Modifier
@@ -433,42 +464,7 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(4.dp))
-
-
-        Spacer(Modifier.height(4.dp))
-
-        // Login to Desktop button
-        if (isLoggedIn) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .clickable { showQRCodeDialog = true }
-                    .padding(horizontal = 18.dp, vertical = 12.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.cast), // Using cast icon as generic device connector
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    Spacer(Modifier.width(16.dp))
-
-                    Text(
-                        text = "Login to Desktop",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-            Spacer(Modifier.height(4.dp))
-        }
-
+        Spacer(Modifier.height(12.dp))
 
         if (isLoggedIn) {
             SwitchPreference(
