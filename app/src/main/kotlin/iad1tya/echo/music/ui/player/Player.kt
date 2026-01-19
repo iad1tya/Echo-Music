@@ -54,6 +54,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -799,10 +800,14 @@ fun BottomSheetPlayer(
                              modifier = Modifier
                                  .fillMaxWidth()
                                  .padding(top = 8.dp),
-                             horizontalArrangement = Arrangement.SpaceBetween,
+                             horizontalArrangement = Arrangement.Start,
                              verticalAlignment = Alignment.CenterVertically
                          ) {
-                             AudioOutputWidget()
+                             Box(modifier = Modifier.offset(x = (-8).dp)) {
+                                 AudioOutputWidget()
+                             }
+
+                             Spacer(Modifier.weight(1f))
 
                              Box(
                                 contentAlignment = Alignment.Center,
@@ -1222,7 +1227,17 @@ fun BottomSheetPlayer(
                     ) {
                         Thumbnail(
                             sliderPositionProvider = { sliderPosition },
-                            modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                            modifier = Modifier
+                                .nestedScroll(state.preUpPostDownNestedScrollConnection)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    if (showLyrics || showQueue) {
+                                        showLyrics = false
+                                        showQueue = false
+                                    }
+                                },
                             isPlayerExpanded = state.isExpanded,
                             onToggleLyrics = {
                                 showLyrics = !showLyrics
@@ -1342,7 +1357,10 @@ fun BottomSheetPlayer(
                                             sliderPositionProvider = { sliderPosition },
                                             isVisible = true,
                                             palette = gradientColors,
-                                            modifier = Modifier.fillMaxSize()
+                                            modifier = Modifier.fillMaxSize(),
+                                            onDismiss = {
+                                                showLyrics = false
+                                            }
                                         )
                                     }
                                     "queue" -> {
@@ -1350,13 +1368,26 @@ fun BottomSheetPlayer(
                                             navController = navController,
                                             modifier = Modifier.fillMaxSize(),
                                             background = bottomSheetBackgroundColor,
-                                            onBackgroundColor = onBackgroundColor
+                                            onBackgroundColor = onBackgroundColor,
+                                            onDismiss = {
+                                                showQueue = false
+                                            }
                                         )
                                     }
                                     else -> {
                                         Thumbnail(
                                             sliderPositionProvider = { sliderPosition },
-                                            modifier = Modifier.nestedScroll(state.preUpPostDownNestedScrollConnection),
+                                            modifier = Modifier
+                                                .nestedScroll(state.preUpPostDownNestedScrollConnection)
+                                                .clickable(
+                                                    interactionSource = remember { MutableInteractionSource() },
+                                                    indication = null
+                                                ) {
+                                                    if (showLyrics || showQueue) {
+                                                        showLyrics = false
+                                                        showQueue = false
+                                                    }
+                                                },
                                             isPlayerExpanded = state.isExpanded,
                                             onToggleLyrics = {
                                                 showLyrics = !showLyrics

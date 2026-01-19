@@ -17,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -212,6 +213,7 @@ fun Lyrics(
     isVisible: Boolean = true,
     palette: List<Color> = emptyList(),
     viewModel: LyricsMenuViewModel = hiltViewModel(),
+    onDismiss: () -> Unit = {},
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val menuState = LocalMenuState.current
@@ -700,6 +702,10 @@ fun Lyrics(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                         .padding(top = 16.dp, bottom = 16.dp) // Moved down
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onDismiss() }
                         .zIndex(1f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

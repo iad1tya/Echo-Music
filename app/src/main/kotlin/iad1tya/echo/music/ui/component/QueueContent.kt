@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,6 +107,7 @@ fun QueueContent(
     modifier: Modifier = Modifier,
     background: Color = MaterialTheme.colorScheme.background,
     onBackgroundColor: Color = MaterialTheme.colorScheme.onBackground,
+    onDismiss: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -211,7 +213,11 @@ fun QueueContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .padding(top = 16.dp, bottom = 12.dp),
+                    .padding(top = 16.dp, bottom = 12.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { onDismiss() },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Album Art (from current playing song)
