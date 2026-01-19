@@ -37,7 +37,7 @@ timber = "5.0.1"
 materialKolor = "3.0.1"
 kuromojiIpadic = "0.9.0"
 extractor = "e30358b"
-metrolistshared = "966d3e5"
+echoshared = "966d3e5"
 firebaseBom = "33.9.0"
 googleServices = "4.4.2"
 firebaseCrashlyticsGradle = "3.0.2"
@@ -126,7 +126,7 @@ nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
 #newpipe-extractor = { module = "com.github.libre-tube:NewPipeExtractor", version = "70abbdb" }
 #newpipe-extractor = { module = "com.github.TeamNewPipe:NewPipeExtractor", version = "dev-SNAPSHOT" }
 extractor = { module = "com.github.mostafaalagamy:MetroExtractor", version.ref = "extractor" }
-metrolistshared = { module = "com.github.mostafaalagamy.MetrolistShared:shared-jvm", version.ref = "metrolistshared" }
+echoshared = { module = "com.github.mostafaalagamy.MetrolistShared:shared-jvm", version.ref = "echoshared" }
 
 kuromoji-ipadic = { module = "com.atilika.kuromoji:kuromoji-ipadic", version.ref = "kuromojiIpadic" }
 
