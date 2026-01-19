@@ -184,7 +184,7 @@ fun AlbumScreen(
                     AsyncImage(
                         model = albumWithSongs.album.thumbnailUrl,
                         contentDescription = null,
-                        modifier =
+                        modifier = Modifier
                             .size(250.dp) // Increased size
                             .clip(RoundedCornerShape(ThumbnailCornerRadius)),
                     )
