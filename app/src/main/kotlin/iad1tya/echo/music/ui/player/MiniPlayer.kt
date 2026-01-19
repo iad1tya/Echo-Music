@@ -208,7 +208,7 @@ private fun NewMiniPlayer(
 
     val contentColor by animateColorAsState(
         targetValue = if (backdrop != null && layer != null) {
-            if (luminance > 0.5f) Color.Black else Color.White
+            Color.White
         } else if (gradientColors.isNotEmpty()) {
             Color.White
         } else {
