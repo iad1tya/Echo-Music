@@ -373,6 +373,7 @@ fun AppearanceSettings(
             )
         )
 
+        /*
         PreferenceGroupTitle(
             title = stringResource(R.string.theme),
         )
@@ -406,11 +407,13 @@ fun AppearanceSettings(
                 onCheckedChange = onPureBlackChange,
             )
         }
+        */
 
         PreferenceGroupTitle(
             title = stringResource(R.string.player),
         )
 
+        /*
         EnumListPreference(
             title = { Text(stringResource(R.string.player_background_style)) },
             icon = { Icon(painterResource(R.drawable.gradient), null) },
@@ -423,6 +426,7 @@ fun AppearanceSettings(
                 }
             },
         )
+        */
 
         SwitchPreference(
             title = { Text("Disable Glass Effect") },

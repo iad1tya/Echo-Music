@@ -23,6 +23,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateDpAsState
@@ -183,6 +184,7 @@ import iad1tya.echo.music.constants.LastImportantNoticeVersionKey
 import iad1tya.echo.music.constants.LastLibSongSyncKey
 import iad1tya.echo.music.constants.LastLikeSongSyncKey
 import iad1tya.echo.music.constants.DarkModeKey
+import iad1tya.echo.music.constants.DarkModeMigrationKey
 import iad1tya.echo.music.constants.DefaultOpenTabKey
 import iad1tya.echo.music.constants.DisableScreenshotKey
 import iad1tya.echo.music.constants.DynamicThemeKey
@@ -479,10 +481,24 @@ class MainActivity : ComponentActivity() {
             var showSplash by remember { mutableStateOf(true) }
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
-            val enableMaterialYou by rememberPreference(MaterialYouKey, defaultValue = false)
+            val (enableMaterialYou, onMaterialYouChange) = rememberPreference(MaterialYouKey, defaultValue = false)
+            val (materialYouMigrated, onMaterialYouMigratedChange) = rememberPreference(booleanPreferencesKey("materialYouMigration_v1"), defaultValue = false)
             
             // Read dark mode preference
-            val darkModePreference by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.ON)
+            val (darkModePreference, onDarkModeChange) = rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.ON)
+            val (darkModeMigrated, onDarkModeMigratedChange) = rememberPreference(DarkModeMigrationKey, defaultValue = false)
+
+            LaunchedEffect(Unit) {
+                if (!darkModeMigrated) {
+                    onDarkModeChange(DarkMode.ON)
+                    onDarkModeMigratedChange(true)
+                }
+                if (!materialYouMigrated) {
+                    onMaterialYouChange(false)
+                    onMaterialYouMigratedChange(true)
+                }
+            }
+
             val useDarkTheme = when (darkModePreference) {
                 DarkMode.ON -> true
                 DarkMode.OFF -> false

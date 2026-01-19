@@ -11,6 +11,7 @@ import java.time.ZoneOffset
 val DynamicThemeKey = booleanPreferencesKey("dynamicTheme")
 val MaterialYouKey = booleanPreferencesKey("materialYou")
 val DarkModeKey = stringPreferencesKey("darkMode")
+val DarkModeMigrationKey = booleanPreferencesKey("darkModeMigration_v1")
 val PureBlackKey = booleanPreferencesKey("pureBlack")
 val DefaultOpenTabKey = stringPreferencesKey("defaultOpenTab")
 val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
