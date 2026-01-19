@@ -1422,6 +1422,40 @@ fun Lyrics(
         }
     }
 }
+
+
+    if (showShareDialog && shareDialogData != null) {
+        val (lyricsText, _, _) = shareDialogData!!
+        
+        mediaMetadata?.let { metadata ->
+            LyricsShareDialog(
+                mediaMetadata = metadata,
+                lyrics = lyricsText,
+                onDismiss = { showShareDialog = false },
+                onShare = { bitmap ->
+                    scope.launch {
+                        try {
+                            val uri = ComposeToImage.saveBitmapAsFile(
+                                context,
+                                bitmap,
+                                "EchoLyrics_${System.currentTimeMillis()}"
+                            )
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Toast.makeText(context, "Failed to share lyrics", Toast.LENGTH_SHORT).show()
+                        }
+                        showShareDialog = false
+                    }
+                }
+            )
+        }
+    }
 }
 
 
