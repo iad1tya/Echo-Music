@@ -782,8 +782,9 @@ fun Lyrics(
                             onDismissRequest = { showMenu = false },
                             shape = RoundedCornerShape(16.dp),
                             containerColor = Color.Black.copy(alpha = 0.4f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
                             tonalElevation = 0.dp,
+                            shadowElevation = 0.dp,
+                            border = null,
                             modifier = Modifier.width(200.dp)
                         ) {
                              Text(
