@@ -74,13 +74,15 @@ fun BottomSheetMenu(
                 state.isVisible = false
             },
             containerColor = Color.Transparent,
+            scrimColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onSurface,
             dragHandle = null,
-            modifier = modifier
+            modifier = modifier.fillMaxHeight()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight()
                     .then(
                         if (backdrop != null && layer != null) {
                             Modifier.drawBackdropCustomShape(
@@ -92,7 +94,7 @@ fun BottomSheetMenu(
                                 useLens = false
                             )
                         } else {
-                            Modifier.background(Color(0xE6000000))
+                            Modifier.background(background)
                         }
                     )
             ) {

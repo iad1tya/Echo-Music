@@ -1787,8 +1787,10 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 BottomSheetMenu(
                                     state = LocalMenuState.current,
-                                    modifier = Modifier.align(Alignment.BottomCenter),
-                                    background = Color.Black
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .glassGrain(pureBlack),
+                                    background = Color.Transparent
                                 )
                             }
 
@@ -2014,7 +2016,7 @@ fun Modifier.glassGrain(pureBlack: Boolean): Modifier = this.drawWithCache {
         // Base translucent layer - increased darkness from 0.85f
         // Use Color.Black for both to ensure "blackish" look as requested, avoiding the grey 1E1E1E
         val baseColor = Color.Black
-        drawRect(baseColor.copy(alpha = 0.99f))
+        drawRect(baseColor.copy(alpha = 0.2f))
         
         val w = size.width
         val h = size.height
