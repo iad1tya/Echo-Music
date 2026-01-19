@@ -655,7 +655,7 @@ fun BottomSheetPlayer(
                             color = TextBackgroundColor,
                             modifier =
                             Modifier
-                                .basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp)
+                                .fillMaxWidth()
                                 .combinedClickable(
                                     enabled = true,
                                     indication = null,
@@ -696,7 +696,7 @@ fun BottomSheetPlayer(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp)
+                                .fillMaxWidth()
                                 .padding(end = 12.dp)
                         ) {
                             var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }

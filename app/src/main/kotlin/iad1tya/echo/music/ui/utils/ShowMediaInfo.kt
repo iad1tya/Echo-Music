@@ -235,7 +235,7 @@ fun DetailsContent(
                         textAlign = TextAlign.Center,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth().basicMarquee(),
+                        modifier = Modifier.fillMaxWidth(),
                         color = sheetContentColor
                     )
                     Spacer(modifier = Modifier.height(8.dp))

@@ -292,7 +292,6 @@ fun Queue(
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .basicMarquee()
                                 )
                             } else {
                                 Icon(
@@ -434,7 +433,7 @@ fun Queue(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.basicMarquee()
+                                modifier = Modifier
                             )
                         }
                     }
@@ -472,7 +471,7 @@ fun Queue(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.basicMarquee()
+                                        modifier = Modifier
                                     )
                                 } else {
                                     Text(
@@ -481,7 +480,7 @@ fun Queue(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.basicMarquee()
+                                        modifier = Modifier
                                     )
                                 }
                             }
@@ -510,7 +509,7 @@ fun Queue(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.basicMarquee()
+                                modifier = Modifier
                             )
                         }
                     }

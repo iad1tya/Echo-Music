@@ -13,8 +13,7 @@ fun Modifier.fadingEdge(
     top: Dp? = null,
     right: Dp? = null,
     bottom: Dp? = null,
-) = graphicsLayer(alpha = 0.99f)
-    .drawWithContent {
+) = drawWithContent {
         drawContent()
         if (top != null) {
             drawRect(

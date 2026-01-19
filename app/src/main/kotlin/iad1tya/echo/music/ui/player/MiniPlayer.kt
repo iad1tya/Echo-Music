@@ -435,7 +435,7 @@ private fun NewMiniPlayer(
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
+                                modifier = Modifier,
                             )
                         }
 
@@ -451,7 +451,7 @@ private fun NewMiniPlayer(
                                     fontSize = 12.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
+                                    modifier = Modifier,
                                 )
                             }
                         }
@@ -939,7 +939,7 @@ private fun LegacyMiniMediaInfo(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.basicMarquee(),
+                    modifier = Modifier,
                 )
             }
 

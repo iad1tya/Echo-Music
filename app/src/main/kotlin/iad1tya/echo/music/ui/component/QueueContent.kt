@@ -89,6 +89,7 @@ import iad1tya.echo.music.extensions.move
 import iad1tya.echo.music.extensions.togglePlayPause
 import iad1tya.echo.music.extensions.toggleRepeatMode
 import iad1tya.echo.music.models.MediaMetadata
+import iad1tya.echo.music.ui.utils.fadingEdge
 import iad1tya.echo.music.utils.joinByBullet
 import iad1tya.echo.music.utils.makeTimeString
 import iad1tya.echo.music.utils.rememberPreference
@@ -369,8 +370,7 @@ fun QueueContent(
                                 startY = 0f,
                                 endY = fadeHeight
                             ),
-                            blendMode = BlendMode.DstIn,
-                            size = size.copy(height = fadeHeight)
+                            blendMode = BlendMode.DstIn
                         )
 
                         // Bottom Fade
@@ -380,9 +380,7 @@ fun QueueContent(
                                 startY = size.height - fadeHeight,
                                 endY = size.height
                             ),
-                            blendMode = BlendMode.DstIn,
-                            topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - fadeHeight),
-                            size = size.copy(height = fadeHeight)
+                            blendMode = BlendMode.DstIn
                         )
                     },
                 contentPadding = WindowInsets.systemBars.add(

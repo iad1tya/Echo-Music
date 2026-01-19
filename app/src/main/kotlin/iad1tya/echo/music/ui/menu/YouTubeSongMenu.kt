@@ -200,7 +200,7 @@ fun YouTubeSongMenu(
         headlineContent = {
             Text(
                 text = song.title,
-                modifier = Modifier.basicMarquee(),
+                modifier = Modifier,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
