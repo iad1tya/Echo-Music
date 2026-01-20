@@ -955,8 +955,8 @@ fun Lyrics(
                     val animatedScale by animateFloatAsState(
                         targetValue = targetScale,
                         animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy, // Gentle bounce
-                            stiffness = Spring.StiffnessLow // Slow and smooth
+                            dampingRatio = 0.45f, // More bouncy (MediumBouncy is 0.5, 0.45 is slightly bouncier)
+                            stiffness = Spring.StiffnessMediumLow // Smooth bounce
                         ),
                         label = "scale"
                     )
@@ -1098,14 +1098,16 @@ fun Lyrics(
                         // Active color is always White for the glow effect
                         val currentTextColor = if (isActive) Color.White else textColor
                         
-                        // Smoother glow animation
+                        // Smoother glow animation (Instant OFF, Smooth ON)
                         val glowBlur by animateFloatAsState(
-                            targetValue = if (isActive) 60f else 0f,
-                            animationSpec = tween(durationMillis = 800)
+                            targetValue = if (isActive) 25f else 0f, // Reduced max blur for tighter text glow (was 60f)
+                            animationSpec = if (isActive) tween(durationMillis = 600) else androidx.compose.animation.core.snap(), // Smooth IN, Instant OUT
+                            label = "glowBlur"
                         )
                         val glowAlpha by animateFloatAsState(
-                            targetValue = if (isActive) 0.9f else 0f,
-                            animationSpec = tween(durationMillis = 800)
+                            targetValue = if (isActive) 0.8f else 0f,
+                            animationSpec = if (isActive) tween(durationMillis = 600) else androidx.compose.animation.core.snap(), // Smooth IN, Instant OUT
+                            label = "glowAlpha"
                         )
 
                         Text(
