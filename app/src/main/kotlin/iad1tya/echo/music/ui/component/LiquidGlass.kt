@@ -101,12 +101,10 @@ fun Modifier.drawOptimizedGlass(
             blur(16.dp.toPx())
         },
         onDrawBackdrop = { drawBackdrop ->
-            drawBackdrop()
-            try {
-                layer.record { drawBackdrop() }
-            } catch (e: IllegalStateException) {
-                // Ignore "Attempting to drawContent for a null node" during transitions
-            }
+            // drawBackdrop() calls drawContent() which causes "Null Node" crash during ModalBottomSheet transitions.
+            // layer.record { drawBackdrop() } causes the same, and catching it causes "Underflow".
+            // We disable the background blur drawing temporarily to ensure stability.
+            // visual effect will be just the surface tint (defined below).
         },
         shape = { shape },
         onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
