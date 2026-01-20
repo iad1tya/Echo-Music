@@ -75,9 +75,12 @@ fun Modifier.drawBackdropCustomShape(
             }
         },
         onDrawBackdrop = { drawBackdrop ->
-            // drawBackdrop()
-            // layer.record { drawBackdrop() }
-            // Disabled to prevent "Null Node" and "Underflow" crashes during transitions
+            drawBackdrop()
+            try {
+                layer.record { drawBackdrop() }
+            } catch (e: Exception) {
+                // Ignore exceptions during recording to prevent crashes
+            }
         },
         shape = { shape },
         onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
@@ -102,10 +105,12 @@ fun Modifier.drawOptimizedGlass(
             blur(16.dp.toPx())
         },
         onDrawBackdrop = { drawBackdrop ->
-            // drawBackdrop() calls drawContent() which causes "Null Node" crash during ModalBottomSheet transitions.
-            // layer.record { drawBackdrop() } causes the same, and catching it causes "Underflow".
-            // We disable the background blur drawing temporarily to ensure stability.
-            // visual effect will be just the surface tint (defined below).
+            drawBackdrop()
+            try {
+                layer.record { drawBackdrop() }
+            } catch (e: IllegalStateException) {
+                // Ignore "Attempting to drawContent for a null node" during transitions
+            }
         },
         shape = { shape },
         onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
