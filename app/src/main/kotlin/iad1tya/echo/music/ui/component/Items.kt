@@ -93,6 +93,7 @@ import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
+import coil3.request.crossfade
 import com.echo.innertube.YouTube
 import com.echo.innertube.models.SongItem
 import com.echo.innertube.models.AlbumItem
@@ -428,6 +429,7 @@ fun ArtistListItem(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .crossfade(true)
                 .build(),
             contentDescription = null,
             modifier = Modifier
@@ -460,6 +462,7 @@ fun ArtistGridItem(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .crossfade(true)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
@@ -1146,6 +1149,7 @@ fun ItemThumbnail(
                     .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                    .crossfade(true)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -1225,6 +1229,7 @@ fun LocalThumbnail(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .crossfade(true)
                 .build(),
             contentDescription = null,
             modifier = Modifier.fillMaxSize()
@@ -1333,6 +1338,7 @@ fun PlaylistThumbnail(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .crossfade(true)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
@@ -1360,6 +1366,7 @@ fun PlaylistThumbnail(
                         .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                         .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                         .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                        .crossfade(true)
                         .build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,

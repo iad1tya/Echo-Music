@@ -272,3 +272,15 @@
 -keep class com.echo.innertube.** { *; }
 -keep interface com.echo.innertube.** { *; }
 -dontwarn com.echo.innertube.**
+
+## Suppress warnings for backend libraries not used in Android
+-dontwarn io.micrometer.**
+-dontwarn javax.enterprise.inject.**
+-dontwarn javax.enterprise.util.**
+-dontwarn org.apache.log4j.**
+-dontwarn org.apache.logging.log4j.**
+-dontwarn reactor.blockhound.**
+-dontwarn reactor.core.**
+-dontwarn reactor.util.**
+-dontwarn io.netty.**
+-dontwarn io.lettuce.**
