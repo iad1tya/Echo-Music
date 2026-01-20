@@ -29,6 +29,7 @@ import iad1tya.echo.music.extensions.toInetSocketAddress
 import iad1tya.echo.music.utils.dataStore
 import iad1tya.echo.music.utils.get
 import iad1tya.echo.music.utils.reportException
+import iad1tya.echo.music.utils.GlobalCrashHandler
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +55,7 @@ class App : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        GlobalCrashHandler.initialize(this)
         Timber.plant(Timber.DebugTree())
 
         // Initialize Firebase with error handling

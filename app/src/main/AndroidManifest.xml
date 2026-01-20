@@ -155,6 +155,12 @@
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.Echo" />
 
+        <activity
+            android:name=".ui.activity.CrashActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Echo" />
+
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.FileProvider"
