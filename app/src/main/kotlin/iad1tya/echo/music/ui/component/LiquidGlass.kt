@@ -70,15 +70,12 @@ fun Modifier.drawBackdropCustomShape(
                     lerp(8f.dp.toPx(), 2f.dp.toPx(), -l)
                 },
             )
-            if (useLens) {
-                lens(24f.dp.toPx(), size.minDimension / 2f, true)
-            }
         },
         onDrawBackdrop = { drawBackdrop ->
             drawBackdrop()
             try {
                 layer.record { drawBackdrop() }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 // Ignore exceptions during recording to prevent crashes
             }
         },
