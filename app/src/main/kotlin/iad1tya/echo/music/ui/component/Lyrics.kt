@@ -113,6 +113,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import java.util.Collections
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -320,10 +324,40 @@ fun Lyrics(
             lines.isNotEmpty()
             // isSynced check removed to allow translating unsynced lyrics too
         ) {
-            // Filter out head entry for translation
             val contentLyrics = lines.drop(1)
+            // Check if we already have translations loaded from DB to avoid refetching
+            val hasTranslations = contentLyrics.any { it.translatedTextFlow.value != null }
             
-            if (contentLyrics.isNotEmpty()) {
+            if (!hasTranslations && contentLyrics.isNotEmpty()) {
+                // Check if the entity has saved translations that just haven't been populated into the flow yet
+                // (Note: In a pure Compose way, we'd ideally not mutate state in side effect, but here we populate flows)
+                val savedTranslationStr = lyricsEntity?.translatedLyrics
+                if (!savedTranslationStr.isNullOrBlank()) {
+                    try {
+                        // Simple splitting by newline for now since we joined by newline
+                        // Ideally strictly JSON, but the previous implementation might vary. 
+                        // Let's assume JSON list if it starts with [
+                        val savedLines = if (savedTranslationStr.trim().startsWith("[")) {
+                             kotlinx.serialization.json.Json.decodeFromString<List<String>>(savedTranslationStr)
+                        } else {
+                             savedTranslationStr.split("\n")
+                        }
+                        
+                        if (savedLines.isNotEmpty()) {
+                             // Populate flows immediately
+                             savedLines.forEachIndexed { index, translation ->
+                                 if (index < contentLyrics.size) {
+                                     contentLyrics[index].translatedTextFlow.value = translation
+                                 }
+                             }
+                             return@LaunchedEffect // Skip network call
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // Fallback to fetch if parsing fails
+                    }
+                }
+
                 LyricsTranslationHelper.translateLyrics(
                     lyrics = contentLyrics,
                     targetLanguage = translateLanguage,
@@ -331,7 +365,20 @@ fun Lyrics(
                     baseUrl = openRouterBaseUrl,
                     model = openRouterModel,
                     mode = translateMode,
-                    scope = scope
+                    scope = scope,
+                    onSuccess = { translatedLines ->
+                        // Save to DB
+                        scope.launch(Dispatchers.IO) {
+                            try {
+                                val jsonString = kotlinx.serialization.json.Json.encodeToString(translatedLines)
+                                lyricsEntity?.id?.let { id ->
+                                    database.updateTranslatedLyrics(id, jsonString)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
                 )
             }
         } else {
