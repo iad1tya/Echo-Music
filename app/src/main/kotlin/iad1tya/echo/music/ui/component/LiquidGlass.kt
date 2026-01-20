@@ -102,7 +102,11 @@ fun Modifier.drawOptimizedGlass(
         },
         onDrawBackdrop = { drawBackdrop ->
             drawBackdrop()
-            layer.record { drawBackdrop() }
+            try {
+                layer.record { drawBackdrop() }
+            } catch (e: IllegalStateException) {
+                // Ignore "Attempting to drawContent for a null node" during transitions
+            }
         },
         shape = { shape },
         onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
