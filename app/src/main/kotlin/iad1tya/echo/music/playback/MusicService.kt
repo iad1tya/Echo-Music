@@ -237,15 +237,15 @@ class MusicService :
     private val songUrlCache = java.util.concurrent.ConcurrentHashMap<String, Pair<String, Long>>()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        intent?.action?.let { action ->
-            when (action) {
-                ACTION_PLAY_PAUSE -> if (player.isPlaying) player.pause() else player.play()
-                ACTION_NEXT -> if (player.hasNextMediaItem()) player.seekToNext()
-                ACTION_PREVIOUS -> if (player.hasPreviousMediaItem()) player.seekToPrevious()
-            }
-        }
-
         try {
+            intent?.action?.let { action ->
+                when (action) {
+                    ACTION_PLAY_PAUSE -> if (player.isPlaying) player.pause() else player.play()
+                    ACTION_NEXT -> if (player.hasNextMediaItem()) player.seekToNext()
+                    ACTION_PREVIOUS -> if (player.hasPreviousMediaItem()) player.seekToPrevious()
+                }
+            }
+
             return super.onStartCommand(intent, flags, startId)
         } catch (e: Exception) {
             // Check if it's the specific foreground service exception (available in API 31+)

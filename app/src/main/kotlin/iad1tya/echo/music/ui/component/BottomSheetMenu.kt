@@ -85,13 +85,11 @@ fun BottomSheetMenu(
                     .fillMaxHeight()
                     .then(
                         if (backdrop != null && layer != null) {
-                            Modifier.drawBackdropCustomShape(
+                            Modifier.drawOptimizedGlass(
                                 backdrop = backdrop,
                                 layer = layer,
-                                luminanceAnimation = luminance,
                                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                                surfaceAlpha = 0.6f,
-                                useLens = false
+                                surfaceAlpha = 0.5f
                             )
                         } else {
                             Modifier.background(background)

@@ -82,3 +82,29 @@ fun Modifier.drawBackdropCustomShape(
         onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
     )
 }
+
+/**
+ * Optimized version of drawBackdropCustomShape for menus.
+ * Removes expensive vibrancy and color controls to improve performance during animations.
+ * Keeps only blur and basic dimming.
+ */
+fun Modifier.drawOptimizedGlass(
+    backdrop: PlatformBackdrop,
+    layer: GraphicsLayer,
+    shape: Shape,
+    surfaceAlpha: Float = 0.4f, // Slightly higher alpha to compensate for lack of other effects
+): Modifier {
+    return this.drawBackdrop(
+        backdrop = backdrop,
+        effects = {
+            // Only apply blur, skip expensive color matrix operations
+            blur(16.dp.toPx())
+        },
+        onDrawBackdrop = { drawBackdrop ->
+            drawBackdrop()
+            layer.record { drawBackdrop() }
+        },
+        shape = { shape },
+        onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
+    )
+}

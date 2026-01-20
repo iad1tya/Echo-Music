@@ -410,6 +410,14 @@ class CastConnectionHandler(
      */
     fun initialize() {
         try {
+            // Check for Google Play Services availability first to avoid crashes on devices without it
+            val availability = com.google.android.gms.common.GoogleApiAvailability.getInstance()
+            val status = availability.isGooglePlayServicesAvailable(context)
+            if (status != com.google.android.gms.common.ConnectionResult.SUCCESS) {
+                Timber.w("Google Play Services not available: $status. Cast will be disabled.")
+                return
+            }
+
             castContext = CastContext.getSharedInstance(context)
             sessionManager = castContext?.sessionManager
             mediaRouter = MediaRouter.getInstance(context)
@@ -428,6 +436,8 @@ class CastConnectionHandler(
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to initialize Cast context")
+        } catch (e: NoClassDefFoundError) {
+            Timber.e(e, "Cast classes not found - possibly missing dependency or Play Services")
         }
     }
     
