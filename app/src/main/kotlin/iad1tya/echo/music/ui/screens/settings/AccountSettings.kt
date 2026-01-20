@@ -128,7 +128,7 @@ fun AccountSettings(
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
@@ -148,7 +148,7 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -176,7 +176,7 @@ fun AccountSettings(
                             }
                         }
                     )
-                    .padding(horizontal = 18.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
             if (isLoggedIn && accountImageUrl != null) {
                 AsyncImage(
@@ -261,7 +261,7 @@ fun AccountSettings(
             )
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
 
         if (showTokenEditor) {
             val text = """
@@ -309,7 +309,7 @@ fun AccountSettings(
                     onClose()
                     navController.navigate("history")
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -330,7 +330,7 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
 
         // Stats button
         Box(
@@ -342,7 +342,7 @@ fun AccountSettings(
                     onClose()
                     navController.navigate("stats")
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -363,7 +363,7 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
 
         Box(
             modifier = Modifier
@@ -375,7 +375,7 @@ fun AccountSettings(
                     else if (!showToken) showToken = true
                     else showTokenEditor = true
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -400,7 +400,7 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
 
         // Login to Desktop button
         if (isLoggedIn) {
@@ -410,7 +410,7 @@ fun AccountSettings(
                     .clip(RoundedCornerShape(50))
                     .background(MaterialTheme.colorScheme.surface)
                     .clickable { showQRCodeDialog = true }
-                    .padding(horizontal = 18.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -430,7 +430,7 @@ fun AccountSettings(
                     )
                 }
             }
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(2.dp))
         }
 
         // Settings button
@@ -443,7 +443,7 @@ fun AccountSettings(
                     onClose()
                     navController.navigate("settings")
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -504,7 +504,7 @@ fun AccountSettings(
             )
         }
 
-        Spacer(Modifier.height(120.dp))
+
     }
 
     if (showQRCodeDialog) {
