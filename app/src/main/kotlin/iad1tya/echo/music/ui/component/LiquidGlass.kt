@@ -73,11 +73,11 @@ fun Modifier.drawBackdropCustomShape(
         },
         onDrawBackdrop = { drawBackdrop ->
             drawBackdrop()
-            try {
-                layer.record { drawBackdrop() }
-            } catch (e: Throwable) {
-                // Ignore exceptions during recording to prevent crashes
-            }
+             // try {
+            //    layer.record { drawBackdrop() }
+            // } catch (e: Throwable) {
+            //    // Ignore exceptions during recording to prevent crashes
+            // }// }
         },
         shape = { shape },
         onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }

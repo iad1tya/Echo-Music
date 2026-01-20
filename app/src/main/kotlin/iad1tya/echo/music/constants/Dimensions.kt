@@ -34,13 +34,13 @@ val PlayerHorizontalPadding = 32.dp
 // Optimized animation specs for smooth, jitter-free performance
 val NavigationBarAnimationSpec = spring<Dp>(
     dampingRatio = Spring.DampingRatioNoBouncy,
-    stiffness = Spring.StiffnessHigh
+    stiffness = Spring.StiffnessMedium // Was High
 )
 val BottomSheetAnimationSpec = spring<Dp>(
     dampingRatio = Spring.DampingRatioNoBouncy,
-    stiffness = Spring.StiffnessHigh
+    stiffness = Spring.StiffnessMedium // Was High
 )
 val BottomSheetSoftAnimationSpec = spring<Dp>(
     dampingRatio = Spring.DampingRatioNoBouncy,
-    stiffness = Spring.StiffnessMedium
+    stiffness = Spring.StiffnessLow // Was Medium
 )

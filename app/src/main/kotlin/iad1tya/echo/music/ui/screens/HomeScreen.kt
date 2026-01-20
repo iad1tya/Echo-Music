@@ -334,7 +334,8 @@ fun HomeScreen(
                                     menuState = menuState,
                                     playerConnection = playerConnection,
                                     scope = scope,
-                                    haptic = haptic
+                                    haptic = haptic,
+                                    modifier = Modifier.animateItem()
                                 )
                             }
                         }
@@ -373,7 +374,8 @@ fun HomeScreen(
                                     menuState = menuState,
                                     playerConnection = playerConnection,
                                     scope = scope,
-                                    haptic = haptic
+                                    haptic = haptic,
+                                    modifier = Modifier.animateItem()
                                 )
                             }
                         }
@@ -436,7 +438,8 @@ fun HomeScreen(
                                     menuState = menuState,
                                     playerConnection = playerConnection,
                                     scope = scope,
-                                    haptic = haptic
+                                    haptic = haptic,
+                                    modifier = Modifier.animateItem()
                                 )
                             }
                         }
@@ -500,6 +503,7 @@ fun HomeScreen(
                                         }
                                     },
                                     modifier = Modifier
+                                        .animateItem()
                                         .width(horizontalLazyGridItemWidth)
                                         .combinedClickable(
                                             onClick = {
@@ -574,7 +578,8 @@ fun HomeScreen(
                                     menuState = menuState,
                                     playerConnection = playerConnection,
                                     scope = scope,
-                                    haptic = haptic
+                                    haptic = haptic,
+                                    modifier = Modifier.animateItem()
                                 )
                             }
                         }
@@ -626,7 +631,8 @@ fun HomeScreen(
                                 menuState = menuState,
                                 playerConnection = playerConnection,
                                 scope = scope,
-                                haptic = haptic
+                                haptic = haptic,
+                                modifier = Modifier.animateItem()
                             )
                         }
                     }
@@ -781,12 +787,13 @@ private fun LocalGridItemHelper(
     menuState: iad1tya.echo.music.ui.component.MenuState,
     playerConnection: iad1tya.echo.music.playback.PlayerConnection,
     scope: CoroutineScope,
-    haptic: androidx.compose.ui.hapticfeedback.HapticFeedback
+    haptic: androidx.compose.ui.hapticfeedback.HapticFeedback,
+    modifier: Modifier = Modifier,
 ) {
     when (item) {
         is Song -> SongGridItem(
             song = item,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .combinedClickable(
                     onClick = {
@@ -820,7 +827,7 @@ private fun LocalGridItemHelper(
             isActive = item.id == mediaMetadata?.album?.id,
             isPlaying = isPlaying,
             coroutineScope = scope,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .combinedClickable(
                     onClick = {
@@ -841,7 +848,7 @@ private fun LocalGridItemHelper(
 
         is Artist -> ArtistGridItem(
             artist = item,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .combinedClickable(
                     onClick = {
@@ -876,14 +883,15 @@ private fun YouTubeGridItemHelper(
     menuState: iad1tya.echo.music.ui.component.MenuState,
     playerConnection: iad1tya.echo.music.playback.PlayerConnection,
     scope: CoroutineScope,
-    haptic: androidx.compose.ui.hapticfeedback.HapticFeedback
+    haptic: androidx.compose.ui.hapticfeedback.HapticFeedback,
+    modifier: Modifier = Modifier,
 ) {
     YouTubeGridItem(
         item = item,
         isActive = item.id in listOf(mediaMetadata?.album?.id, mediaMetadata?.id),
         isPlaying = isPlaying,
         coroutineScope = scope,
-        modifier = Modifier
+        modifier = modifier
             .combinedClickable(
                 onClick = {
                     when (item) {
