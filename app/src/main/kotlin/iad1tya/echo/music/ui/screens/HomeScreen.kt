@@ -90,6 +90,7 @@ import iad1tya.echo.music.db.entities.LocalItem
 import iad1tya.echo.music.db.entities.Playlist
 import iad1tya.echo.music.db.entities.Song
 import iad1tya.echo.music.extensions.togglePlayPause
+import iad1tya.echo.music.models.MediaMetadata
 import iad1tya.echo.music.models.toMediaMetadata
 import iad1tya.echo.music.playback.queues.ListQueue
 import iad1tya.echo.music.playback.queues.LocalAlbumRadio
@@ -165,7 +166,7 @@ fun HomeScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
-    val quickPicksLazyGridState = rememberLazyGridState()
+    val quickPicksLazyListState = rememberLazyListState()
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsState()
@@ -206,148 +207,12 @@ fun HomeScreen(
         }
     }
 
-    val localGridItem: @Composable (LocalItem) -> Unit = {
-        when (it) {
-            is Song -> SongGridItem(
-                song = it,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .combinedClickable(
-                        onClick = {
-                            if (it.id == mediaMetadata?.id) {
-                                playerConnection.player.togglePlayPause()
-                            } else {
-                                playerConnection.playQueue(
-                                    YouTubeQueue.radio(it.toMediaMetadata()),
-                                )
-                            }
-                        },
-                        onLongClick = {
-                            haptic.performHapticFeedback(
-                                HapticFeedbackType.LongPress,
-                            )
-                            menuState.show {
-                                SongMenu(
-                                    originalSong = it,
-                                    navController = navController,
-                                    onDismiss = menuState::dismiss,
-                                )
-                            }
-                        },
-                    ),
-                isActive = it.id == mediaMetadata?.id,
-                isPlaying = isPlaying,
-            )
+    // localGridItem definition removed
 
-            is Album -> AlbumGridItem(
-                album = it,
-                isActive = it.id == mediaMetadata?.album?.id,
-                isPlaying = isPlaying,
-                coroutineScope = scope,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .combinedClickable(
-                        onClick = {
-                            navController.navigate("album/${it.id}")
-                        },
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            menuState.show {
-                                AlbumMenu(
-                                    originalAlbum = it,
-                                    navController = navController,
-                                    onDismiss = menuState::dismiss
-                                )
-                            }
-                        }
-                    )
-            )
-
-            is Artist -> ArtistGridItem(
-                artist = it,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .combinedClickable(
-                        onClick = {
-                            navController.navigate("artist/${it.id}")
-                        },
-                        onLongClick = {
-                            haptic.performHapticFeedback(
-                                HapticFeedbackType.LongPress,
-                            )
-                            menuState.show {
-                                ArtistMenu(
-                                    originalArtist = it,
-                                    coroutineScope = scope,
-                                    onDismiss = menuState::dismiss,
-                                )
-                            }
-                        },
-                    ),
-            )
-
-            is Playlist -> {}
-        }
-    }
-
-    val ytGridItem: @Composable (YTItem) -> Unit = { item ->
-        YouTubeGridItem(
-            item = item,
-            isActive = item.id in listOf(mediaMetadata?.album?.id, mediaMetadata?.id),
-            isPlaying = isPlaying,
-            coroutineScope = scope,
-            modifier = Modifier
-                .combinedClickable(
-                    onClick = {
-                        when (item) {
-                            is SongItem -> playerConnection.playQueue(
-                                YouTubeQueue(
-                                    item.endpoint ?: WatchEndpoint(
-                                        videoId = item.id
-                                    ), item.toMediaMetadata()
-                                )
-                            )
-
-                            is AlbumItem -> navController.navigate("album/${item.id}")
-                            is ArtistItem -> navController.navigate("artist/${item.id}")
-                            is PlaylistItem -> navController.navigate("online_playlist/${item.id}")
-                        }
-                    },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show {
-                            when (item) {
-                                is SongItem -> YouTubeSongMenu(
-                                    song = item,
-                                    navController = navController,
-                                    onDismiss = menuState::dismiss
-                                )
-
-                                is AlbumItem -> YouTubeAlbumMenu(
-                                    albumItem = item,
-                                    navController = navController,
-                                    onDismiss = menuState::dismiss
-                                )
-
-                                is ArtistItem -> YouTubeArtistMenu(
-                                    artist = item,
-                                    onDismiss = menuState::dismiss
-                                )
-
-                                is PlaylistItem -> YouTubePlaylistMenu(
-                                    playlist = item,
-                                    coroutineScope = scope,
-                                    onDismiss = menuState::dismiss
-                                )
-                            }
-                        }
-                    }
-                )
-        )
-    }
+    // ytGridItem definition removed
 
     LaunchedEffect(quickPicks) {
-        quickPicksLazyGridState.scrollToItem(0)
+        quickPicksLazyListState.scrollToItem(0)
     }
 
     LaunchedEffect(forgottenFavorites) {
@@ -366,9 +231,9 @@ fun HomeScreen(
     ) {
         val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
         val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-        val quickPicksSnapLayoutInfoProvider = remember(quickPicksLazyGridState) {
+        val quickPicksSnapLayoutInfoProvider = remember(quickPicksLazyListState) {
             SnapLayoutInfoProvider(
-                lazyGridState = quickPicksLazyGridState,
+                lazyListState = quickPicksLazyListState,
                 positionInLayout = { layoutSize, itemSize ->
                     (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
                 }
@@ -440,9 +305,8 @@ fun HomeScreen(
                     }
 
                     item(key = "quick_picks_list") {
-                        LazyHorizontalGrid(
-                            state = quickPicksLazyGridState,
-                            rows = GridCells.Fixed(1),
+                        LazyRow(
+                            state = quickPicksLazyListState,
                             flingBehavior = rememberSnapFlingBehavior(quickPicksSnapLayoutInfoProvider),
                             contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
                                 .asPaddingValues(),
@@ -462,7 +326,16 @@ fun HomeScreen(
                                 val song by database.song(originalSong.id)
                                     .collectAsState(initial = originalSong)
 
-                                localGridItem(song!!)
+                                LocalGridItemHelper(
+                                    item = song!!,
+                                    mediaMetadata = mediaMetadata,
+                                    isPlaying = isPlaying,
+                                    navController = navController,
+                                    menuState = menuState,
+                                    playerConnection = playerConnection,
+                                    scope = scope,
+                                    haptic = haptic
+                                )
                             }
                         }
                     }
@@ -492,7 +365,16 @@ fun HomeScreen(
                                 .animateItem()
                         ) {
                             items(keepListening) {
-                                localGridItem(it)
+                                LocalGridItemHelper(
+                                    item = it,
+                                    mediaMetadata = mediaMetadata,
+                                    isPlaying = isPlaying,
+                                    navController = navController,
+                                    menuState = menuState,
+                                    playerConnection = playerConnection,
+                                    scope = scope,
+                                    haptic = haptic
+                                )
                             }
                         }
                     }
@@ -546,7 +428,16 @@ fun HomeScreen(
                                 items = accountPlaylists.distinctBy { it.id },
                                 key = { it.id },
                             ) { item ->
-                                ytGridItem(item)
+                                YouTubeGridItemHelper(
+                                    item = item,
+                                    mediaMetadata = mediaMetadata,
+                                    isPlaying = isPlaying,
+                                    navController = navController,
+                                    menuState = menuState,
+                                    playerConnection = playerConnection,
+                                    scope = scope,
+                                    haptic = haptic
+                                )
                             }
                         }
                     }
@@ -675,7 +566,16 @@ fun HomeScreen(
                             modifier = Modifier.animateItem()
                         ) {
                             items(recommendation.items) { item ->
-                                ytGridItem(item)
+                                YouTubeGridItemHelper(
+                                    item = item,
+                                    mediaMetadata = mediaMetadata,
+                                    isPlaying = isPlaying,
+                                    navController = navController,
+                                    menuState = menuState,
+                                    playerConnection = playerConnection,
+                                    scope = scope,
+                                    haptic = haptic
+                                )
                             }
                         }
                     }
@@ -718,7 +618,16 @@ fun HomeScreen(
                         modifier = Modifier.animateItem()
                     ) {
                         items(section.items) { item ->
-                            ytGridItem(item)
+                            YouTubeGridItemHelper(
+                                item = item,
+                                mediaMetadata = mediaMetadata,
+                                isPlaying = isPlaying,
+                                navController = navController,
+                                menuState = menuState,
+                                playerConnection = playerConnection,
+                                scope = scope,
+                                haptic = haptic
+                            )
                         }
                     }
                 }
@@ -860,4 +769,166 @@ fun HomeScreen(
                 .padding(LocalPlayerAwareWindowInsets.current.asPaddingValues()),
         )
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun LocalGridItemHelper(
+    item: LocalItem,
+    mediaMetadata: MediaMetadata?,
+    isPlaying: Boolean,
+    navController: NavController,
+    menuState: iad1tya.echo.music.ui.component.MenuState,
+    playerConnection: iad1tya.echo.music.playback.PlayerConnection,
+    scope: CoroutineScope,
+    haptic: androidx.compose.ui.hapticfeedback.HapticFeedback
+) {
+    when (item) {
+        is Song -> SongGridItem(
+            song = item,
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    onClick = {
+                        if (item.id == mediaMetadata?.id) {
+                            playerConnection.player.togglePlayPause()
+                        } else {
+                            playerConnection.playQueue(
+                                YouTubeQueue.radio(item.toMediaMetadata()),
+                            )
+                        }
+                    },
+                    onLongClick = {
+                        haptic.performHapticFeedback(
+                            HapticFeedbackType.LongPress,
+                        )
+                        menuState.show {
+                            SongMenu(
+                                originalSong = item,
+                                navController = navController,
+                                onDismiss = menuState::dismiss,
+                            )
+                        }
+                    },
+                ),
+            isActive = item.id == mediaMetadata?.id,
+            isPlaying = isPlaying,
+        )
+
+        is Album -> AlbumGridItem(
+            album = item,
+            isActive = item.id == mediaMetadata?.album?.id,
+            isPlaying = isPlaying,
+            coroutineScope = scope,
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    onClick = {
+                        navController.navigate("album/${item.id}")
+                    },
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        menuState.show {
+                            AlbumMenu(
+                                originalAlbum = item,
+                                navController = navController,
+                                onDismiss = menuState::dismiss
+                            )
+                        }
+                    }
+                )
+        )
+
+        is Artist -> ArtistGridItem(
+            artist = item,
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    onClick = {
+                        navController.navigate("artist/${item.id}")
+                    },
+                    onLongClick = {
+                        haptic.performHapticFeedback(
+                            HapticFeedbackType.LongPress,
+                        )
+                        menuState.show {
+                            ArtistMenu(
+                                originalArtist = item,
+                                coroutineScope = scope,
+                                onDismiss = menuState::dismiss,
+                            )
+                        }
+                    },
+                ),
+        )
+
+        is Playlist -> {}
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun YouTubeGridItemHelper(
+    item: YTItem,
+    mediaMetadata: MediaMetadata?,
+    isPlaying: Boolean,
+    navController: NavController,
+    menuState: iad1tya.echo.music.ui.component.MenuState,
+    playerConnection: iad1tya.echo.music.playback.PlayerConnection,
+    scope: CoroutineScope,
+    haptic: androidx.compose.ui.hapticfeedback.HapticFeedback
+) {
+    YouTubeGridItem(
+        item = item,
+        isActive = item.id in listOf(mediaMetadata?.album?.id, mediaMetadata?.id),
+        isPlaying = isPlaying,
+        coroutineScope = scope,
+        modifier = Modifier
+            .combinedClickable(
+                onClick = {
+                    when (item) {
+                        is SongItem -> playerConnection.playQueue(
+                            YouTubeQueue(
+                                item.endpoint ?: WatchEndpoint(
+                                    videoId = item.id
+                                ), item.toMediaMetadata()
+                            )
+                        )
+
+                        is AlbumItem -> navController.navigate("album/${item.id}")
+                        is ArtistItem -> navController.navigate("artist/${item.id}")
+                        is PlaylistItem -> navController.navigate("online_playlist/${item.id}")
+                    }
+                },
+                onLongClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    menuState.show {
+                        when (item) {
+                            is SongItem -> YouTubeSongMenu(
+                                song = item,
+                                navController = navController,
+                                onDismiss = menuState::dismiss
+                            )
+
+                            is AlbumItem -> YouTubeAlbumMenu(
+                                albumItem = item,
+                                navController = navController,
+                                onDismiss = menuState::dismiss
+                            )
+
+                            is ArtistItem -> YouTubeArtistMenu(
+                                artist = item,
+                                onDismiss = menuState::dismiss
+                            )
+
+                            is PlaylistItem -> YouTubePlaylistMenu(
+                                playlist = item,
+                                coroutineScope = scope,
+                                onDismiss = menuState::dismiss
+                            )
+                        }
+                    }
+                }
+            )
+    )
 }

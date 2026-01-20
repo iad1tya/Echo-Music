@@ -31,6 +31,10 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -1347,7 +1351,13 @@ fun BottomSheetPlayer(
                                     else -> "thumbnail"
                                 },
                                 transitionSpec = {
-                                    fadeIn(animationSpec = tween(400)).togetherWith(fadeOut(animationSpec = tween(400)))
+                                    if (targetState == "thumbnail") {
+                                        (fadeIn(tween(400)) + scaleIn(initialScale = 0.9f, animationSpec = tween(400)))
+                                            .togetherWith(slideOutVertically(animationSpec = tween(400)) { it } + fadeOut(tween(400)))
+                                    } else {
+                                        (slideInVertically(animationSpec = tween(400)) { it } + fadeIn(tween(400)))
+                                            .togetherWith(fadeOut(tween(400)) + scaleOut(targetScale = 0.9f, animationSpec = tween(400)))
+                                    }
                                 },
                                 label = "PlayerViewTransition"
                             ) { viewMode ->

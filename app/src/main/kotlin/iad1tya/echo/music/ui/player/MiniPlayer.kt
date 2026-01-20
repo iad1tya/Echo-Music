@@ -229,7 +229,7 @@ private fun NewMiniPlayer(
     // Optimized animation spec for smoother, more responsive feel
     val animationSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessHigh,
+        stiffness = Spring.StiffnessMedium,
         visibilityThreshold = 0.1f
     )
 
