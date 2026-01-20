@@ -75,8 +75,9 @@ fun Modifier.drawBackdropCustomShape(
             }
         },
         onDrawBackdrop = { drawBackdrop ->
-            drawBackdrop()
-            layer.record { drawBackdrop() }
+            // drawBackdrop()
+            // layer.record { drawBackdrop() }
+            // Disabled to prevent "Null Node" and "Underflow" crashes during transitions
         },
         shape = { shape },
         onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
