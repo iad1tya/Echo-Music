@@ -166,7 +166,7 @@ fun HomeScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
-    val quickPicksLazyListState = rememberLazyListState()
+    val quickPicksLazyGridState = rememberLazyGridState()
     val forgottenFavoritesLazyGridState = rememberLazyGridState()
 
     val accountName by viewModel.accountName.collectAsState()
@@ -212,7 +212,7 @@ fun HomeScreen(
     // ytGridItem definition removed
 
     LaunchedEffect(quickPicks) {
-        quickPicksLazyListState.scrollToItem(0)
+        quickPicksLazyGridState.scrollToItem(0)
     }
 
     LaunchedEffect(forgottenFavorites) {
@@ -231,9 +231,9 @@ fun HomeScreen(
     ) {
         val horizontalLazyGridItemWidthFactor = if (maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
         val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
-        val quickPicksSnapLayoutInfoProvider = remember(quickPicksLazyListState) {
+        val quickPicksSnapLayoutInfoProvider = remember(quickPicksLazyGridState) {
             SnapLayoutInfoProvider(
-                lazyListState = quickPicksLazyListState,
+                lazyGridState = quickPicksLazyGridState,
                 positionInLayout = { layoutSize, itemSize ->
                     (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
                 }
@@ -305,17 +305,15 @@ fun HomeScreen(
                     }
 
                     item(key = "quick_picks_list") {
-                        LazyRow(
-                            state = quickPicksLazyListState,
-                            flingBehavior = rememberSnapFlingBehavior(quickPicksSnapLayoutInfoProvider),
+                        LazyHorizontalGrid(
+                            rows = GridCells.Fixed(4),
+                            state = quickPicksLazyGridState,
                             contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
                                 .asPaddingValues(),
+                            flingBehavior = rememberSnapFlingBehavior(quickPicksSnapLayoutInfoProvider),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(GridThumbnailHeight + with(LocalDensity.current) {
-                                    MaterialTheme.typography.bodyLarge.lineHeight.toDp() * 2 +
-                                            MaterialTheme.typography.bodyMedium.lineHeight.toDp() * 2
-                                })
+                                .height(ListItemHeight * 4)
                                 .animateItem()
                         ) {
                             items(
@@ -326,16 +324,57 @@ fun HomeScreen(
                                 val song by database.song(originalSong.id)
                                     .collectAsState(initial = originalSong)
 
-                                LocalGridItemHelper(
-                                    item = song!!,
-                                    mediaMetadata = mediaMetadata,
+                                SongListItem(
+                                    song = song!!,
+                                    showInLibraryIcon = true,
+                                    isActive = song!!.id == mediaMetadata?.id,
                                     isPlaying = isPlaying,
-                                    navController = navController,
-                                    menuState = menuState,
-                                    playerConnection = playerConnection,
-                                    scope = scope,
-                                    haptic = haptic,
-                                    modifier = Modifier.animateItem()
+                                    isSwipeable = false,
+                                    trailingContent = {
+                                        IconButton(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                menuState.show {
+                                                    SongMenu(
+                                                        originalSong = song!!,
+                                                        navController = navController,
+                                                        onDismiss = menuState::dismiss
+                                                    )
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.more_vert),
+                                                contentDescription = null
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .animateItem()
+                                        .width(horizontalLazyGridItemWidth)
+                                        .combinedClickable(
+                                            onClick = {
+                                                if (song!!.id == mediaMetadata?.id) {
+                                                    playerConnection.player.togglePlayPause()
+                                                } else {
+                                                    playerConnection.playQueue(
+                                                        YouTubeQueue.radio(
+                                                            song!!.toMediaMetadata()
+                                                        )
+                                                    )
+                                                }
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                menuState.show {
+                                                    SongMenu(
+                                                        originalSong = song!!,
+                                                        navController = navController,
+                                                        onDismiss = menuState::dismiss
+                                                    )
+                                                }
+                                            }
+                                        )
                                 )
                             }
                         }
