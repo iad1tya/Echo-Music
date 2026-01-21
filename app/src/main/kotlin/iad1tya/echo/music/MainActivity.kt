@@ -33,9 +33,12 @@ import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -57,6 +60,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialogDefaults
@@ -1458,12 +1462,16 @@ class MainActivity : ComponentActivity() {
                                                 luminance = luminanceAnimation.value
                                             )
                                             // Pill-shaped Navigation Bar
-                                            Box(
+                                            // Split Navigation Bar (Apple Style)
+                                            val mainTabs = navigationItems.filter { it != Screens.Find }
+                                            val echoTabs = navigationItems.filter { it == Screens.Find }
+
+                                            Row(
                                                 modifier = Modifier
                                                     .align(Alignment.BottomCenter)
                                                     .padding(bottom = bottomInset + 16.dp)
-                                                    .padding(horizontal = 12.dp) // Adjusted padding to match MiniPlayer width
-                                                    .fillMaxWidth() // Ensure row has width to distribute items
+                                                    .padding(horizontal = 12.dp)
+                                                    .fillMaxWidth()
                                                     .offset {
                                                         if (navigationBarHeight == 0.dp) {
                                                             IntOffset(
@@ -1484,107 +1492,181 @@ class MainActivity : ComponentActivity() {
                                                                 y = (slideOffset + hideOffset).roundToPx(),
                                                             )
                                                         }
-                                                    }
+                                                    },
+                                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-
-                                                Box(
-                                                    modifier = Modifier
-                                                        .height(NavigationBarHeight)
-                                                        // Shadow needs to be applied before clipping or drawing if we want it outside, 
-                                                        // but usually shadow requires a surface or manual drawing. 
-                                                        // drawBackdropCustomShape effectively draws a surface.
-                                                        // Let's try adding shadow via modifier.
-                                                        .shadow(16.dp, RoundedCornerShape(percent = 50))
-                                                        .drawBackdropCustomShape(
-                                                            backdrop = backdrop,
-                                                            layer = layer,
-                                                            luminanceAnimation = luminanceAnimation.value,
-                                                            shape = RoundedCornerShape(percent = 50),
-                                                            surfaceAlpha = miniPlayerGlassOpacity,
-                                                            customBlur = miniPlayerGlassBlur.dp
-                                                        )
-                                                        .border(
-                                                            width = 1.dp,
-                                                            brush = Brush.verticalGradient(
-                                                                colors = listOf(
-                                                                    Color.White.copy(alpha = 0.5f),
-                                                                    Color.White.copy(alpha = 0.1f)
-                                                                )
-                                                            ),
-                                                            shape = RoundedCornerShape(percent = 50)
-                                                        )
-                                                ) {
-                                                    Row(
+                                                // Main Group Pill
+                                                if (mainTabs.isNotEmpty()) {
+                                                    Box(
                                                         modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(horizontal = 12.dp), // Adjusted padding
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly // Evenly distribute items
-                                                    ) {
-                                                        navigationItems.fastForEach { screen ->
-                                                            val isSelected =
-                                                                navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
-
-                                                            NavigationBarItem(
-                                                                selected = isSelected,
-                                                                icon = {
-                                                                    Icon(
-                                                                        painter = painterResource(
-                                                                            id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
-                                                                        ),
-                                                                        contentDescription = null,
-                                                                        modifier = Modifier.size(26.dp) // Slightly larger icons
+                                                            .weight(1f)
+                                                            .height(NavigationBarHeight)
+                                                            .shadow(16.dp, RoundedCornerShape(percent = 50))
+                                                            .drawBackdropCustomShape(
+                                                                backdrop = backdrop,
+                                                                layer = layer,
+                                                                luminanceAnimation = luminanceAnimation.value,
+                                                                shape = RoundedCornerShape(percent = 50),
+                                                                surfaceAlpha = miniPlayerGlassOpacity,
+                                                                customBlur = miniPlayerGlassBlur.dp
+                                                            )
+                                                            .border(
+                                                                width = 1.dp,
+                                                                brush = Brush.verticalGradient(
+                                                                    colors = listOf(
+                                                                        Color.White.copy(alpha = 0.5f),
+                                                                        Color.White.copy(alpha = 0.1f)
                                                                     )
-                                                                },
-                                                                label = {
-                                                                    if (isSelected) {
-                                                                        Text(
-                                                                            text = stringResource(screen.titleId),
-                                                                            maxLines = 1,
-                                                                            overflow = TextOverflow.Ellipsis,
-                                                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                                                 fontWeight = FontWeight.Bold
-                                                                            )
-                                                                        )
-                                                                    }
-                                                                },
-                                                                alwaysShowLabel = false,
-                                                                colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
-                                                                    indicatorColor = Color.Transparent, // Remove pill indicator
-                                                                    selectedIconColor = MaterialTheme.colorScheme.primary, // Use primary color for active
-                                                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                                                    unselectedIconColor = Color.White.copy(alpha = 0.6f),
-                                                                    unselectedTextColor = Color.White.copy(alpha = 0.6f)
                                                                 ),
+                                                                shape = RoundedCornerShape(percent = 50)
+                                                            )
+                                                    ) {
+                                                        Row(
+                                                            modifier = Modifier.fillMaxSize(),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly
+                                                        ) {
+                                                            mainTabs.fastForEach { screen ->
+                                                                val isSelected =
+                                                                    navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+
+                                                                    val interactionSource = remember { MutableInteractionSource() }
+
+                                                                    Box(
+                                                                        modifier = Modifier
+                                                                            .weight(1f)
+                                                                            .height(NavigationBarHeight)
+                                                                            .clickable(
+                                                                                interactionSource = interactionSource,
+                                                                                indication = null,
+                                                                                onClick = {
+                                                                                    if (screen.route == Screens.Search.route) {
+                                                                                        onActiveChange(true)
+                                                                                    } else if (isSelected) {
+                                                                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                                                                            "scrollToTop",
+                                                                                            true
+                                                                                        )
+                                                                                        coroutineScope.launch {
+                                                                                            searchBarScrollBehavior.state.resetHeightOffset()
+                                                                                        }
+                                                                                    } else {
+                                                                                        if (screen.route == Screens.Home.route) {
+                                                                                            navController.navigate(screen.route) {
+                                                                                                popUpTo(navController.graph.id)
+                                                                                            }
+                                                                                        } else {
+                                                                                            navController.navigate(screen.route) {
+                                                                                                popUpTo(navController.graph.startDestinationId) {
+                                                                                                    saveState = true
+                                                                                                }
+                                                                                                launchSingleTop = true
+                                                                                                restoreState = true
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            ),
+                                                                        contentAlignment = Alignment.Center
+                                                                    ) {
+                                                                        Row(
+                                                                            verticalAlignment = Alignment.CenterVertically,
+                                                                            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                                                                            modifier = Modifier.padding(horizontal = 4.dp)
+                                                                        ) {
+                                                                            Icon(
+                                                                                painter = painterResource(
+                                                                                    id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                                                                                ),
+                                                                                contentDescription = null,
+                                                                                modifier = Modifier.size(28.dp),
+                                                                                tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.6f)
+                                                                            )
+                                                                            androidx.compose.animation.AnimatedVisibility(
+                                                                                visible = isSelected,
+                                                                                enter = androidx.compose.animation.expandHorizontally() + androidx.compose.animation.fadeIn(),
+                                                                                exit = androidx.compose.animation.shrinkHorizontally() + androidx.compose.animation.fadeOut()
+                                                                            ) {
+                                                                                Row {
+                                                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                                                    Text(
+                                                                                        text = stringResource(screen.titleId),
+                                                                                        maxLines = 1,
+                                                                                        overflow = TextOverflow.Ellipsis,
+                                                                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                                                                            fontWeight = FontWeight.Bold
+                                                                                        ),
+                                                                                        color = MaterialTheme.colorScheme.primary
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                // Echo Bubble
+                                                if (echoTabs.isNotEmpty()) {
+                                                    val screen = echoTabs.first()
+                                                    val isSelected =
+                                                        navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                                    
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .width(NavigationBarHeight)
+                                                            .height(NavigationBarHeight)
+                                                            .shadow(16.dp, RoundedCornerShape(percent = 50))
+                                                            .drawBackdropCustomShape(
+                                                                backdrop = backdrop,
+                                                                layer = layer,
+                                                                luminanceAnimation = luminanceAnimation.value,
+                                                                shape = RoundedCornerShape(percent = 50),
+                                                                surfaceAlpha = miniPlayerGlassOpacity,
+                                                                customBlur = miniPlayerGlassBlur.dp
+                                                            )
+                                                            .border(
+                                                                width = 1.dp,
+                                                                brush = Brush.verticalGradient(
+                                                                    colors = listOf(
+                                                                        Color.White.copy(alpha = 0.5f),
+                                                                        Color.White.copy(alpha = 0.1f)
+                                                                    )
+                                                                ),
+                                                                shape = RoundedCornerShape(percent = 50)
+                                                            )
+                                                            .clickable(
+                                                                interactionSource = remember { MutableInteractionSource() },
+                                                                indication = null,
                                                                 onClick = {
-                                                                    if (screen.route == Screens.Search.route) {
-                                                                        onActiveChange(true)
-                                                                    } else if (isSelected) {
+                                                                    if (isSelected) {
                                                                         navController.currentBackStackEntry?.savedStateHandle?.set(
                                                                             "scrollToTop",
                                                                             true
                                                                         )
-                                                                        coroutineScope.launch {
-                                                                            searchBarScrollBehavior.state.resetHeightOffset()
-                                                                        }
                                                                     } else {
-                                                                        if (screen.route == Screens.Home.route) {
-                                                                            navController.navigate(screen.route) {
-                                                                                popUpTo(navController.graph.id)
+                                                                        navController.navigate(screen.route) {
+                                                                            popUpTo(navController.graph.startDestinationId) {
+                                                                                saveState = true
                                                                             }
-                                                                        } else {
-                                                                            navController.navigate(screen.route) {
-                                                                                popUpTo(navController.graph.startDestinationId) {
-                                                                                    saveState = true
-                                                                                }
-                                                                                launchSingleTop = true
-                                                                                restoreState = true
-                                                                            }
+                                                                            launchSingleTop = true
+                                                                            restoreState = true
                                                                         }
                                                                     }
                                                                 }
-                                                            )
-                                                        }
+                                                            ),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                       Icon(
+                                                            painter = painterResource(
+                                                                id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                                                            ),
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(28.dp),
+                                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.6f)
+                                                        )
                                                     }
                                                 }
                                             }

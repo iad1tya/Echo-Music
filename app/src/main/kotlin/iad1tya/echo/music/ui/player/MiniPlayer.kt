@@ -343,14 +343,14 @@ private fun NewMiniPlayer(
                 )
                 .height(64.dp) // Circular height
                 .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                .clip(RoundedCornerShape(32.dp)) // Clip first for perfect rounded corners
+                .clip(RoundedCornerShape(percent = 50)) // Clip first for perfect rounded corners
                 .then(
                     if (backdrop != null && layer != null) {
                         Modifier.drawBackdropCustomShape(
                             backdrop = backdrop,
                             layer = layer,
                             luminanceAnimation = luminance,
-                            shape = RoundedCornerShape(32.dp),
+                            shape = RoundedCornerShape(percent = 50),
                             surfaceAlpha = miniPlayerGlassOpacity,
                             customBlur = miniPlayerGlassBlur.dp
                         )
