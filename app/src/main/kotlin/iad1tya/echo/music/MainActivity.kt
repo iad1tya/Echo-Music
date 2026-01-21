@@ -1462,7 +1462,7 @@ class MainActivity : ComponentActivity() {
                                                 modifier = Modifier
                                                     .align(Alignment.BottomCenter)
                                                     .padding(bottom = bottomInset + 16.dp)
-                                                    .padding(horizontal = 24.dp) // Adjusted padding to match MiniPlayer width
+                                                    .padding(horizontal = 12.dp) // Adjusted padding to match MiniPlayer width
                                                     .fillMaxWidth() // Ensure row has width to distribute items
                                                     .offset {
                                                         if (navigationBarHeight == 0.dp) {
@@ -1516,9 +1516,10 @@ class MainActivity : ComponentActivity() {
                                                 ) {
                                                     Row(
                                                         modifier = Modifier
-                                                            .padding(horizontal = 24.dp), // Increased padding
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 12.dp), // Adjusted padding
                                                         verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp) // Proper spacing
+                                                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly // Evenly distribute items
                                                     ) {
                                                         navigationItems.fastForEach { screen ->
                                                             val isSelected =
