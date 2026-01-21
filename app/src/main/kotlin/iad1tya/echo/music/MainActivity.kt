@@ -1532,10 +1532,14 @@ class MainActivity : ComponentActivity() {
                                                                     navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
 
                                                                     val interactionSource = remember { MutableInteractionSource() }
+                                                                    val weight by androidx.compose.animation.core.animateFloatAsState(
+                                                                        targetValue = if (isSelected) 1.5f else 1f,
+                                                                        label = "nav_weight"
+                                                                    )
 
                                                                     Box(
                                                                         modifier = Modifier
-                                                                            .weight(1f)
+                                                                            .weight(weight)
                                                                             .height(NavigationBarHeight)
                                                                             .clickable(
                                                                                 interactionSource = interactionSource,
