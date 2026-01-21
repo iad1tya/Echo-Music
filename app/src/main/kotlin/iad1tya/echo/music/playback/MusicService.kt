@@ -43,6 +43,7 @@ import androidx.media3.datasource.cache.CacheDataSource.FLAG_IGNORE_CACHE_ON_ERR
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.analytics.PlaybackStats
@@ -301,6 +302,7 @@ class MusicService :
                     false,
                 ).setSeekBackIncrementMs(5000)
                 .setSeekForwardIncrementMs(5000)
+                .setLoadControl(createLoadControl())
                 .build()
                 .apply {
                     addListener(this@MusicService)
@@ -1535,6 +1537,18 @@ class MusicService :
                     ),
                 ).build()
         }
+
+    private fun createLoadControl(): DefaultLoadControl {
+        return DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                30_000, // Min buffer 30s
+                30_000, // Max buffer 30s
+                500,    // Buffer for playback start (500ms for fast start)
+                1000    // Buffer for rebuffer (1s)
+            )
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
+    }
 
     override fun onPlaybackStatsReady(
         eventTime: AnalyticsListener.EventTime,
