@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="explore">Explorer</string>
+
+    <string name="local_history">Locale</string>
+    <string name="remote_history">Distant</string>
+
+    <string name="charts">Charts</string>
+    <string name="back_button_desc">Retour</string>
+    <string name="no_title">Sans titre</string>
+    <string name="unknown_artist">Artiste inconnu</string>
+    <string name="unknown_item_type">Type d\'élément inconnu</string>
+    <string name="loading_charts">Chargement des charts…</string>
+    <string name="retry_button">Réessayer</string>
+    <string name="album_cover_desc">Pochette d\'album</string>
+    <string name="top_music_videos">Meilleurs Clips Musicaux</string>
+    <string name="trending">Tendances</string>
+
+    <string name="days">Jours</string>
+    <string name="weeks">Semaines</string>
+    <string name="months">Mois</string>
+    <string name="years">Années</string>
+    <string name="continuous">En Continu</string>
+
+    <string name="liked">Favoris</string>
+    <string name="offline">Hors-Ligne</string>
+    <string name="my_top">Mon Top</string>
+    <string name="cached_playlist">En Cache</string>
+    <string name="uploaded_playlist">Téléchargés</string>
+    <string name="filter_uploaded">Téléchargés</string>
+    <string name="sync_playlist">Synchroniser la playlist</string>
+    <string name="sync_disabled">Synchronisation désactivée</string>
+    <string name="elements_selected">%1$d éléments sélectionnés</string>
+    <string name="allows_for_sync_witch_youtube">Remarque : Cela permet la synchronisation avec YouTube Music. Ce paramètre ne peut pas être modifié ultérieurement.</string>
+    <string name="generating_image">Génération d\'image</string>
+    <string name="please_wait">Veuillez patienter</string>
+    <string name="cancel">Annuler</string>
+    <string name="share_lyrics">Partager les paroles</string>
+    <string name="share_as_text">Partager sous forme de texte</string>
+    <string name="share_as_image">Partager sous forme d\'image</string>
+    <string name="max_selection_limit">Limite de sélection maximale</string>
+    <string name="share_selected">Partager la sélection</string>
+    <string name="customize_colors">Personnaliser les couleurs</string>
+    <string name="more_options">Plus d\'options</string>
+    <string name="text_color">Couleur du texte</string>
+    <string name="secondary_text_color">Couleur du texte secondaire</string>
+    <string name="background_color">Couleur d\'arrière-plan</string>
+
+    <string name="added_to_play_next">Ajouté à la playlist</string>
+    <string name="added_to_queue">Ajouté à la file d\'attente</string>
+    <string name="remove_from_cache">Supprimer du cache</string>
+    <string name="copy_link">Copier le lien</string>
+    <string name="select">Tout sélectionner</string>
+    <string name="like_all">J\'aime</string>
+    <string name="dislike_all">Je n\'aime pas</string>
+    <string name="sort_by_last_updated">Date de mise à jour</string>
+    <string name="link_copied">Lien copié dans le presse-papiers</string>
+    <string name="starting_radio">Démarrer la radio</string>
+    <string name="now_playing">En cours de lecture</string>
+
+    <string name="lyrics">Paroles</string>
+    <string name="close">Fermer</string>
+    <string name="minimum_volume">Volume Minimum</string>
+    <string name="maximum_volume">Volume Maximum</string>
+    <string name="hide_player_thumbnail">Masquer la vignette du lecteur</string>
+    <string name="hide_player_thumbnail_desc">Remplacer la pochette de l\'album par le logo de l\'application dans le lecteur</string>
+
+    <string name="already_in_playlist">Déjà dans la playlist :</string>
+
+    <plurals name="n_element">
+        <item quantity="one">%d élément</item>
+        <item quantity="other">%d éléments</item>
+    </plurals>
+    <plurals name="n_time">
+        <item quantity="one">%d fois</item>
+        <item quantity="other">%d fois</item>
+    </plurals>
+
+    <string name="seek_backward">5 secondes en arrière</string>
+    <string name="seek_forward">5 secondes en avant</string>
+    <string name="seek_forward_dynamic">+%1$d secondes en avant</string>
+    <string name="seek_backward_dynamic">-%1$d secondes en arrière</string>
+    <string name="seek_seconds_addup">Recherche progressive</string>
+    <string name="seek_seconds_addup_description">Si cette option est activée, cela ajoute 5 secondes supplémentaires à chaque saut de recherche.</string>
+
+    <string name="similar_content">Contenu similaire</string>
+
+    <string name="login_settings">Paramètres de connexion</string>
+    <string name="general_settings">Paramètres généraux</string>
+
+    <string name="player_background_style">Style d'arrière-plan du lecteur</string>
+    <string name="follow_theme">Sombre</string>
+    <string name="gradient">Accent musical</string>
+    <string name="new_player_design">Nouveau design du lecteur</string>
+    <string name="new_mini_player_design">Nouveau design du mini-lecteur</string>
+    <string name="player_background_blur">Flou</string>
+    <string name="player_buttons_style">Couleurs des boutons du lecteur</string>
+    <string name="default_style">Par défaut</string>
+    <string name="secondary_color_style">Secondaire</string>
+    <string name="enable_squiggly_slider">Activer le curseur ondulé</string>
+    <string name="enable_swipe_thumbnail">Activer le balayage pour changer de titre</string>
+    <string name="swipe_song_to_add">Balayez le titre vers la gauche pour l\'ajouter à la file d\'attente ou vers la droite pour le lire ensuite</string>
+    <string name="swipe_song_to_remove">Balayez le titre pour le supprimer de la playlist</string>
+    <string name="lyrics_click_change">Changer les paroles en cliquant</string>
+    <string name="lyrics_auto_scroll">Défilement automatique des paroles</string>
+    <string name="slim">Fine</string>
+    <string name="slim_navbar">Barre de navigation inférieure fine</string>
+    <string name="auto_playlists">Playlists automatiques</string>
+    <string name="show_liked_playlist">Afficher la playlist « Favoris »</string>
+    <string name="show_downloaded_playlist">Afficher la playlist « Hors-Ligne »</string>
+    <string name="show_top_playlist">Afficher la playlist « Mon Top »</string>
+    <string name="show_cached_playlist">Afficher la playlist « En Cache »</string>
+    <string name="show_uploaded_playlist">Afficher la playlist « Téléchargés »</string>
+  
