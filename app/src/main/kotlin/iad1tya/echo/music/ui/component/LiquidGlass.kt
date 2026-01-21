@@ -2,6 +2,7 @@ package iad1tya.echo.music.ui.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.layer.GraphicsLayer
@@ -95,21 +96,5 @@ fun Modifier.drawOptimizedGlass(
     shape: Shape,
     surfaceAlpha: Float = 0.4f, // Slightly higher alpha to compensate for lack of other effects
 ): Modifier {
-    return this.drawBackdrop(
-        backdrop = backdrop,
-        effects = {
-            // Only apply blur, skip expensive color matrix operations
-            blur(16.dp.toPx())
-        },
-        onDrawBackdrop = { drawBackdrop ->
-            drawBackdrop()
-            try {
-                layer.record { drawBackdrop() }
-            } catch (e: IllegalStateException) {
-                // Ignore "Attempting to drawContent for a null node" during transitions
-            }
-        },
-        shape = { shape },
-        onDrawSurface = { drawRect(Color.Black.copy(alpha = surfaceAlpha)) }
-    )
+    return this.background(Color.Black.copy(alpha = 0.85f))
 }

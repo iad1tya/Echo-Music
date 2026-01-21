@@ -125,7 +125,7 @@ fun SongMenu(
     val scope = rememberCoroutineScope()
     var refetchIconDegree by remember { mutableFloatStateOf(0f) }
 
-    val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
+
 
     val rotationAnimation by animateFloatAsState(
         targetValue = refetchIconDegree,
@@ -133,15 +133,7 @@ fun SongMenu(
         label = "",
     )
 
-    val orderedArtists by produceState(initialValue = emptyList<ArtistEntity>(), song) {
-        withContext(Dispatchers.IO) {
-            val artistMaps = database.songArtistMap(song.id).sortedBy { it.position }
-            val sorted = artistMaps.mapNotNull { map ->
-                song.artists.firstOrNull { it.id == map.artistId }
-            }
-            value = sorted
-        }
-    }
+
 
     var showEditDialog by rememberSaveable {
         mutableStateOf(false)
@@ -614,6 +606,7 @@ fun SongMenu(
         }
         if (isFromCache) {
             item {
+                val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
                 ListItem(
                     headlineContent = { Text(text = stringResource(R.string.remove_from_cache)) },
                     leadingContent = {
