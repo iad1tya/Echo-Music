@@ -9,7 +9,7 @@
 <resources>
     <!-- Bottom navigation -->
     <string name="home">Accueil</string>
-    <string name="songs">Titress</string>
+    <string name="songs">Titres</string>
     <string name="artists">Artistes</string>
     <string name="albums">Albums</string>
     <string name="playlists">Playlists</string>
