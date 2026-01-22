@@ -15,6 +15,5 @@ dependencies {
     implementation(libs.ktor.client.encoding)
     implementation(libs.brotli)
     implementation(libs.extractor)
-    implementation(libs.echoshared)
     testImplementation(libs.junit)
 }

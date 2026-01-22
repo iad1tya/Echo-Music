@@ -12,9 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -187,15 +184,7 @@ fun AccountScreen(
     }
 
     TopAppBar(
-        title = { 
-            Text(
-                text = stringResource(R.string.account),
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        },
+        title = { Text(stringResource(R.string.account)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

@@ -337,7 +337,6 @@ fun StorageSettings(
                 }
             )
         }
-        Spacer(Modifier.height(120.dp))
     }
 
     Box {
@@ -375,7 +374,10 @@ fun StorageSettings(
             title = { 
                 Text(
                     text = stringResource(R.string.storage),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                        fontWeight = FontWeight.Bold
+                    )
                 )
             },
             navigationIcon = {

@@ -143,7 +143,11 @@ fun FindSongScreen(
                 title = {
                     Text(
                         text = "Echo Find",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 28.sp
+                        ),
                         color = MaterialTheme.colorScheme.primary
                     )
                 },
@@ -157,7 +161,6 @@ fun FindSongScreen(
                     }
                 },
                 actions = {
-                    iad1tya.echo.music.ui.component.CastButton()
                     val currentState = state
                     if (currentState is RecognitionState.Success) {
                         val scope = rememberCoroutineScope()

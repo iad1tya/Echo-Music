@@ -117,8 +117,7 @@ fun BottomSheet(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        alpha = (state.progress.coerceAtLeast(0f)).pow(0.5f).coerceIn(0f, 1f)
-                        translationY = (1f - state.progress) * 100.dp.toPx()
+                        alpha = ((state.progress - 0.25f) * 4).coerceIn(0f, 1f)
                     },
                 content = content
             )
@@ -128,7 +127,7 @@ fun BottomSheet(
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        alpha = 1f - (state.progress * 2).coerceAtMost(1f)
+                        alpha = 1f - (state.progress * 4).coerceAtMost(1f)
                     }
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

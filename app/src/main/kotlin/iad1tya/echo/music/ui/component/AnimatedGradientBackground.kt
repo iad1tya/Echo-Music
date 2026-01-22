@@ -94,24 +94,15 @@ fun AnimatedGradientBackground(
 }
 
 private fun DrawScope.drawRadialBlob(color: Color, center: Offset, radius: Float) {
-    if (size.minDimension <= 0f) return
-
-    try {
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(color.copy(alpha = 0.6f), Color.Transparent),
-                center = center,
-                radius = radius
-            ),
-            radius = radius,
-            center = center
-        )
-    } catch (e: UnsupportedOperationException) {
-        // Catch crash on some devices where Canvas is invalid (EmptyCanvas)
-        // This is a decorative background, so it's safe to skip drawing
-    } catch (e: Exception) {
-        // Catch generic exceptions to prevent app crash
-    }
+    drawCircle(
+        brush = Brush.radialGradient(
+            colors = listOf(color.copy(alpha = 0.6f), Color.Transparent),
+            center = center,
+            radius = radius
+        ),
+        radius = radius,
+        center = center
+    )
 }
 
 private fun calculateAnimatedOffset(

@@ -24,8 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -82,11 +80,6 @@ import iad1tya.echo.music.utils.rememberPreference
 import iad1tya.echo.music.viewmodels.HomeViewModel
 import iad1tya.echo.music.viewmodels.AccountSettingsViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.ui.window.Dialog
-import android.graphics.Bitmap
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.common.BitMatrix
 
 @Composable
 fun AccountSettings(
@@ -123,12 +116,11 @@ fun AccountSettings(
     var showToken by remember { mutableStateOf(false) }
     var showTokenEditor by remember { mutableStateOf(false) }
     var showAccountSwitcher by remember { mutableStateOf(false) }
-    var showQRCodeDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
@@ -139,7 +131,10 @@ fun AccountSettings(
         ) {
             Text(
                 text = stringResource(R.string.account),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                    fontWeight = FontWeight.Bold
+                ),
                 modifier = Modifier.padding(start = 4.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -148,7 +143,7 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(12.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -176,7 +171,7 @@ fun AccountSettings(
                             }
                         }
                     )
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .padding(horizontal = 18.dp, vertical = 12.dp)
             ) {
             if (isLoggedIn && accountImageUrl != null) {
                 AsyncImage(
@@ -190,7 +185,7 @@ fun AccountSettings(
                     painter = painterResource(R.drawable.google),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    colorFilter = ColorFilter.tint(Color.White)
+                    colorFilter = null
                 )
             }
 
@@ -261,7 +256,7 @@ fun AccountSettings(
             )
         }
 
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(4.dp))
 
         if (showTokenEditor) {
             val text = """
@@ -299,72 +294,6 @@ fun AccountSettings(
             )
         }
 
-        // History button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable {
-                    onClose()
-                    navController.navigate("history")
-                }
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.history),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-
-                Spacer(Modifier.width(16.dp))
-
-                Text(
-                    text = stringResource(R.string.history),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        Spacer(Modifier.height(2.dp))
-
-        // Stats button
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface)
-                .clickable {
-                    onClose()
-                    navController.navigate("stats")
-                }
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.stats),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-
-                Spacer(Modifier.width(16.dp))
-
-                Text(
-                    text = stringResource(R.string.stats),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        Spacer(Modifier.height(2.dp))
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -375,7 +304,7 @@ fun AccountSettings(
                     else if (!showToken) showToken = true
                     else showTokenEditor = true
                 }
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .padding(horizontal = 18.dp, vertical = 12.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -400,38 +329,7 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(2.dp))
-
-        // Login to Desktop button
-        if (isLoggedIn) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .clickable { showQRCodeDialog = true }
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.desktop),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    Spacer(Modifier.width(16.dp))
-
-                    Text(
-                        text = "Login to Desktop",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-            Spacer(Modifier.height(2.dp))
-        }
+        Spacer(Modifier.height(4.dp))
 
         // Settings button
         Box(
@@ -443,25 +341,17 @@ fun AccountSettings(
                     onClose()
                     navController.navigate("settings")
                 }
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .padding(horizontal = 18.dp, vertical = 12.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                BadgedBox(
-                    badge = {
-                        if (latestVersionName != BuildConfig.VERSION_NAME) {
-                            Badge()
-                        }
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.settings_outlined),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                Icon(
+                    painter = painterResource(R.drawable.settings_outlined),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
 
                 Spacer(Modifier.width(16.dp))
 
@@ -472,7 +362,9 @@ fun AccountSettings(
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(4.dp))
+
+
 
         if (isLoggedIn) {
             SwitchPreference(
@@ -504,54 +396,6 @@ fun AccountSettings(
             )
         }
 
-
+        Spacer(Modifier.height(12.dp))
     }
-
-    if (showQRCodeDialog) {
-        Dialog(onDismissRequest = { showQRCodeDialog = false }) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    Text(
-                        text = "Scan to Login",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    val qrBitmap = remember(innerTubeCookie) {
-                        createQRCodeBitmap(innerTubeCookie, 512)
-                    }
-                    
-                    Image(
-                        bitmap = qrBitmap.asImageBitmap(),
-                        contentDescription = "Login QR Code",
-                        modifier = Modifier
-                            .size(250.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                }
-            }
-        }
-    }
-}
-
-private fun createQRCodeBitmap(text: String, size: Int): Bitmap {
-    val bitMatrix: BitMatrix = MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, size, size)
-    val width = bitMatrix.width
-    val height = bitMatrix.height
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-    for (x in 0 until width) {
-        for (y in 0 until height) {
-            bitmap.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
-        }
-    }
-    return bitmap
 }

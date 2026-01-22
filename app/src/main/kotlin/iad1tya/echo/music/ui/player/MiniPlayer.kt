@@ -7,7 +7,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -78,9 +77,6 @@ import iad1tya.echo.music.constants.MiniPlayerHeight
 import iad1tya.echo.music.constants.SwipeSensitivityKey
 import iad1tya.echo.music.constants.ThumbnailCornerRadius
 import iad1tya.echo.music.constants.UseNewMiniPlayerDesignKey
-import iad1tya.echo.music.constants.DisableGlassEffectKey
-import iad1tya.echo.music.constants.MiniPlayerGlassOpacityKey
-import iad1tya.echo.music.constants.MiniPlayerGlassBlurKey
 import iad1tya.echo.music.db.entities.ArtistEntity
 import iad1tya.echo.music.extensions.togglePlayPause
 import iad1tya.echo.music.models.MediaMetadata
@@ -99,9 +95,6 @@ import coil3.request.allowHardware
 import coil3.toBitmap
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.toArgb
-import iad1tya.echo.music.ui.component.PlatformBackdrop
-import iad1tya.echo.music.ui.component.drawBackdropCustomShape
-import androidx.compose.ui.graphics.layer.GraphicsLayer
 
 @Composable
 fun MiniPlayer(
@@ -109,28 +102,19 @@ fun MiniPlayer(
     duration: Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
-    backdrop: PlatformBackdrop? = null,
-    layer: GraphicsLayer? = null,
-    luminance: Float = 0f,
 ) {
     val useNewMiniPlayerDesign by rememberPreference(UseNewMiniPlayerDesignKey, true)
-    val disableGlassEffect by rememberPreference(DisableGlassEffectKey, false)
 
     if (useNewMiniPlayerDesign) {
         NewMiniPlayer(
             position = position,
             duration = duration,
             modifier = modifier,
-            pureBlack = pureBlack,
-            // Disable glass effect (blur) if the setting is enabled, but keep the Pill design
-            backdrop = if (disableGlassEffect) null else backdrop,
-            layer = if (disableGlassEffect) null else layer,
-            luminance = luminance
+            pureBlack = pureBlack
         )
     } else {
         // NEW: Wrap LegacyMiniPlayer in a Box to allow alignment on tablet landscape.
         // The outer Box fills the width, providing a container for the inner player to be aligned within.
-        // Also applying the height offset (bottom padding) here for the classic design.
         Box(modifier = modifier.fillMaxWidth()) {
             LegacyMiniPlayer(
                 position = position,
@@ -157,9 +141,6 @@ private fun NewMiniPlayer(
     duration: Long,
     modifier: Modifier = Modifier,
     pureBlack: Boolean,
-    backdrop: PlatformBackdrop? = null,
-    layer: GraphicsLayer? = null,
-    luminance: Float = 0f,
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val database = LocalDatabase.current
@@ -175,9 +156,6 @@ private fun NewMiniPlayer(
     val coroutineScope = rememberCoroutineScope()
     val swipeSensitivity by rememberPreference(SwipeSensitivityKey, 0.73f)
     val swipeThumbnail by rememberPreference(iad1tya.echo.music.constants.SwipeThumbnailKey, true)
-    
-    val miniPlayerGlassOpacity by rememberPreference(MiniPlayerGlassOpacityKey, 0.5f)
-    val miniPlayerGlassBlur by rememberPreference(MiniPlayerGlassBlurKey, 16f)
 
     val configuration = LocalConfiguration.current
     val isTabletLandscape = configuration.screenWidthDp >= 600 &&
@@ -200,7 +178,7 @@ private fun NewMiniPlayer(
                     val palette = Palette.from(bitmap)
                         .maximumColorCount(32)
                         .generate()
-                    gradientColors = PlayerColorExtractor.extractMiniPlayerColors(
+                    gradientColors = PlayerColorExtractor.extractGradientColors(
                         palette = palette,
                         fallbackColor = Color.Black.toArgb()
                     )
@@ -211,17 +189,6 @@ private fun NewMiniPlayer(
         }
     }
 
-    val contentColor by animateColorAsState(
-        targetValue = if (backdrop != null && layer != null) {
-            Color.White
-        } else if (gradientColors.isNotEmpty()) {
-            Color.White
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        },
-        label = "contentColor"
-    )
-
     val offsetXAnimatable = remember { Animatable(0f) }
     var dragStartTime by remember { mutableLongStateOf(0L) }
     var totalDragDistance by remember { mutableFloatStateOf(0f) }
@@ -229,7 +196,7 @@ private fun NewMiniPlayer(
     // Optimized animation spec for smoother, more responsive feel
     val animationSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessMedium,
+        stiffness = Spring.StiffnessHigh,
         visibilityThreshold = 0.1f
     )
 
@@ -343,20 +310,11 @@ private fun NewMiniPlayer(
                 )
                 .height(64.dp) // Circular height
                 .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                .clip(RoundedCornerShape(percent = 50)) // Clip first for perfect rounded corners
+                .clip(RoundedCornerShape(32.dp)) // Clip first for perfect rounded corners
                 .then(
-                    if (backdrop != null && layer != null) {
-                        Modifier.drawBackdropCustomShape(
-                            backdrop = backdrop,
-                            layer = layer,
-                            luminanceAnimation = luminance,
-                            shape = RoundedCornerShape(percent = 50),
-                            surfaceAlpha = miniPlayerGlassOpacity,
-                            customBlur = miniPlayerGlassBlur.dp
-                        )
-                    } else if (gradientColors.isNotEmpty()) {
+                    if (gradientColors.isNotEmpty()) {
                         Modifier.background(
-                            Brush.verticalGradient(
+                            Brush.horizontalGradient(
                                 colors = gradientColors
                             )
                         )
@@ -383,10 +341,10 @@ private fun NewMiniPlayer(
                         CircularProgressIndicator(
                             progress = { (position.toFloat() / duration).coerceIn(0f, 1f) },
                             modifier = Modifier.size(48.dp),
-                            color = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty()) contentColor else MaterialTheme.colorScheme.primary,
+                            color = if (gradientColors.isNotEmpty()) Color.White else MaterialTheme.colorScheme.primary,
                             strokeWidth = 3.dp,
-                            trackColor = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty()) 
-                                contentColor.copy(alpha = 0.2f)
+                            trackColor = if (gradientColors.isNotEmpty()) 
+                                Color.White.copy(alpha = 0.2f)
                             else 
                                 MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                         )
@@ -400,8 +358,8 @@ private fun NewMiniPlayer(
                             .clip(CircleShape)
                             .border(
                                 width = 1.dp,
-                                color = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty())
-                                    contentColor.copy(alpha = 0.3f)
+                                color = if (gradientColors.isNotEmpty())
+                                    Color.White.copy(alpha = 0.3f)
                                 else
                                     MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                 shape = CircleShape
@@ -437,12 +395,12 @@ private fun NewMiniPlayer(
                         ) { title ->
                             Text(
                                 text = title,
-                                color = contentColor,
+                                color = if (gradientColors.isNotEmpty()) Color.White else MaterialTheme.colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier,
+                                modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
                             )
                         }
 
@@ -454,11 +412,11 @@ private fun NewMiniPlayer(
                             ) { artists ->
                                 Text(
                                     text = artists,
-                                    color = contentColor.copy(alpha = 0.7f),
+                                    color = if (gradientColors.isNotEmpty()) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                     fontSize = 12.sp,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier,
+                                    modifier = Modifier.basicMarquee(iterations = 1, initialDelayMillis = 3000, velocity = 30.dp),
                                 )
                             }
                         }
@@ -490,8 +448,8 @@ private fun NewMiniPlayer(
                         .clip(CircleShape)
                         .border(
                             width = 1.dp,
-                            color = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty())
-                                contentColor.copy(alpha = 0.3f)
+                            color = if (gradientColors.isNotEmpty())
+                                Color.White.copy(alpha = 0.3f)
                             else
                                 MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                             shape = CircleShape
@@ -508,9 +466,9 @@ private fun NewMiniPlayer(
                         painter = painterResource(R.drawable.skip_previous),
                         contentDescription = null,
                         tint = if (canSkipPrevious)
-                            contentColor
+                            (if (gradientColors.isNotEmpty()) Color.White else MaterialTheme.colorScheme.onSurface)
                         else
-                            contentColor.copy(alpha = 0.3f),
+                            (if (gradientColors.isNotEmpty()) Color.White.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -525,15 +483,15 @@ private fun NewMiniPlayer(
                         .clip(CircleShape)
                         .border(
                             width = 1.dp,
-                            color = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty()) 
-                                contentColor.copy(alpha = 0.5f)
+                            color = if (gradientColors.isNotEmpty()) 
+                                Color.White.copy(alpha = 0.5f)
                             else 
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                             shape = CircleShape
                         )
                         .background(
-                            color = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty())
-                                contentColor.copy(alpha = 0.2f)
+                            color = if (gradientColors.isNotEmpty())
+                                Color.White.copy(alpha = 0.2f)
                             else
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                             shape = CircleShape
@@ -558,7 +516,7 @@ private fun NewMiniPlayer(
                             }
                         ),
                         contentDescription = null,
-                        tint = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty()) contentColor else MaterialTheme.colorScheme.primary,
+                        tint = if (gradientColors.isNotEmpty()) Color.White else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -573,8 +531,8 @@ private fun NewMiniPlayer(
                         .clip(CircleShape)
                         .border(
                             width = 1.dp,
-                            color = if ((backdrop != null && layer != null) || gradientColors.isNotEmpty())
-                                contentColor.copy(alpha = 0.3f)
+                            color = if (gradientColors.isNotEmpty())
+                                Color.White.copy(alpha = 0.3f)
                             else
                                 MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                             shape = CircleShape
@@ -591,9 +549,9 @@ private fun NewMiniPlayer(
                         painter = painterResource(R.drawable.skip_next),
                         contentDescription = null,
                         tint = if (canSkipNext)
-                            contentColor
+                            (if (gradientColors.isNotEmpty()) Color.White else MaterialTheme.colorScheme.onSurface)
                         else
-                            contentColor.copy(alpha = 0.3f),
+                            (if (gradientColors.isNotEmpty()) Color.White.copy(alpha = 0.3f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -946,7 +904,7 @@ private fun LegacyMiniMediaInfo(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier,
+                    modifier = Modifier.basicMarquee(),
                 )
             }
 

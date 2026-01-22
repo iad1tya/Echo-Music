@@ -605,9 +605,6 @@ interface DatabaseDao {
     @Query("SELECT * FROM lyrics WHERE id = :id")
     fun lyrics(id: String?): Flow<LyricsEntity?>
 
-    @Query("UPDATE lyrics SET translatedLyrics = :translatedLyrics WHERE id = :id")
-    suspend fun updateTranslatedLyrics(id: String, translatedLyrics: String?)
-
     @Transaction
     @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
     @Query("SELECT *, (SELECT COUNT(1) FROM song_artist_map JOIN song ON song_artist_map.songId = song.id WHERE artistId = artist.id AND song.inLibrary IS NOT NULL) AS songCount FROM artist WHERE songCount > 0 ORDER BY rowId")

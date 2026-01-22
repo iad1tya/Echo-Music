@@ -40,8 +40,7 @@ object LyricsTranslationHelper {
         baseUrl: String,
         model: String,
         mode: String,
-        scope: CoroutineScope,
-        onSuccess: (List<String>) -> Unit = {}
+        scope: CoroutineScope
     ) {
         translationJob?.cancel()
         _status.value = TranslationStatus.Translating
@@ -125,7 +124,6 @@ object LyricsTranslationHelper {
                     if (_status.value is TranslationStatus.Success) {
                         _status.value = TranslationStatus.Idle
                     }
-                    onSuccess(translatedLines)
                 }.onFailure { error ->
                     val errorMessage = error.message ?: "Unknown error occurred"
                     

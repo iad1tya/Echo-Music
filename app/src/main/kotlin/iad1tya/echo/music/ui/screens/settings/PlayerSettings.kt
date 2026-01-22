@@ -292,7 +292,6 @@ fun PlayerSettings(
             checked = stopMusicOnTaskClear,
             onCheckedChange = onStopMusicOnTaskClearChange
         )
-        Spacer(Modifier.height(120.dp))
     }
 
     Box {
@@ -331,6 +330,8 @@ fun PlayerSettings(
                 Text(
                     text = stringResource(R.string.player_and_audio),
                     style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                        fontWeight = FontWeight.Bold
                     )
                 )
             },

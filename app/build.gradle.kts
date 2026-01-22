@@ -93,7 +93,7 @@ android {
             )
         }
         debug {
-            // applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".debug"
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -147,8 +147,6 @@ android {
             excludes += "META-INF/NOTICE.md"
             excludes += "META-INF/CONTRIBUTORS.md"
             excludes += "META-INF/LICENSE.md"
-            excludes += "/META-INF/io.netty.versions.properties"
-            excludes += "/META-INF/INDEX.LIST"
         }
     }
 }
@@ -251,5 +249,4 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation(libs.mlkit.language.id)
-    implementation(libs.backdrop)
 }

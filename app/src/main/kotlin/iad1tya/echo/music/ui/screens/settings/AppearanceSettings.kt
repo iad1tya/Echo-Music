@@ -71,8 +71,6 @@ import iad1tya.echo.music.constants.LyricsScrollKey
 import iad1tya.echo.music.constants.LyricsTextPositionKey
 import iad1tya.echo.music.constants.UseNewPlayerDesignKey
 import iad1tya.echo.music.constants.UseNewMiniPlayerDesignKey
-import iad1tya.echo.music.constants.DisableGlassEffectKey
-import iad1tya.echo.music.constants.MiniPlayerBottomPaddingKey
 import iad1tya.echo.music.constants.PlayerBackgroundStyle
 import iad1tya.echo.music.constants.PlayerBackgroundStyleKey
 import iad1tya.echo.music.constants.PureBlackKey
@@ -81,8 +79,6 @@ import iad1tya.echo.music.constants.PlayerButtonsStyleKey
 import iad1tya.echo.music.constants.SliderStyle
 import iad1tya.echo.music.constants.SliderStyleKey
 import iad1tya.echo.music.constants.SlimNavBarKey
-import iad1tya.echo.music.constants.MiniPlayerGlassOpacityKey
-import iad1tya.echo.music.constants.MiniPlayerGlassBlurKey
 import iad1tya.echo.music.constants.ShowLikedPlaylistKey
 import iad1tya.echo.music.constants.ShowDownloadedPlaylistKey
 import iad1tya.echo.music.constants.ShowTopPlaylistKey
@@ -127,12 +123,6 @@ fun AppearanceSettings(
     // Dark mode forced on - removed theme settings
     // New player design removed - always use old design
     // New mini player design removed - always use old design
-    // New mini player design removed - always use old design
-    val (disableGlassEffect, onDisableGlassEffectChange) = rememberPreference(DisableGlassEffectKey, defaultValue = false)
-    val (miniPlayerGlassOpacity, onMiniPlayerGlassOpacityChange) = rememberPreference(MiniPlayerGlassOpacityKey, defaultValue = 0.5f)
-    val (miniPlayerGlassBlur, onMiniPlayerGlassBlurChange) = rememberPreference(MiniPlayerGlassBlurKey, defaultValue = 16f)
-    val (miniPlayerBottomPadding, onMiniPlayerBottomPaddingChange) = rememberPreference(MiniPlayerBottomPaddingKey, defaultValue = 0)
-
     val (playerBackground, onPlayerBackgroundChange) =
         rememberEnumPreference(
             PlayerBackgroundStyleKey,
@@ -373,7 +363,6 @@ fun AppearanceSettings(
             )
         )
 
-        /*
         PreferenceGroupTitle(
             title = stringResource(R.string.theme),
         )
@@ -407,13 +396,11 @@ fun AppearanceSettings(
                 onCheckedChange = onPureBlackChange,
             )
         }
-        */
 
         PreferenceGroupTitle(
             title = stringResource(R.string.player),
         )
 
-        /*
         EnumListPreference(
             title = { Text(stringResource(R.string.player_background_style)) },
             icon = { Icon(painterResource(R.drawable.gradient), null) },
@@ -426,169 +413,8 @@ fun AppearanceSettings(
                 }
             },
         )
-        */
 
-        SwitchPreference(
-            title = { Text("Disable Glass Effect") },
-            description = "Reverts to the classic bottom navigation and miniplayer design",
-            icon = { Icon(painterResource(R.drawable.palette), null) },
-            checked = disableGlassEffect,
-            onCheckedChange = onDisableGlassEffectChange,
-        )
-
-        AnimatedVisibility(visible = !disableGlassEffect) {
-            Column {
-               var showGlassSettingsDialog by rememberSaveable { mutableStateOf(false) }
-
-               if (showGlassSettingsDialog) {
-                    var tempOpacity by remember { mutableFloatStateOf(miniPlayerGlassOpacity) }
-                    var tempBlur by remember { mutableFloatStateOf(miniPlayerGlassBlur) }
-
-                    DefaultDialog(
-                        onDismiss = { showGlassSettingsDialog = false },
-                        buttons = {
-                            TextButton(
-                                onClick = {
-                                    tempOpacity = 0.5f
-                                    tempBlur = 16f
-                                }
-                            ) {
-                                Text(stringResource(R.string.reset))
-                            }
-                            Spacer(modifier = Modifier.weight(1f))
-                            TextButton(onClick = { showGlassSettingsDialog = false }) {
-                                Text(stringResource(android.R.string.cancel))
-                            }
-                            TextButton(
-                                onClick = {
-                                    onMiniPlayerGlassOpacityChange(tempOpacity)
-                                    onMiniPlayerGlassBlurChange(tempBlur)
-                                    showGlassSettingsDialog = false
-                                }
-                            ) {
-                                Text(stringResource(android.R.string.ok))
-                            }
-                        }
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Text(
-                                text = "Glass Effect Settings",
-                                style = MaterialTheme.typography.headlineSmall,
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
-                            
-                            Column {
-                                Text(
-                                    text = "Opacity: ${(tempOpacity * 100).toInt()}%",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Slider(
-                                    value = tempOpacity,
-                                    onValueChange = { tempOpacity = it },
-                                    valueRange = 0f..1f
-                                )
-                            }
-
-                            Column {
-                                Text(
-                                    text = "Blur: ${tempBlur.toInt()} dp",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Slider(
-                                    value = tempBlur,
-                                    onValueChange = { tempBlur = it },
-                                    valueRange = 0f..100f
-                                )
-                            }
-                        }
-                    }
-               }
-
-               PreferenceEntry(
-                   title = { Text("Glass Properties") },
-                   description = "Opacity: ${(miniPlayerGlassOpacity * 100).toInt()}%, Blur: ${miniPlayerGlassBlur.toInt()} dp",
-                   icon = { Icon(painterResource(R.drawable.contrast), null) },
-                   onClick = { showGlassSettingsDialog = true }
-               )
-            }
-        }
-
-        AnimatedVisibility(visible = disableGlassEffect) {
-            var showPaddingDialog by rememberSaveable { mutableStateOf(false) }
-
-            if (showPaddingDialog) {
-                var tempPadding by remember { mutableFloatStateOf(miniPlayerBottomPadding.toFloat()) }
-
-                DefaultDialog(
-                    onDismiss = {
-                        showPaddingDialog = false
-                    },
-                    buttons = {
-                        TextButton(
-                            onClick = {
-                                tempPadding = 0f
-                            }
-                        ) {
-                            Text(stringResource(R.string.reset))
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        TextButton(
-                            onClick = {
-                                showPaddingDialog = false
-                            }
-                        ) {
-                            Text(stringResource(android.R.string.cancel))
-                        }
-                        TextButton(
-                            onClick = {
-                                onMiniPlayerBottomPaddingChange(tempPadding.roundToInt())
-                                showPaddingDialog = false
-                            }
-                        ) {
-                            Text(stringResource(android.R.string.ok))
-                        }
-                    }
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "MiniPlayer Height Offset",
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        Text(
-                            text = "${tempPadding.roundToInt()} dp",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        Slider(
-                            value = tempPadding,
-                            onValueChange = { tempPadding = it },
-                            valueRange = -50f..100f, // -50dp to 100dp range
-                            steps = 149, // 1dp steps
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
-
-            PreferenceEntry(
-                title = { Text("MiniPlayer Height Offset") },
-                description = "${miniPlayerBottomPadding} dp",
-                icon = { Icon(painterResource(R.drawable.expand_less), null) }, // Using expand_less as "up/down" indicator
-                onClick = { showPaddingDialog = true }
-            )
-        }
-
+        // Player button colors option hidden per user request
         /*
         EnumListPreference(
             title = { Text(stringResource(R.string.player_buttons_style)) },
@@ -780,14 +606,12 @@ fun AppearanceSettings(
             onCheckedChange = onSwipeToRemoveSongChange
         )
 
-        AnimatedVisibility(visible = disableGlassEffect) {
-            SwitchPreference(
-                title = { Text(stringResource(R.string.slim_navbar)) },
-                icon = { Icon(painterResource(R.drawable.nav_bar), null) },
-                checked = slimNav,
-                onCheckedChange = onSlimNavChange
-            )
-        }
+        SwitchPreference(
+            title = { Text(stringResource(R.string.slim_navbar)) },
+            icon = { Icon(painterResource(R.drawable.nav_bar), null) },
+            checked = slimNav,
+            onCheckedChange = onSlimNavChange
+        )
 
         EnumListPreference(
             title = { Text(stringResource(R.string.grid_cell_size)) },
@@ -813,8 +637,6 @@ fun AppearanceSettings(
             checked = showFindInNavbar,
             onCheckedChange = onShowFindInNavbarChange
         )
-        
-        Spacer(modifier = Modifier.height(120.dp))
     }
 
     Box {
@@ -853,6 +675,8 @@ fun AppearanceSettings(
                 Text(
                     text = stringResource(R.string.appearance),
                     style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                        fontWeight = FontWeight.Bold
                     )
                 )
             },

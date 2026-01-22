@@ -17,9 +17,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.systemBars
@@ -38,7 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import iad1tya.echo.music.ui.component.TransparentListItem as ListItem
+import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -125,7 +123,7 @@ fun SongMenu(
     val scope = rememberCoroutineScope()
     var refetchIconDegree by remember { mutableFloatStateOf(0f) }
 
-
+    val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
 
     val rotationAnimation by animateFloatAsState(
         targetValue = refetchIconDegree,
@@ -133,7 +131,15 @@ fun SongMenu(
         label = "",
     )
 
-
+    val orderedArtists by produceState(initialValue = emptyList<ArtistEntity>(), song) {
+        withContext(Dispatchers.IO) {
+            val artistMaps = database.songArtistMap(song.id).sortedBy { it.position }
+            val sorted = artistMaps.mapNotNull { map ->
+                song.artists.firstOrNull { it.id == map.artistId }
+            }
+            value = sorted
+        }
+    }
 
     var showEditDialog by rememberSaveable {
         mutableStateOf(false)
@@ -353,6 +359,7 @@ fun SongMenu(
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     LazyColumn(
+        userScrollEnabled = !isPortrait,
         contentPadding = PaddingValues(
             start = 0.dp,
             top = 0.dp,
@@ -606,7 +613,6 @@ fun SongMenu(
         }
         if (isFromCache) {
             item {
-                val cacheViewModel = hiltViewModel<CachePlaylistViewModel>()
                 ListItem(
                     headlineContent = { Text(text = stringResource(R.string.remove_from_cache)) },
                     leadingContent = {

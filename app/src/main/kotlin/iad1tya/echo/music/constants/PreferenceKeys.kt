@@ -11,7 +11,6 @@ import java.time.ZoneOffset
 val DynamicThemeKey = booleanPreferencesKey("dynamicTheme")
 val MaterialYouKey = booleanPreferencesKey("materialYou")
 val DarkModeKey = stringPreferencesKey("darkMode")
-val DarkModeMigrationKey = booleanPreferencesKey("darkModeMigration_v1")
 val PureBlackKey = booleanPreferencesKey("pureBlack")
 val DefaultOpenTabKey = stringPreferencesKey("defaultOpenTab")
 val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
@@ -23,11 +22,6 @@ val UseNewPlayerDesignKey= booleanPreferencesKey("useNewPlayerDesign")
 val UseNewMiniPlayerDesignKey = booleanPreferencesKey("useNewMiniPlayerDesign")
 val HidePlayerThumbnailKey = booleanPreferencesKey("hidePlayerThumbnail")
 val SeekExtraSeconds = booleanPreferencesKey("seekExtraSeconds")
-val DisableGlassEffectKey = booleanPreferencesKey("disable_glass_effect")
-val MiniPlayerBottomPaddingKey = intPreferencesKey("mini_player_bottom_padding")
-val MiniPlayerGlassOpacityKey = floatPreferencesKey("mini_player_glass_opacity")
-val MiniPlayerGlassBlurKey = floatPreferencesKey("mini_player_glass_blur")
-
 
 enum class SliderStyle {
     DEFAULT,

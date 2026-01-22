@@ -463,7 +463,7 @@ fun SettingsScreen(
         )
         
         
-        Spacer(modifier = Modifier.height(120.dp))
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     Box {
@@ -502,6 +502,8 @@ fun SettingsScreen(
                 Text(
                     text = stringResource(R.string.settings),
                     style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                        fontWeight = FontWeight.Bold
                     )
                 )
             },

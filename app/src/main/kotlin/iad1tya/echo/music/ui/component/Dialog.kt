@@ -172,7 +172,7 @@ fun AccountSettingsDialog(
                 modifier = Modifier
                     .fillMaxWidth(0.92f) // Use 92% width on phones
                     .widthIn(max = 500.dp) // Max width for tablets
-                    .padding(top = 58.dp, start = 16.dp, end = 16.dp)
+                    .padding(top = 72.dp, start = 16.dp, end = 16.dp)
                     .clip(RoundedCornerShape(28.dp)),
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.surface,

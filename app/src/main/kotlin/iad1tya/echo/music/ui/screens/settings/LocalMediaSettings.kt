@@ -257,7 +257,7 @@ fun LocalMediaSettings(
 
         SwitchPreference(
             title = { Text("Strict Extensions") },
-            description = "Only scan supported audio formats (mp3, flac, wav, etc.)",
+            description = "Only scan .mp3, .flac, .m4a, .wav, .ogg",
             checked = strictExt,
             onCheckedChange = onStrictExtChange
         )
@@ -268,7 +268,6 @@ fun LocalMediaSettings(
             checked = strictFilePaths,
             onCheckedChange = onStrictFilePathsChange
         )
-        Spacer(Modifier.height(120.dp))
     }
 
     Box {
@@ -306,7 +305,10 @@ fun LocalMediaSettings(
             title = { 
                 Text(
                     text = stringResource(R.string.local_media),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.zalando_sans_expanded)),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
                 )
             },
             navigationIcon = {

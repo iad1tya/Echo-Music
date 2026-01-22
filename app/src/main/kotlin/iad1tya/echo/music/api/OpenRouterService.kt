@@ -10,7 +10,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 import java.util.concurrent.TimeUnit
-import android.util.Log
 
 object OpenRouterService {
     private val client = OkHttpClient.Builder()
@@ -124,14 +123,8 @@ Output MUST be a JSON array with EXACTLY $lineCount strings."""
                     .post(jsonBody.toString().toRequestBody(JSON))
                     .build()
 
-                Log.d("OpenRouter", "Sending request to ${request.url}")
-                // Log.d("OpenRouter", "Request body: ${jsonBody.toString()}") // Careful with API key logging
-
                 val response = client.newCall(request).execute()
                 val responseBody = response.body?.string()
-                
-                Log.d("OpenRouter", "Response code: ${response.code}")
-                Log.d("OpenRouter", "Response body: $responseBody")
 
                 if (!response.isSuccessful) {
                     // Retry on server errors (5xx)
@@ -141,38 +134,11 @@ Output MUST be a JSON array with EXACTLY $lineCount strings."""
                         continue
                     }
                     
-                     // Parse error message
-                    var errorMsg = "HTTP ${response.code}: ${response.message}"
-                    try {
-                        if (responseBody != null) {
-                            val jsonError = JSONObject(responseBody).optJSONObject("error")
-                            if (jsonError != null) {
-                                errorMsg = jsonError.optString("message", errorMsg)
-                                // Try to extract more detailed error from metadata.raw
-                                val metadata = jsonError.optJSONObject("metadata")
-                                if (metadata != null) {
-                                    val raw = metadata.optString("raw")
-                                    if (raw.isNotEmpty()) {
-                                        try {
-                                            val rawJson = JSONObject(raw)
-                                            val rawError = rawJson.optString("error")
-                                            if (rawError.isNotEmpty()) {
-                                                errorMsg = rawError
-                                            } else {
-                                                val rawMessage = rawJson.optString("message")
-                                                if (rawMessage.isNotEmpty()) {
-                                                    errorMsg = rawMessage
-                                                }
-                                            }
-                                        } catch (e: Exception) {
-                                            // Raw wasn't JSON or didn't have error field, ignore
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    val errorMsg = try {
+                        JSONObject(responseBody ?: "").optJSONObject("error")?.optString("message") 
+                            ?: "HTTP ${response.code}: ${response.message}"
                     } catch (e: Exception) {
-                        Log.e("OpenRouter", "Error parsing error response", e)
+                        "HTTP ${response.code}: ${response.message}"
                     }
                     return@withContext Result.failure(Exception("Translation failed: $errorMsg"))
                 }
@@ -242,7 +208,6 @@ Output MUST be a JSON array with EXACTLY $lineCount strings."""
                     }
                 }
             } catch (e: Exception) {
-                Log.e("OpenRouter", "Error during translation", e)
                 if (currentAttempt == maxRetries - 1) {
                     return@withContext Result.failure(e)
                 }

@@ -7,8 +7,6 @@ import androidx.room.PrimaryKey
 data class LyricsEntity(
     @PrimaryKey val id: String,
     val lyrics: String,
-    val provider: String = "Unknown",
-    val translatedLyrics: String? = null
 ) {
     companion object {
         const val LYRICS_NOT_FOUND = "LYRICS_NOT_FOUND"

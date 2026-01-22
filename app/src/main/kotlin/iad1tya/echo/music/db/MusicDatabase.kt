@@ -93,7 +93,7 @@ class MusicDatabase(
         SortedSongAlbumMap::class,
         PlaylistSongMapPreview::class,
     ],
-    version = 27,
+    version = 26,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -109,7 +109,7 @@ abstract class InternalDatabase : RoomDatabase() {
                 delegate =
                 Room
                     .databaseBuilder(context, InternalDatabase::class.java, DB_NAME)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_26_27)
+                    .addMigrations(MIGRATION_1_2)
                     .fallbackToDestructiveMigration()
                     .build(),
             )
@@ -500,11 +500,5 @@ class Migration25To26 : AutoMigrationSpec {
     override fun onPostMigrate(db: SupportSQLiteDatabase) {
         // Add localPath column
         db.execSQL("ALTER TABLE song ADD COLUMN localPath TEXT DEFAULT NULL")
-    }
-}
-
-val MIGRATION_26_27 = object : Migration(26, 27) {
-    override fun migrate(db: SupportSQLiteDatabase) {
-        db.execSQL("ALTER TABLE lyrics ADD COLUMN translatedLyrics TEXT DEFAULT NULL")
     }
 }

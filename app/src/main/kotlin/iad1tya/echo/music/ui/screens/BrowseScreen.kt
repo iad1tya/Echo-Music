@@ -140,9 +140,6 @@ package iad1tya.echo.music.ui.screens
                      contentDescription = null
                  )
              }
-         },
-         actions = {
-             iad1tya.echo.music.ui.component.CastButton()
          }
      )
  }

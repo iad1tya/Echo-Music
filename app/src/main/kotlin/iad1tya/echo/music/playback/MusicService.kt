@@ -43,7 +43,6 @@ import androidx.media3.datasource.cache.CacheDataSource.FLAG_IGNORE_CACHE_ON_ERR
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.analytics.PlaybackStats
@@ -52,7 +51,9 @@ import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.SilenceSkippingAudioProcessor
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
-import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.ExtractorsFactory
+import androidx.media3.extractor.mkv.MatroskaExtractor
+import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaController
@@ -238,15 +239,15 @@ class MusicService :
     private val songUrlCache = java.util.concurrent.ConcurrentHashMap<String, Pair<String, Long>>()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        try {
-            intent?.action?.let { action ->
-                when (action) {
-                    ACTION_PLAY_PAUSE -> if (player.isPlaying) player.pause() else player.play()
-                    ACTION_NEXT -> if (player.hasNextMediaItem()) player.seekToNext()
-                    ACTION_PREVIOUS -> if (player.hasPreviousMediaItem()) player.seekToPrevious()
-                }
+        intent?.action?.let { action ->
+            when (action) {
+                ACTION_PLAY_PAUSE -> if (player.isPlaying) player.pause() else player.play()
+                ACTION_NEXT -> if (player.hasNextMediaItem()) player.seekToNext()
+                ACTION_PREVIOUS -> if (player.hasPreviousMediaItem()) player.seekToPrevious()
             }
+        }
 
+        try {
             return super.onStartCommand(intent, flags, startId)
         } catch (e: Exception) {
             // Check if it's the specific foreground service exception (available in API 31+)
@@ -302,7 +303,6 @@ class MusicService :
                     false,
                 ).setSeekBackIncrementMs(5000)
                 .setSeekForwardIncrementMs(5000)
-                .setLoadControl(createLoadControl())
                 .build()
                 .apply {
                     addListener(this@MusicService)
@@ -395,19 +395,23 @@ class MusicService :
             updateNotification()
         }
 
-        currentMediaMetadata.distinctUntilChangedBy { it?.id }.collectLatest(scope) { mediaMetadata ->
-            if (mediaMetadata != null && database.lyrics(mediaMetadata.id)
+        combine(
+            currentMediaMetadata.distinctUntilChangedBy { it?.id },
+            dataStore.data.map { it[ShowLyricsKey] ?: false }.distinctUntilChanged(),
+        ) { mediaMetadata, showLyrics ->
+            mediaMetadata to showLyrics
+        }.collectLatest(scope) { (mediaMetadata, showLyrics) ->
+            if (showLyrics && mediaMetadata != null && database.lyrics(mediaMetadata.id)
                     .first() == null
             ) {
-                val result = lyricsHelper.getLyrics(mediaMetadata)
+                val lyrics = lyricsHelper.getLyrics(mediaMetadata)
                 // Check again if lyrics were added manually during the fetch duration
                 if (database.lyrics(mediaMetadata.id).first() == null) {
                     database.query {
                         upsert(
                             LyricsEntity(
                                 id = mediaMetadata.id,
-                                lyrics = result.lyrics,
-                                provider = result.providerName
+                                lyrics = lyrics,
                             ),
                         )
                     }
@@ -1516,7 +1520,9 @@ class MusicService :
     private fun createMediaSourceFactory() =
         DefaultMediaSourceFactory(
             createDataSourceFactory(),
-            DefaultExtractorsFactory(),
+            ExtractorsFactory {
+                arrayOf(MatroskaExtractor(), FragmentedMp4Extractor())
+            },
         )
 
     private fun createRenderersFactory() =
@@ -1537,18 +1543,6 @@ class MusicService :
                     ),
                 ).build()
         }
-
-    private fun createLoadControl(): DefaultLoadControl {
-        return DefaultLoadControl.Builder()
-            .setBufferDurationsMs(
-                30_000, // Min buffer 30s
-                30_000, // Max buffer 30s
-                500,    // Buffer for playback start (500ms for fast start)
-                1000    // Buffer for rebuffer (1s)
-            )
-            .setPrioritizeTimeOverSizeThresholds(true)
-            .build()
-    }
 
     override fun onPlaybackStatsReady(
         eventTime: AnalyticsListener.EventTime,

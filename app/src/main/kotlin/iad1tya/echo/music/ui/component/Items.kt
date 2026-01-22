@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -61,7 +60,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
@@ -79,21 +77,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.media3.common.MediaItem
-import androidx.palette.graphics.Palette
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
 import androidx.media3.exoplayer.offline.Download.STATE_DOWNLOADING
 import androidx.media3.exoplayer.offline.Download.STATE_QUEUED
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
-import coil3.imageLoader
 import coil3.request.ImageRequest
-import coil3.request.allowHardware
-import coil3.toBitmap
-import coil3.request.crossfade
 import com.echo.innertube.YouTube
 import com.echo.innertube.models.SongItem
 import com.echo.innertube.models.AlbumItem
@@ -367,7 +359,7 @@ fun SongGridItem(
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.basicMarquee().fillMaxWidth()
         )
     },
     subtitle = {
@@ -429,12 +421,11 @@ fun ArtistListItem(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
-                .crossfade(true)
                 .build(),
             contentDescription = null,
             modifier = Modifier
                 .size(ListThumbnailSize)
-                .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                .clip(CircleShape),
         )
     },
     trailingContent = trailingContent,
@@ -462,13 +453,12 @@ fun ArtistGridItem(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
-                .crossfade(true)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                .clip(CircleShape)
         )
     },
     fillMaxWidth = fillMaxWidth,
@@ -588,7 +578,7 @@ fun AlbumGridItem(
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.basicMarquee().fillMaxWidth()
         )
     },
     subtitle = {
@@ -700,7 +690,7 @@ fun PlaylistGridItem(
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.basicMarquee().fillMaxWidth()
         )
     },
     subtitle = {
@@ -849,7 +839,7 @@ fun YouTubeListItem(
                     isSelected = isSelected,
                     isActive = isActive,
                     isPlaying = isPlaying,
-                    shape = RoundedCornerShape(ThumbnailCornerRadius),
+                    shape = if (item is ArtistItem) CircleShape else RoundedCornerShape(ThumbnailCornerRadius),
                     modifier = Modifier.size(ListThumbnailSize)
                 )
             },
@@ -897,6 +887,7 @@ fun YouTubeGridItem(
             Icon.Download(download?.state)
         }
     },
+    thumbnailRatio: Float = if (item is SongItem) 16f / 9 else 1f,
     isActive: Boolean = false,
     isPlaying: Boolean = false,
     fillMaxWidth: Boolean = false,
@@ -909,7 +900,7 @@ fun YouTubeGridItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = if (item is ArtistItem) TextAlign.Center else TextAlign.Start,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.basicMarquee().fillMaxWidth()
         )
     },
     subtitle = {
@@ -934,105 +925,41 @@ fun YouTubeGridItem(
         val database = LocalDatabase.current
         val playerConnection = LocalPlayerConnection.current ?: return@GridItem
         val scope = rememberCoroutineScope()
-        val context = LocalContext.current
 
-        // Check if this is a video (wide thumbnail) vs song (square thumbnail)
-        // Videos typically have ytimg.com URLs without "/release/" or have maxresdefault/sddefault
-        val isVideo = item is SongItem && item.thumbnail.let { url ->
-            url.contains("ytimg.com") && (
-                url.contains("vi/") || 
-                url.contains("maxresdefault") || 
-                url.contains("sddefault") ||
-                url.contains("hqdefault")
-            ) && !url.contains("/release/")
-        }
+        ItemThumbnail(
+            thumbnailUrl = item.thumbnail,
+            isActive = isActive,
+            isPlaying = isPlaying,
+            shape = if (item is ArtistItem) CircleShape else RoundedCornerShape(ThumbnailCornerRadius),
+        )
 
-        // Extract dominant color for video label gradient
-        var dominantColor by remember { mutableStateOf(Color.Black) }
-        
-        if (isVideo) {
-            LaunchedEffect(item.thumbnail) {
-                try {
-                    val request = ImageRequest.Builder(context)
-                        .data(item.thumbnail)
-                        .allowHardware(false)
-                        .build()
-                    val result = context.imageLoader.execute(request)
-                    result.image?.let { image ->
-                        val bitmap = image.toBitmap()
-                        val palette = androidx.palette.graphics.Palette.from(bitmap)
-                            .maximumColorCount(8)
-                            .generate()
-                        
-                        // Get the most vibrant or dominant color
-                        val color = palette.vibrantSwatch?.rgb
-                            ?: palette.dominantSwatch?.rgb
-                            ?: palette.mutedSwatch?.rgb
-                            ?: Color.Black.toArgb()
-                        
-                        dominantColor = Color(color)
-                    }
-                } catch (e: Exception) {
-                    dominantColor = Color.Black
-                }
-            }
-        }
-
-        Box {
-            ItemThumbnail(
-                thumbnailUrl = item.thumbnail,
-                isActive = isActive,
-                isPlaying = isPlaying,
-                shape = RoundedCornerShape(ThumbnailCornerRadius),
+        if (item is SongItem && !isActive) {
+            OverlayPlayButton(
+                visible = true
             )
+        }
 
-            // Add "Video" label ONLY for actual videos (not songs with square album art)
-            if (isVideo) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .background(Color.Black)
-                        .padding(vertical = 6.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Video",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            if (item is SongItem && !isActive) {
-                OverlayPlayButton(
-                    visible = true
-                )
-            }
-
-            AlbumPlayButton(
-                visible = item is AlbumItem && !isActive,
-                onClick = {
-                    scope.launch(Dispatchers.IO) {
-                        var albumWithSongs = database.albumWithSongs(item.id).first()
-                        if (albumWithSongs?.songs.isNullOrEmpty()) {
-                            YouTube.album(item.id).onSuccess { albumPage ->
-                                database.transaction { insert(albumPage) }
-                                albumWithSongs = database.albumWithSongs(item.id).first()
-                            }.onFailure { reportException(it) }
-                        }
-                        albumWithSongs?.let {
-                            withContext(Dispatchers.Main) {
-                                playerConnection.playQueue(LocalAlbumRadio(it))
-                            }
+        AlbumPlayButton(
+            visible = item is AlbumItem && !isActive,
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    var albumWithSongs = database.albumWithSongs(item.id).first()
+                    if (albumWithSongs?.songs.isNullOrEmpty()) {
+                        YouTube.album(item.id).onSuccess { albumPage ->
+                            database.transaction { insert(albumPage) }
+                            albumWithSongs = database.albumWithSongs(item.id).first()
+                        }.onFailure { reportException(it) }
+                    }
+                    albumWithSongs?.let {
+                        withContext(Dispatchers.Main) {
+                            playerConnection.playQueue(LocalAlbumRadio(it))
                         }
                     }
                 }
-            )
-        }
+            }
+        )
     },
-    thumbnailRatio = 1f,  // Always use square ratio
+    thumbnailRatio = thumbnailRatio,
     fillMaxWidth = fillMaxWidth,
     modifier = modifier
 )
@@ -1085,7 +1012,7 @@ fun LocalArtistsGrid(
             thumbnailUrl = thumbnailUrl,
             isActive = false,
             isPlaying = false,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
+            shape = CircleShape,
             modifier = if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier,
             showCenterPlay = false,
             playButtonVisible = false
@@ -1149,10 +1076,8 @@ fun ItemThumbnail(
                     .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
-                    .crossfade(true)
                     .build(),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
                 error = painterResource(R.drawable.echo_logo),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1229,7 +1154,6 @@ fun LocalThumbnail(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
-                .crossfade(true)
                 .build(),
             contentDescription = null,
             modifier = Modifier.fillMaxSize()
@@ -1338,7 +1262,6 @@ fun PlaylistThumbnail(
                 .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
-                .crossfade(true)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
@@ -1366,7 +1289,6 @@ fun PlaylistThumbnail(
                         .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                         .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                         .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
-                        .crossfade(true)
                         .build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
@@ -1630,51 +1552,5 @@ private object Icon {
                 .size(18.dp)
                 .padding(end = 2.dp)
         )
-    }
-}
-
-@Composable
-fun QuickPickGridItem(
-    song: Song,
-    modifier: Modifier = Modifier,
-    isActive: Boolean = false,
-    isPlaying: Boolean = false,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(end = 12.dp)
-    ) {
-        ItemThumbnail(
-            thumbnailUrl = song.song.thumbnailUrl,
-            isActive = isActive,
-            isPlaying = isPlaying,
-            shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp),
-            modifier = Modifier.size(56.dp) // Standard list size
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = song.song.title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = song.artists.joinToString { it.name },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
     }
 }
