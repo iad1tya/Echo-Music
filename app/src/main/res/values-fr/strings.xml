@@ -302,9 +302,9 @@
     <string name="persistent_queue">File d\'attente persistante</string>
     <string name="persistent_queue_desc">Restaurer votre dernière file d\'attente au démarrage de l\'application</string>
     <string name="auto_load_more">Charger automatiquement plus de titres</string>
-    <string name="auto_load_more_desc">Ajouter automatiquement d\'autres chansons lorsque la fin de la file d\'attente est atteinte, si possible</string>
+    <string name="auto_load_more_desc">Ajouter automatiquement d\'autres titres lorsque la fin de la file d\'attente est atteinte, si possible</string>
     <string name="skip_silence">Passer le silence</string>
-    <string name="audio_normalization">Audio normalization</string>
+    <string name="audio_normalization">Normalisation audio</string>
     <string name="auto_skip_next_on_error">Passer automatiquement au titre suivant en cas d\'erreur</string>
     <string name="auto_skip_next_on_error_desc">Assurez-vous une expérience de lecture continue</string>
     <string name="stop_music_on_task_clear">Arrêter la musique lors de la fin de la tâche</string>
