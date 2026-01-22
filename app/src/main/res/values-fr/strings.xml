@@ -8,120 +8,120 @@
 
 <resources>
     <!-- Bottom navigation -->
-    <string name="home">Home</string>
-    <string name="songs">Songs</string>
-    <string name="artists">Artists</string>
+    <string name="home">Accueil</string>
+    <string name="songs">Titress</string>
+    <string name="artists">Artistes</string>
     <string name="albums">Albums</string>
     <string name="playlists">Playlists</string>
-    <string name="find_song">Find</string>
+    <string name="find_song">Trouver</string>
 
     <!-- Top bar -->
     <plurals name="n_selected">
-        <item quantity="other">%d selected</item>
+        <item quantity="other">%d sélectionnés</item>
     </plurals>
 
     <!-- Home -->
-    <string name="history">History</string>
-    <string name="stats">Stats</string>
-    <string name="mood_and_genres">Mood and Genres</string>
-    <string name="account">Account</string>
-    <string name="quick_picks">Quick picks</string>
-    <string name="quick_access">Quick Access</string>
-    <string name="quick_picks_empty">Listen to songs to generate your quick picks</string>
-    <string name="forgotten_favorites">Forgotten favorites</string>
-    <string name="keep_listening">Keep listening</string>
-    <string name="your_youtube_playlists">Your YouTube playlists</string>
-    <string name="similar_to">Similar to</string>
-    <string name="new_release_albums">New release albums</string>
+    <string name="history">Historique</string>
+    <string name="stats">Statistiques</string>
+    <string name="mood_and_genres">Ambiance et Genres</string>
+    <string name="account">Compte</string>
+    <string name="quick_picks">Sélection Rapide</string>
+    <string name="quick_access">Accès Rapide</string>
+    <string name="quick_picks_empty">Écoutez quelques titres pour générer votre sélection rapide</string>
+    <string name="forgotten_favorites">Favoris Oubliés</string>
+    <string name="keep_listening">Continuez à écouter</string>
+    <string name="your_youtube_playlists">Vos Playlists YouTube</string>
+    <string name="similar_to">Similaire à</string>
+    <string name="new_release_albums">Nouveautés</string>
 
     <!-- History -->
-    <string name="today">Today</string>
-    <string name="yesterday">Yesterday</string>
-    <string name="this_week">This week</string>
-    <string name="last_week">Last week</string>
+    <string name="today">Aujourd\'hui</string>
+    <string name="yesterday">Hier</string>
+    <string name="this_week">Cette semaine</string>
+    <string name="last_week">La semaine dernière</string>
 
     <!-- Stats -->
-    <string name="most_played_songs">Most played songs</string>
-    <string name="most_played_artists">Most played artists</string>
-    <string name="most_played_albums">Most played albums</string>
+    <string name="most_played_songs">Titres les plus joués</string>
+    <string name="most_played_artists">Artistes les plus joués</string>
+    <string name="most_played_albums">Albums les plus joués</string>
 
     <!-- Search -->
-    <string name="search">Search</string>
-    <string name="search_yt_music">What\'s your mood today?</string>
-    <string name="search_library">Search library…</string>
-    <string name="filter_library">Library</string>
-    <string name="filter_liked">Liked</string>
-    <string name="filter_downloaded">Downloaded</string>
-    <string name="filter_all">All</string>
-    <string name="filter_songs">Songs</string>
-    <string name="filter_videos">Videos</string>
+    <string name="search">Rechercher</string>
+    <string name="search_yt_music">Rechercher sur YouTube Music…</string>
+    <string name="search_library">Rechercher dans votre Bibliothèque…</string>
+    <string name="filter_library">Bibliothèque</string>
+    <string name="filter_liked">Aimés</string>
+    <string name="filter_downloaded">Téléchargés</string>
+    <string name="filter_all">Tout</string>
+    <string name="filter_songs">Titres</string>
+    <string name="filter_videos">Vidéos</string>
     <string name="filter_albums">Albums</string>
-    <string name="filter_artists">Artists</string>
+    <string name="filter_artists">Artistes</string>
     <string name="filter_playlists">Playlists</string>
-    <string name="filter_community_playlists">Community playlists</string>
-    <string name="filter_featured_playlists">Featured playlists</string>
-    <string name="filter_bookmarked">Bookmarked</string>
-    <string name="no_results_found">No results found</string>
+    <string name="filter_community_playlists">Playlists Communautaires</string>
+    <string name="filter_featured_playlists">Playlists en Vedette</string>
+    <string name="filter_bookmarked">Favoris</string>
+    <string name="no_results_found">Aucun résultat trouvé</string>
 
     <!-- Library -->
-    <string name="library_song_empty">Library songs will show up here</string>
-    <string name="library_artist_empty">Library artists will show up here</string>
-    <string name="library_album_empty">Library albums will show up here</string>
-    <string name="library_playlist_empty">Your playlists will show up here</string>
+    <string name="library_song_empty">Les titres de la bibliothèque apparaîtront ici.</string>
+    <string name="library_artist_empty">Les artistes de la bibliothèque apparaîtront ici.</string>
+    <string name="library_album_empty">Les albums de la bibliothèque apparaîtront ici.</string>
+    <string name="library_playlist_empty">Vos playlists s\'afficheront ici.</string>
 
     <!-- Artist screen -->
-    <string name="from_your_library">From your library</string>
+    <string name="from_your_library">De votre bibliothèque</string>
 
     <!-- Album screen -->
-    <string name="other_versions">Other versions</string>
+    <string name="other_versions">Autres versions</string>
 
     <!-- Playlist -->
-    <string name="liked_songs">Liked songs</string>
-    <string name="downloaded_songs">Downloaded songs</string>
-    <string name="playlist_is_empty">The playlist is empty</string>
-    <string name="no_liked_songs">No songs have been liked</string>
-    <string name="no_downloaded_songs">No downloaded songs found</string>
-    <string name="no_uploaded_songs">No uploaded songs found</string>
-    <string name="no_top_songs">No top songs available</string>
-    <string name="no_cached_songs">No cached songs found</string>
-    <string name="remove_download_playlist_confirm">Do you really want to remove all \"%s\" playlist songs from the Downloaded Songs storage?</string>
-    <string name="delete_playlist_confirm">Do you really want to delete the playlist \"%s\"?</string>
+    <string name="liked_songs">Titres appréciés</string>
+    <string name="downloaded_songs">Titres téléchargés</string>
+    <string name="playlist_is_empty">La playlist est vide</string>
+    <string name="no_liked_songs">Aucun titre n\'a été aimé</string>
+    <string name="no_downloaded_songs">Aucun titre téléchargé n\'a été trouvé</string>
+    <string name="no_uploaded_songs">Aucun titre téléchargé n\'a été trouvé</string>
+    <string name="no_top_songs">Aucun titre populaire disponible</string>
+    <string name="no_cached_songs">Aucun titre mis en cache n\'a été trouvé</string>
+    <string name="remove_download_playlist_confirm">Voulez-vous vraiment supprimer tous les titres de la playlist « %s » du stockage des titres téléchargés ?</string>
+    <string name="delete_playlist_confirm">Voulez-vous vraiment supprimer la playlist « %s » ?</string>
 
     <!-- Button -->
-    <string name="retry">Retry</string>
+    <string name="retry">Réessayer</string>
     <string name="radio">Radio</string>
-    <string name="shuffle">Shuffle</string>
-    <string name="reset">Reset</string>
+    <string name="shuffle">Lecture Aléatoire</string>
+    <string name="reset">Réinitialiser</string>
 
     <!-- Menu -->
-    <string name="details">Details</string>
-    <string name="edit">Edit</string>
-    <string name="start_radio">Start radio</string>
-    <string name="play">Play</string>
-    <string name="play_next">Play next</string>
-    <string name="add_to_queue">Add to queue</string>
-    <string name="add_to_library">Add to library</string>
-    <string name="add_all_to_library">Add all to library</string>
-    <string name="translate_lyrics">Translate Lyrics</string>
-    <string name="remove_from_library">Remove from library</string>
-    <string name="remove_all_from_library">Remove all from library</string>
-    <string name="action_download">Download</string>
-    <string name="downloading">Downloading</string>
-    <string name="remove_download">Remove download</string>
-    <string name="import_playlist">Import playlist</string>
-    <string name="add_to_playlist">Add to playlist</string>
-    <string name="view_artist">View artist</string>
-    <string name="view_album">View album</string>
-    <string name="refetch">Refetch</string>
-    <string name="share">Share</string>
-    <string name="delete">Delete</string>
-    <string name="remove_from_history">Remove from history</string>
-    <string name="remove_from_playlist">Remove from playlist</string>
-    <string name="remove_from_queue">Remove from queue</string>
-    <string name="search_online">Search online</string>
-    <string name="action_sync">Sync</string>
-    <string name="advanced">Advanced</string>
-    <string name="tempo_and_pitch">Tempo and Pitch</string>
+    <string name="details">Détails</string>
+    <string name="edit">Modifier</string>
+    <string name="start_radio">Démarrer la radio</string>
+    <string name="play">Lecture</string>
+    <string name="play_next">Suivant</string>
+    <string name="add_to_queue">Ajouter à la file d\'attente</string>
+    <string name="add_to_library">Ajouter à la bibliothèque</string>
+    <string name="add_all_to_library">Ajouter tout à la bibliothèque</string>
+    <string name="translate_lyrics">Traduire les paroles</string>
+    <string name="remove_from_library">Supprimer de la bibliothèque</string>
+    <string name="remove_all_from_library">Supprimer tout de la bibliothèque</string >
+    <string name="action_download">Télécharger</string>
+    <string name="downloading">Téléchargement</string>
+    <string name="remove_download">Supprimer le téléchargement</string>
+    <string name="import_playlist">Importer une playlist</string>
+    <string name="add_to_playlist">Ajouter à une playlist</string>
+    <string name="view_artist">Voir l\’artiste</string>
+    <string name="view_album">Voir l\’album</string>
+    <string name="refetch">Récupérer</string>
+    <string name="share">Partager</string>
+    <string name="delete">Effacer</string>
+    <string name="remove_from_history">Supprimer de l\’historique</string>
+    <string name="remove_from_playlist">Supprimer de la playlist</string>
+    <string name="remove_from_queue">Supprimer de la file d\'attente</string>
+    <string name="search_online">Rechercher en ligne</string>
+    <string name="action_sync">Synchroniser</string>
+    <string name="advanced">Avancé</string>
+    <string name="tempo_and_pitch">Tempo et Hauteur</string>
 
     <!-- Sort menu -->
     <string name="sort_by_create_date">Date added</string>
