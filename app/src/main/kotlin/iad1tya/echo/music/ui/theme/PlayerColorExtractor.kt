@@ -59,11 +59,10 @@ object PlayerColorExtractor {
         listOf(
             primaryColor, // Start: primary vibrant color
             primaryColor.copy(
-                red = (primaryColor.red * 0.4f).coerceAtLeast(0f),
-                green = (primaryColor.green * 0.4f).coerceAtLeast(0f),
-                blue = (primaryColor.blue * 0.4f).coerceAtLeast(0f)
-            ), // Middle: Deep dark version of primary color (40% brightness)
-            Color.Black // End: Pure black for maximum contrast
+                red = (primaryColor.red * 0.5f).coerceAtLeast(0f),
+                green = (primaryColor.green * 0.5f).coerceAtLeast(0f),
+                blue = (primaryColor.blue * 0.5f).coerceAtLeast(0f)
+            ) // End: Darker version of primary color (50% brightness)
         )
     }
 
