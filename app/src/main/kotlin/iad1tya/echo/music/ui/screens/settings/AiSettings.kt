@@ -220,12 +220,11 @@ fun AiSettings(
                     modifier = Modifier.padding(start = 24.dp),
                     title = { Text("Translation Mode") },
                     selectedValue = translateMode,
-                    values = listOf("Literal", "Romanized", "Translated"),
+                    values = listOf("Literal", "Transcribed"),
                     valueText = { 
                         when(it) {
-                            "Literal" -> "Literal (Original + Translation)"
-                            "Romanized" -> "Romanized (Script only)"
-                            "Translated" -> "Translated (Replace original)"
+                            "Literal" -> "Original + Translation"
+                            "Transcribed" -> "Original + Transcribed"
                             else -> it
                         }
                     },

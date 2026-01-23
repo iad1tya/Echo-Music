@@ -940,40 +940,8 @@ fun Lyrics(
                         // Check for translation errors
                         isTranslationError = translatedText?.startsWith("⚠️") == true || translatedText?.startsWith("Error:") == true
                         
-                        when {
-                            // Translation mode: Show translated text if available, original as fallback
-                            translateMode == "Translated" -> {
-                                displayText = if (translatedText != null && !isTranslationError) {
-                                    translatedText
-                                } else {
-                                    item.text // Fallback to original
-                                }
-                            }
-                            // Romanized mode: Show AI romanization if available, local romanization if available, original as fallback
-                            translateMode == "Romanized" -> {
-                                displayText = when {
-                                    translatedText != null && !isTranslationError -> translatedText // AI romanization
-                                    romanizedText != null -> romanizedText // Local romanization
-                                    else -> item.text // Fallback to original
-                                }
-                            }
-                            // Literal mode: Show original text (translation shown separately below)
-                            translateMode == "Literal" -> {
-                                displayText = if (currentSong?.romanizeLyrics == true && romanizedText != null) {
-                                    romanizedText // Show romanized version of original
-                                } else {
-                                    item.text // Show original text
-                                }
-                            }
-                            // Default: Show local romanization if available, otherwise original
-                            currentSong?.romanizeLyrics == true && romanizedText != null -> {
-                                displayText = romanizedText
-                            }
-                            // Default: Show original text
-                            else -> {
-                                displayText = item.text
-                            }
-                        }
+                        // Always show original text as the main display
+                        displayText = item.text
                         
                         // Display the selected text
                         val currentTextColor = if (isActive && palette.isNotEmpty()) palette.first() else textColor
@@ -1000,11 +968,31 @@ fun Lyrics(
                             fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold
                         )
                         
-                        // In Literal mode, show translated text below original
-                        val literalTranslation = translatedText
-                        if (translateMode == "Literal" && literalTranslation != null && !isTranslationError) {
+                        // Show secondary text based on mode
+                        val secondaryText: String?
+                        val showSecondaryText: Boolean
+                        
+                        when (translateMode) {
+                            "Literal" -> {
+                                // Show translation below original
+                                secondaryText = translatedText
+                                showSecondaryText = translatedText != null && !isTranslationError
+                            }
+                            "Transcribed" -> {
+                                // Show AI transcription if available, otherwise local romanization
+                                val aiTranscription = if (translatedText != null && !isTranslationError) translatedText else null
+                                secondaryText = aiTranscription ?: romanizedText
+                                showSecondaryText = secondaryText != null
+                            }
+                            else -> {
+                                secondaryText = translatedText
+                                showSecondaryText = translatedText != null && !isTranslationError
+                            }
+                        }
+                        
+                        if (showSecondaryText && secondaryText != null) {
                             Text(
-                                text = literalTranslation,
+                                text = secondaryText,
                                 fontSize = 18.sp,
                                 color = if (isActive) {
                                     currentTextColor.copy(alpha = 0.85f)

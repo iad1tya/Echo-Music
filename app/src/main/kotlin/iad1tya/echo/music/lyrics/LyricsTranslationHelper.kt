@@ -71,23 +71,18 @@ object LyricsTranslationHelper {
                     return@launch
                 }
 
-                // Validate language for translation mode
-                if (mode != "Romanized" && targetLanguage.isBlank()) {
-                    _status.value = TranslationStatus.Error("Target language is required for translation")
+                // Validate language for all modes
+                if (targetLanguage.isBlank()) {
+                    _status.value = TranslationStatus.Error("Target language is required")
                     return@launch
                 }
 
                 // Convert language code to full language name for better AI understanding
-                val fullLanguageName = if (mode == "Romanized") {
-                    "Latin"
-                } else {
-                    // First try our language map, then try Java Locale, fallback to the code itself
-                    LanguageCodeToName[targetLanguage] 
-                        ?: try {
-                            Locale(targetLanguage).displayLanguage.takeIf { it.isNotBlank() && it != targetLanguage }
-                        } catch (e: Exception) { null }
-                        ?: targetLanguage
-                }
+                val fullLanguageName = LanguageCodeToName[targetLanguage] 
+                    ?: try {
+                        Locale(targetLanguage).displayLanguage.takeIf { it.isNotBlank() && it != targetLanguage }
+                    } catch (e: Exception) { null }
+                    ?: targetLanguage
 
                 val result = OpenRouterService.translate(
                     text = fullText,
