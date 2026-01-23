@@ -220,15 +220,6 @@ private fun QuickAccessSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Local Media (New Tile)
-             QuickAccessCard(
-                title = stringResource(R.string.local_media),
-                icon = R.drawable.storage, // Using storage icon as proxy for folder if folder not found
-                backgroundColor = Color(0xFFB7A3E3), // Lavender
-                onClick = { navController.navigate("auto_playlist/local") },
-                modifier = Modifier.weight(1f)
-            )
-
             // Downloads / Offline
             if (showDownloaded) {
                 QuickAccessCard(

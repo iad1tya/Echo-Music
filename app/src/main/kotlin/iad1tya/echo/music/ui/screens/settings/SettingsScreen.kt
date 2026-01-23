@@ -321,18 +321,6 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Material3SettingsGroup(
-            items = listOf(
-                Material3SettingsItem(
-                    icon = painterResource(R.drawable.storage),
-                    title = { Text(stringResource(R.string.local_media)) },
-                    onClick = { navController.navigate("settings/local_media") }
-                )
-            )
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-
         // AI - Separate
         Material3SettingsGroup(
             items = listOf(
