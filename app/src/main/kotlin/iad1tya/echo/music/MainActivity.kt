@@ -973,20 +973,30 @@ class MainActivity : ComponentActivity() {
                                                         )
                                                     }
                                                     IconButton(onClick = { showAccountDialog = true }) {
-                                                        if (accountImageUrl != null) {
-                                                            AsyncImage(
-                                                                model = accountImageUrl,
-                                                                contentDescription = stringResource(R.string.account),
-                                                                modifier = Modifier
-                                                                    .size(24.dp)
-                                                                    .clip(CircleShape)
-                                                            )
-                                                        } else {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.account),
-                                                                contentDescription = stringResource(R.string.account),
-                                                                modifier = Modifier.size(24.dp)
-                                                            )
+                                                        BadgedBox(
+                                                            badge = {
+                                                                if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                                                    Badge(
+                                                                        containerColor = MaterialTheme.colorScheme.error
+                                                                    )
+                                                                }
+                                                            }
+                                                        ) {
+                                                            if (accountImageUrl != null) {
+                                                                AsyncImage(
+                                                                    model = accountImageUrl,
+                                                                    contentDescription = stringResource(R.string.account),
+                                                                    modifier = Modifier
+                                                                        .size(24.dp)
+                                                                        .clip(CircleShape)
+                                                                )
+                                                            } else {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.account),
+                                                                    contentDescription = stringResource(R.string.account),
+                                                                    modifier = Modifier.size(24.dp)
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 },
