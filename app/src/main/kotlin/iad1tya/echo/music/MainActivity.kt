@@ -1341,13 +1341,21 @@ class MainActivity : ComponentActivity() {
                                                                     if (navBackStackEntry?.destination?.route == Screens.Search.route && screen.route != Screens.Search.route) {
                                                                         onActiveChange(false)
                                                                     }
-                                                                    // Navigate to the screen, popping everything to get a clean state
-                                                                    navController.navigate(screen.route) {
-                                                                        popUpTo(navController.graph.id) {
-                                                                            saveState = true
+                                                                    // Navigate to the screen
+                                                                    if (screen.route == Screens.Home.route) {
+                                                                        navController.navigate(screen.route) {
+                                                                            popUpTo(navController.graph.id) {
+                                                                                inclusive = true
+                                                                            }
                                                                         }
-                                                                        launchSingleTop = true
-                                                                        restoreState = true
+                                                                    } else {
+                                                                        navController.navigate(screen.route) {
+                                                                            popUpTo(navController.graph.id) {
+                                                                                saveState = true
+                                                                            }
+                                                                            launchSingleTop = true
+                                                                            restoreState = true
+                                                                        }
                                                                     }
                                                                     // Open search bar when navigating to search
                                                                     if (screen.route == Screens.Search.route) {
@@ -1413,13 +1421,21 @@ class MainActivity : ComponentActivity() {
                                                         if (navBackStackEntry?.destination?.route == Screens.Search.route && screen.route != Screens.Search.route) {
                                                             onActiveChange(false)
                                                         }
-                                                        // Navigate to the screen, popping everything to get a clean state
-                                                        navController.navigate(screen.route) {
-                                                            popUpTo(navController.graph.id) {
-                                                                saveState = true
+                                                        // Navigate to the screen
+                                                        if (screen.route == Screens.Home.route) {
+                                                            navController.navigate(screen.route) {
+                                                                popUpTo(navController.graph.id) {
+                                                                    inclusive = true
+                                                                }
                                                             }
-                                                            launchSingleTop = true
-                                                            restoreState = true
+                                                        } else {
+                                                            navController.navigate(screen.route) {
+                                                                popUpTo(navController.graph.id) {
+                                                                    saveState = true
+                                                                }
+                                                                launchSingleTop = true
+                                                                restoreState = true
+                                                            }
                                                         }
                                                         // Open search bar when navigating to search
                                                         if (screen.route == Screens.Search.route) {
