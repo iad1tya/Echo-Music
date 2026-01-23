@@ -276,7 +276,12 @@ fun LyricsScreen(
                     }
                 }
                 else -> {
-                    // DEFAULT background
+                    // DEFAULT background - use Material You surface color
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface)
+                    )
                 }
             }
 
