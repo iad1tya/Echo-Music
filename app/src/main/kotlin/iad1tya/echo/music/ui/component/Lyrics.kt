@@ -937,10 +937,12 @@ fun Lyrics(
                         val displayText: String?
                         val isTranslationError: Boolean
                         
+                        // Check for translation errors
+                        isTranslationError = translatedText?.startsWith("⚠️") == true || translatedText?.startsWith("Error:") == true
+                        
                         when {
                             // Translation mode: Show translated text if available, original as fallback
                             translateMode == "Translated" -> {
-                                isTranslationError = translatedText?.startsWith("⚠️") == true || translatedText?.startsWith("Error:") == true
                                 displayText = if (translatedText != null && !isTranslationError) {
                                     translatedText
                                 } else {
@@ -949,21 +951,26 @@ fun Lyrics(
                             }
                             // Romanized mode: Show AI romanization if available, local romanization if available, original as fallback
                             translateMode == "Romanized" -> {
-                                isTranslationError = translatedText?.startsWith("⚠️") == true || translatedText?.startsWith("Error:") == true
                                 displayText = when {
                                     translatedText != null && !isTranslationError -> translatedText // AI romanization
                                     romanizedText != null -> romanizedText // Local romanization
                                     else -> item.text // Fallback to original
                                 }
                             }
-                            // Literal mode or no translation: Show local romanization if available, otherwise original
+                            // Literal mode: Show original text (translation shown separately below)
+                            translateMode == "Literal" -> {
+                                displayText = if (currentSong?.romanizeLyrics == true && romanizedText != null) {
+                                    romanizedText // Show romanized version of original
+                                } else {
+                                    item.text // Show original text
+                                }
+                            }
+                            // Default: Show local romanization if available, otherwise original
                             currentSong?.romanizeLyrics == true && romanizedText != null -> {
-                                isTranslationError = false
                                 displayText = romanizedText
                             }
                             // Default: Show original text
                             else -> {
-                                isTranslationError = false
                                 displayText = item.text
                             }
                         }
@@ -992,6 +999,33 @@ fun Lyrics(
                             },
                             fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold
                         )
+                        
+                        // In Literal mode, show translated text below original
+                        val literalTranslation = translatedText
+                        if (translateMode == "Literal" && literalTranslation != null && !isTranslationError) {
+                            Text(
+                                text = literalTranslation,
+                                fontSize = 18.sp,
+                                color = if (isActive) {
+                                    currentTextColor.copy(alpha = 0.85f)
+                                } else {
+                                    textColor.copy(alpha = 0.6f)
+                                },
+                                style = TextStyle(
+                                    shadow = if (isActive) Shadow(
+                                        color = currentTextColor.copy(alpha = 0.3f),
+                                        blurRadius = 20f
+                                    ) else Shadow.None
+                                ),
+                                textAlign = when (lyricsTextPosition) {
+                                    LyricsPosition.LEFT -> TextAlign.Left
+                                    LyricsPosition.CENTER -> TextAlign.Center
+                                    LyricsPosition.RIGHT -> TextAlign.Right
+                                },
+                                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                     }
                 }
             }

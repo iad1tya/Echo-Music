@@ -1,6 +1,7 @@
 package iad1tya.echo.music.lyrics
 
 import iad1tya.echo.music.api.OpenRouterService
+import iad1tya.echo.music.constants.LanguageCodeToName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 object LyricsTranslationHelper {
     private val _status = MutableStateFlow<TranslationStatus>(TranslationStatus.Idle)
@@ -75,9 +77,21 @@ object LyricsTranslationHelper {
                     return@launch
                 }
 
+                // Convert language code to full language name for better AI understanding
+                val fullLanguageName = if (mode == "Romanized") {
+                    "Latin"
+                } else {
+                    // First try our language map, then try Java Locale, fallback to the code itself
+                    LanguageCodeToName[targetLanguage] 
+                        ?: try {
+                            Locale(targetLanguage).displayLanguage.takeIf { it.isNotBlank() && it != targetLanguage }
+                        } catch (e: Exception) { null }
+                        ?: targetLanguage
+                }
+
                 val result = OpenRouterService.translate(
                     text = fullText,
-                    targetLanguage = if (mode == "Romanized") "Latin" else targetLanguage,
+                    targetLanguage = fullLanguageName,
                     apiKey = apiKey,
                     baseUrl = baseUrl,
                     model = model,

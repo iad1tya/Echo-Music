@@ -215,16 +215,17 @@ fun AiSettings(
                     onCheckedChange = { autoTranslateLyricsMismatch = it }
                 )
 
-                var translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Translated")
+                var translateMode by rememberPreference(iad1tya.echo.music.constants.TranslateModeKey, "Literal")
                 ListPreference(
                     modifier = Modifier.padding(start = 24.dp),
                     title = { Text("Translation Mode") },
                     selectedValue = translateMode,
-                    values = listOf("Romanized", "Translated"),
+                    values = listOf("Literal", "Romanized", "Translated"),
                     valueText = { 
                         when(it) {
+                            "Literal" -> "Literal (Original + Translation)"
                             "Romanized" -> "Romanized (Script only)"
-                            "Translated" -> "Translated"
+                            "Translated" -> "Translated (Replace original)"
                             else -> it
                         }
                     },
