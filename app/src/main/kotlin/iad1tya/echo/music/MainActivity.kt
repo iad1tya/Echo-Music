@@ -1286,9 +1286,7 @@ class MainActivity : ComponentActivity() {
                                                                 }
                                                             },
                                                             onClick = {
-                                                                if (screen.route == Screens.Search.route) {
-                                                                    onActiveChange(true)
-                                                                } else if (isSelected) {
+                                                                if (isSelected) {
                                                                     navController.currentBackStackEntry?.savedStateHandle?.set(
                                                                         "scrollToTop",
                                                                         true
@@ -1297,6 +1295,10 @@ class MainActivity : ComponentActivity() {
                                                                         searchBarScrollBehavior.state.resetHeightOffset()
                                                                     }
                                                                 } else {
+                                                                    // Close search bar when navigating away from search
+                                                                    if (navBackStackEntry?.destination?.route == Screens.Search.route && screen.route != Screens.Search.route) {
+                                                                        onActiveChange(false)
+                                                                    }
                                                                     if (screen.route == Screens.Home.route) {
                                                                         navController.navigate(screen.route) {
                                                                             popUpTo(navController.graph.id)
@@ -1309,6 +1311,10 @@ class MainActivity : ComponentActivity() {
                                                                             launchSingleTop = true
                                                                             restoreState = true
                                                                         }
+                                                                    }
+                                                                    // Open search bar when navigating to search
+                                                                    if (screen.route == Screens.Search.route) {
+                                                                        onActiveChange(true)
                                                                     }
                                                                 }
                                                             },
@@ -1360,14 +1366,16 @@ class MainActivity : ComponentActivity() {
                                             NavigationRailItem(
                                                 selected = isSelected,
                                                 onClick = {
-                                                    if (screen.route == Screens.Search.route) {
-                                                        onActiveChange(true)
-                                                    } else if (isSelected) {
+                                                    if (isSelected) {
                                                         navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
                                                         coroutineScope.launch {
                                                             searchBarScrollBehavior.state.resetHeightOffset()
                                                         }
                                                     } else {
+                                                        // Close search bar when navigating away from search
+                                                        if (navBackStackEntry?.destination?.route == Screens.Search.route && screen.route != Screens.Search.route) {
+                                                            onActiveChange(false)
+                                                        }
                                                         if (screen.route == Screens.Home.route) {
                                                             navController.navigate(screen.route) {
                                                                 popUpTo(navController.graph.id)
@@ -1380,6 +1388,10 @@ class MainActivity : ComponentActivity() {
                                                                 launchSingleTop = true
                                                                 restoreState = false
                                                             }
+                                                        }
+                                                        // Open search bar when navigating to search
+                                                        if (screen.route == Screens.Search.route) {
+                                                            onActiveChange(true)
                                                         }
                                                     }
                                                 },
