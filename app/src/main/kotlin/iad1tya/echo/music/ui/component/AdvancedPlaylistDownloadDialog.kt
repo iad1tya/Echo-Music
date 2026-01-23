@@ -226,7 +226,8 @@ fun AdvancedPlaylistDownloadDialog(
                                 }
 
                                 try {
-                                    val result = YouTube.player(song.id, client = YouTubeClient.MOBILE)
+                                    // Use ANDROID_VR_NO_AUTH to avoid authentication issues when logged in
+                                    val result = YouTube.player(song.id, client = YouTubeClient.ANDROID_VR_NO_AUTH)
                                     val playerResponse = result.getOrNull()
                                     val formats = playerResponse?.streamingData?.adaptiveFormats
 

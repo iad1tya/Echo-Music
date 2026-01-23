@@ -72,7 +72,8 @@ fun AdvancedDownloadDialog(
     // Fetch PlayerResponse for formats
     LaunchedEffect(mediaMetadata.id) {
         withContext(Dispatchers.IO) {
-            val result = YouTube.player(mediaMetadata.id, client = YouTubeClient.MOBILE)
+            // Use ANDROID_VR_NO_AUTH to avoid authentication issues when logged in
+            val result = YouTube.player(mediaMetadata.id, client = YouTubeClient.ANDROID_VR_NO_AUTH)
             playerResponse = result.getOrNull()
             isLoading = false
         }
