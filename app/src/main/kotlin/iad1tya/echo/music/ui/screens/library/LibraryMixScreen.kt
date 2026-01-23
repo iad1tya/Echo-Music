@@ -203,23 +203,6 @@ private fun QuickAccessSection(
                     modifier = Modifier.weight(1f)
                 )
             }
-            if (showUploaded) {
-                QuickAccessCard(
-                    title = stringResource(R.string.uploaded_playlist),
-                    icon = R.drawable.backup,
-                    backgroundColor = Color(0xFF66BB6A), // Shifted Green
-                    onClick = { navController.navigate("auto_playlist/uploaded") },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
             // Downloads / Offline
             if (showDownloaded) {
                 QuickAccessCard(
@@ -229,8 +212,6 @@ private fun QuickAccessSection(
                     onClick = { navController.navigate("auto_playlist/downloaded") },
                     modifier = Modifier.weight(1f)
                 )
-            } else {
-                 Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
