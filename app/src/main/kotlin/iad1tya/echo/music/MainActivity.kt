@@ -20,6 +20,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -608,7 +609,9 @@ class MainActivity : ComponentActivity() {
                                 lifecycleScope.launch {
                                     delay(300)
                                     onActiveChange(false)
-                                    navController.navigate("search/${URLEncoder.encode(spokenText, "UTF-8")}")
+                                    navController.navigate("search/${URLEncoder.encode(spokenText, "UTF-8")}") {
+                                        popUpTo(Screens.Home.route)
+                                    }
                                     
                                     if (dataStore[PauseSearchHistoryKey] != true) {
                                         lifecycleScope.launch(Dispatchers.IO) {
@@ -626,7 +629,10 @@ class MainActivity : ComponentActivity() {
                         { searchQuery ->
                             if (searchQuery.isNotEmpty()) {
                                 onActiveChange(false)
-                                navController.navigate("search/${URLEncoder.encode(searchQuery, "UTF-8")}")
+                                // Navigate to search results and pop Search tab from back stack
+                                navController.navigate("search/${URLEncoder.encode(searchQuery, "UTF-8")}") {
+                                    popUpTo(Screens.Home.route)
+                                }
 
                                 if (dataStore[PauseSearchHistoryKey] != true) {
                                     lifecycleScope.launch(Dispatchers.IO) {
@@ -878,6 +884,18 @@ class MainActivity : ComponentActivity() {
 
                     val baseBg = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
                     val insetBg = if (playerBottomSheetState.progress > 0f) Color.Transparent else baseBg
+
+                    // Handle back press on search screens - navigate to home instead of search tab
+                    val isOnSearchTab = navBackStackEntry?.destination?.route == Screens.Search.route
+                    val isOnSearchResults = navBackStackEntry?.destination?.route?.startsWith("search/") == true
+                    BackHandler(enabled = isOnSearchTab || isOnSearchResults) {
+                        if (active) {
+                            onActiveChange(false)
+                        }
+                        navController.navigate(Screens.Home.route) {
+                            popUpTo(Screens.Home.route) { inclusive = true }
+                        }
+                    }
 
                     CompositionLocalProvider(
                         LocalDatabase provides database,
@@ -1202,7 +1220,9 @@ class MainActivity : ComponentActivity() {
                                                         onSearch = { searchQuery ->
                                                             navController.navigate(
                                                                 "search/${URLEncoder.encode(searchQuery, "UTF-8")}"
-                                                            )
+                                                            ) {
+                                                                popUpTo(Screens.Home.route)
+                                                            }
                                                             if (dataStore[PauseSearchHistoryKey] != true) {
                                                                 lifecycleScope.launch(Dispatchers.IO) {
                                                                     database.query {

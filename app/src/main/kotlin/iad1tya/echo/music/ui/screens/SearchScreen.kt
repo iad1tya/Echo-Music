@@ -1,5 +1,6 @@
 package iad1tya.echo.music.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,13 @@ fun SearchScreen(
     // Automatically open search bar when entering search screen
     LaunchedEffect(Unit) {
         onSearchBarClick()
+    }
+
+    // Navigate back to home when pressing back on this screen
+    BackHandler {
+        navController.navigate(Screens.Home.route) {
+            popUpTo(Screens.Home.route) { inclusive = true }
+        }
     }
 
     Box(
