@@ -1182,6 +1182,21 @@ fun BottomSheetPlayer(
                             .clickable { state.collapseSoft() }
                     )
                     
+                    // Echo Music title at top center
+                    Text(
+                        text = "Echo Music",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontFamily = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.zalando_sans_expanded)),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 28.sp
+                        ),
+                        color = textButtonColor,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                            .padding(16.dp)
+                    )
+                    
                     // Share button at top right
                     Icon(
                         painter = painterResource(R.drawable.share),
@@ -1326,6 +1341,21 @@ fun BottomSheetPlayer(
                             .padding(16.dp)
                             .size(24.dp)
                             .clickable { state.collapseSoft() }
+                    )
+                    
+                    // Echo Music title at top center
+                    Text(
+                        text = "Echo Music",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontFamily = androidx.compose.ui.text.font.FontFamily(androidx.compose.ui.text.font.Font(R.font.zalando_sans_expanded)),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 28.sp
+                        ),
+                        color = Color.White, // Always white on dark immersive bg
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                            .padding(16.dp)
                     )
                     
                     // Share button at top right

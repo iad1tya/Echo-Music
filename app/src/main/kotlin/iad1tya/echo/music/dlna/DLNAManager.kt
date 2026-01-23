@@ -147,7 +147,7 @@ class DLNAManager @Inject constructor(
         }
     }
     
-    fun stop() {
+    fun stopPlayback() {
         val player = currentPlayer ?: return
         scope.launch {
             try {
