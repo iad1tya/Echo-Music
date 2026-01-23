@@ -498,7 +498,7 @@ private fun BuyMeCoffeeItem(
                     painter = painterResource(R.drawable.buymeacoffee),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    colorFilter = ColorFilter.tint(Color.White)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
                 )
             }
         }
