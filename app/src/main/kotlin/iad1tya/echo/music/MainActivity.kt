@@ -893,7 +893,18 @@ class MainActivity : ComponentActivity() {
                             onActiveChange(false)
                         }
                         navController.navigate(Screens.Home.route) {
-                            popUpTo(Screens.Home.route) { inclusive = true }
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                        }
+                    }
+
+                    // Handle back press on Find screen - navigate to home instead of closing app
+                    BackHandler(enabled = isFindScreen) {
+                        navController.navigate(Screens.Home.route) {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
                         }
                     }
 

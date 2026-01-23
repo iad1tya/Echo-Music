@@ -152,7 +152,11 @@ fun FindSongScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { 
+                        navController.navigate(Screens.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Back",
