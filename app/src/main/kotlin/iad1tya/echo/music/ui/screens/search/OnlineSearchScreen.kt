@@ -38,6 +38,7 @@ import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.SearchBarIconOffsetX
 import iad1tya.echo.music.ui.component.YouTubeListItem
 import iad1tya.echo.music.ui.menu.*
+import iad1tya.echo.music.ui.screens.Screens
 import iad1tya.echo.music.viewmodels.OnlineSearchSuggestionViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -142,11 +143,7 @@ fun OnlineSearchScreen(
         items(viewState.items, key = { "item_${it.id}" }) { item ->
             YouTubeListItem(
                 item = item,
-                isActive = when (item) {
-                    is SongItem -> mediaMetadata?.id == item.id
-                    is AlbumItem -> mediaMetadata?.album?.id == item.id
-                    else -> false
-                },
+                isActive = false,
                 isPlaying = isPlaying,
                 trailingContent = {
                     IconButton(
@@ -205,19 +202,24 @@ fun OnlineSearchScreen(
                                         playerConnection.playQueue(
                                             YouTubeQueue.radio(item.toMediaMetadata())
                                         )
-                                        onDismiss()
                                     }
                                 }
                                 is AlbumItem -> {
-                                    navController.navigate("album/${item.id}")
+                                    navController.navigate("album/${item.id}") {
+                                        popUpTo(Screens.Home.route)
+                                    }
                                     onDismiss()
                                 }
                                 is ArtistItem -> {
-                                    navController.navigate("artist/${item.id}")
+                                    navController.navigate("artist/${item.id}") {
+                                        popUpTo(Screens.Home.route)
+                                    }
                                     onDismiss()
                                 }
                                 is PlaylistItem -> {
-                                    navController.navigate("online_playlist/${item.id}")
+                                    navController.navigate("online_playlist/${item.id}") {
+                                        popUpTo(Screens.Home.route)
+                                    }
                                     onDismiss()
                                 }
                             }
