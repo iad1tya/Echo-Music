@@ -1,5 +1,6 @@
 package iad1tya.echo.music.ui.screens.library
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -103,6 +104,7 @@ fun LibraryAlbumsScreen(
                 colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
                 onClick = onDeselect,
                 shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 leadingIcon = {
                     Icon(painter = painterResource(R.drawable.close), contentDescription = "")
                 },
@@ -111,8 +113,7 @@ fun LibraryAlbumsScreen(
                 chips =
                 listOf(
                     AlbumFilter.LIKED to stringResource(R.string.filter_liked),
-                    AlbumFilter.LIBRARY to stringResource(R.string.filter_library),
-                    AlbumFilter.UPLOADED to stringResource(R.string.filter_uploaded)
+                    AlbumFilter.LIBRARY to stringResource(R.string.filter_library)
                 ),
                 currentValue = filter,
                 onValueUpdate = {

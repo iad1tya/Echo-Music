@@ -75,6 +75,27 @@ $text
 
 Output MUST be a JSON array with EXACTLY $lineCount strings using ONLY simple ASCII characters."""
 
+                    "Transcribed" -> """Transcribe/transliterate the following $lineCount lines phonetically into $targetLanguage script.
+
+CRITICAL REQUIREMENTS:
+- Convert the SOUND/PRONUNCIATION of the original text into $targetLanguage script
+- DO NOT translate the meaning - only represent how the original words SOUND
+- Use the native script of $targetLanguage (e.g., Devanagari for Hindi, Hangul for Korean, etc.)
+- Preserve the original pronunciation as closely as possible in the target script
+- Keep punctuation and formatting
+- Preserve line-by-line structure exactly
+- If text is already in $targetLanguage script, return it UNCHANGED
+
+Examples:
+- Japanese "こんにちは" to Hindi → "कोन्निचिवा" (phonetic, not translation)
+- English "Hello" to Hindi → "हेलो" (phonetic)
+- Korean "안녕하세요" to Hindi → "अन्न्योंग हासेयो" (phonetic)
+
+Input ($lineCount lines):
+$text
+
+Output MUST be a JSON array with EXACTLY $lineCount strings in $targetLanguage script."""
+
                     else -> """Translate the following $lineCount lines to $targetLanguage.
 
 IMPORTANT:

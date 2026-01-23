@@ -203,32 +203,6 @@ private fun QuickAccessSection(
                     modifier = Modifier.weight(1f)
                 )
             }
-            if (showUploaded) {
-                QuickAccessCard(
-                    title = stringResource(R.string.uploaded_playlist),
-                    icon = R.drawable.backup,
-                    backgroundColor = Color(0xFF66BB6A), // Shifted Green
-                    onClick = { navController.navigate("auto_playlist/uploaded") },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Local Media (New Tile)
-             QuickAccessCard(
-                title = stringResource(R.string.local_media),
-                icon = R.drawable.storage, // Using storage icon as proxy for folder if folder not found
-                backgroundColor = Color(0xFFB7A3E3), // Lavender
-                onClick = { navController.navigate("auto_playlist/local") },
-                modifier = Modifier.weight(1f)
-            )
-
             // Downloads / Offline
             if (showDownloaded) {
                 QuickAccessCard(
@@ -238,8 +212,6 @@ private fun QuickAccessSection(
                     onClick = { navController.navigate("auto_playlist/downloaded") },
                     modifier = Modifier.weight(1f)
                 )
-            } else {
-                 Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
@@ -323,7 +295,7 @@ fun LibraryMixScreen(
     val (showDownloaded) = rememberPreference(ShowDownloadedPlaylistKey, true)
     val (showTop) = rememberPreference(ShowTopPlaylistKey, true)
     val (showCached) = rememberPreference(ShowCachedPlaylistKey, true)
-    val (showUploaded) = rememberPreference(ShowUploadedPlaylistKey, true)
+    val (showUploaded) = rememberPreference(ShowUploadedPlaylistKey, false)
 
     val albums = viewModel.albums.collectAsState()
     val artist = viewModel.artists.collectAsState()

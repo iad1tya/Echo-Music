@@ -2,6 +2,8 @@ package iad1tya.echo.music
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -18,6 +20,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -98,15 +101,11 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.asComposeRenderEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -138,21 +137,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
-import iad1tya.echo.music.ui.component.rememberBackdrop
-import iad1tya.echo.music.ui.component.layerBackdrop
-import iad1tya.echo.music.ui.component.drawBackdropCustomShape
-import iad1tya.echo.music.ui.component.LocalBackdrop
-import iad1tya.echo.music.ui.component.LocalLayer
-import iad1tya.echo.music.ui.component.LocalLuminance
-import androidx.compose.ui.graphics.rememberGraphicsLayer
-import android.graphics.Bitmap
-import androidx.compose.animation.core.Animatable
-import androidx.compose.ui.graphics.asAndroidBitmap
-import kotlinx.coroutines.isActive
-import java.nio.IntBuffer
-import androidx.compose.ui.draw.shadow
-import androidx.compose.foundation.border
-import androidx.compose.animation.animateColorAsState
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.navigation.NavGraph
@@ -218,7 +202,6 @@ import iad1tya.echo.music.ui.component.shimmer.ShimmerTheme
 import iad1tya.echo.music.ui.menu.YouTubeSongMenu
 import iad1tya.echo.music.ui.player.BottomSheetPlayer
 import iad1tya.echo.music.ui.screens.Screens
-import iad1tya.echo.music.ui.screens.SplashScreen
 import iad1tya.echo.music.ui.screens.navigationBuilder
 import iad1tya.echo.music.ui.screens.search.LocalSearchScreen
 import iad1tya.echo.music.ui.screens.search.OnlineSearchScreen
@@ -460,8 +443,13 @@ class MainActivity : ComponentActivity() {
                             val json = org.json.JSONObject(responseText)
                             val tagName = json.getString("tag_name")
                             if (tagName.isNotEmpty()) {
+                                val version = tagName.removePrefix("v")
                                 withContext(Dispatchers.Main) {
-                                    latestVersionName = tagName.removePrefix("v")
+                                    latestVersionName = version
+                                    // Show notification if new version is available
+                                    if (version != BuildConfig.VERSION_NAME) {
+                                        showUpdateNotification(this@MainActivity, version)
+                                    }
                                 }
                             }
                         }
@@ -470,8 +458,6 @@ class MainActivity : ComponentActivity() {
                     latestVersionName = BuildConfig.VERSION_NAME
                 }
             }
-
-            var showSplash by remember { mutableStateOf(true) }
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
             val enableMaterialYou by rememberPreference(MaterialYouKey, defaultValue = false)
@@ -537,20 +523,7 @@ class MainActivity : ComponentActivity() {
                 themeColor = themeColor,
                 isDynamicColor = enableMaterialYou,
             ) {
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = showSplash,
-                    exit = fadeOut(animationSpec = tween(300))
-                ) {
-                    SplashScreen(
-                        onTimeout = { showSplash = false }
-                    )
-                }
-                
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = !showSplash,
-                    enter = fadeIn(animationSpec = tween(500))
-                ) {
-                    BoxWithConstraints(
+                BoxWithConstraints(
                         modifier =
                         Modifier
                             .fillMaxSize()
@@ -636,7 +609,9 @@ class MainActivity : ComponentActivity() {
                                 lifecycleScope.launch {
                                     delay(300)
                                     onActiveChange(false)
-                                    navController.navigate("search/${URLEncoder.encode(spokenText, "UTF-8")}")
+                                    navController.navigate("search/${URLEncoder.encode(spokenText, "UTF-8")}") {
+                                        popUpTo(Screens.Home.route)
+                                    }
                                     
                                     if (dataStore[PauseSearchHistoryKey] != true) {
                                         lifecycleScope.launch(Dispatchers.IO) {
@@ -654,7 +629,10 @@ class MainActivity : ComponentActivity() {
                         { searchQuery ->
                             if (searchQuery.isNotEmpty()) {
                                 onActiveChange(false)
-                                navController.navigate("search/${URLEncoder.encode(searchQuery, "UTF-8")}")
+                                // Navigate to search results and pop Search tab from back stack
+                                navController.navigate("search/${URLEncoder.encode(searchQuery, "UTF-8")}") {
+                                    popUpTo(Screens.Home.route)
+                                }
 
                                 if (dataStore[PauseSearchHistoryKey] != true) {
                                     lifecycleScope.launch(Dispatchers.IO) {
@@ -907,10 +885,17 @@ class MainActivity : ComponentActivity() {
                     val baseBg = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
                     val insetBg = if (playerBottomSheetState.progress > 0f) Color.Transparent else baseBg
 
-                    val backdrop = rememberBackdrop()
-                    val menuBackdrop = rememberBackdrop()
-                    val layer = rememberGraphicsLayer()
-                    val luminanceAnimation = remember { Animatable(0f) }
+                    // Handle back press on search screens - navigate to home instead of search tab
+                    val isOnSearchTab = navBackStackEntry?.destination?.route == Screens.Search.route
+                    val isOnSearchResults = navBackStackEntry?.destination?.route?.startsWith("search/") == true
+                    BackHandler(enabled = isOnSearchTab || isOnSearchResults) {
+                        if (active) {
+                            onActiveChange(false)
+                        }
+                        navController.navigate(Screens.Home.route) {
+                            popUpTo(Screens.Home.route) { inclusive = true }
+                        }
+                    }
 
                     CompositionLocalProvider(
                         LocalDatabase provides database,
@@ -920,46 +905,7 @@ class MainActivity : ComponentActivity() {
                         LocalDownloadUtil provides downloadUtil,
                         LocalShimmerTheme provides ShimmerTheme,
                         LocalSyncUtils provides syncUtils,
-                        LocalBackdrop provides backdrop,
-                        LocalLayer provides layer,
-                        LocalLuminance provides luminanceAnimation.value,
                     ) {
-
-
-                        LaunchedEffect(layer) {
-                            val buffer = IntBuffer.allocate(25)
-                            while (isActive) {
-                                try {
-                                    withContext(Dispatchers.IO) {
-                                        val imageBitmap = layer.toImageBitmap()
-                                        val thumbnail = Bitmap.createScaledBitmap(
-                                            imageBitmap.asAndroidBitmap(),
-                                            5,
-                                            5,
-                                            false
-                                        ).copy(Bitmap.Config.ARGB_8888, false)
-                                        buffer.rewind()
-                                        thumbnail.copyPixelsToBuffer(buffer)
-                                    }
-                                } catch (e: Exception) {
-                                  // Ignore
-                                }
-                                val averageLuminance =
-                                    (0 until 25).sumOf { index ->
-                                        val color = buffer.get(index)
-                                        val r = (color shr 16 and 0xFF) / 255f
-                                        val g = (color shr 8 and 0xFF) / 255f
-                                        val b = (color and 0xFF) / 255f
-                                        0.2126 * r + 0.7152 * g + 0.0722 * b
-                                    } / 25
-                                luminanceAnimation.animateTo(
-                                    averageLuminance.coerceAtMost(0.8).toFloat(),
-                                    tween(500),
-                                )
-                                delay(1000)
-                            }
-                        }
-
                         Scaffold(
                             topBar = {
                                 AnimatedVisibility(
@@ -1023,35 +969,52 @@ class MainActivity : ComponentActivity() {
                                                         } else {
                                                             currentTitleRes?.let { stringResource(it) } ?: ""
                                                         },
-                                                        style = if (navBackStackEntry?.destination?.route == Screens.Home.route) {
-                                                            MaterialTheme.typography.titleLarge.copy(
-                                                                fontWeight = FontWeight.ExtraBold,
-                                                                fontSize = 32.sp
-                                                            )
-                                                        } else {
-                                                            MaterialTheme.typography.titleLarge
-                                                        },
+                                                        style = MaterialTheme.typography.titleLarge.copy(
+                                                            fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = if (navBackStackEntry?.destination?.route == Screens.Home.route) 28.sp else MaterialTheme.typography.titleLarge.fontSize
+                                                        ),
                                                     )
                                                 },
                                                 actions = {
-                                                    // Find icon button
-
-
+                                                    IconButton(onClick = { navController.navigate("history") }) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.history),
+                                                            contentDescription = stringResource(R.string.history)
+                                                        )
+                                                    }
+                                                    IconButton(onClick = { navController.navigate("stats") }) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.stats),
+                                                            contentDescription = stringResource(R.string.stats),
+                                                            modifier = Modifier.size(20.dp)
+                                                        )
+                                                    }
                                                     IconButton(onClick = { showAccountDialog = true }) {
-                                                        if (accountImageUrl != null) {
-                                                            AsyncImage(
-                                                                model = accountImageUrl,
-                                                                contentDescription = stringResource(R.string.account),
-                                                                modifier = Modifier
-                                                                    .size(32.dp)
-                                                                    .clip(CircleShape)
-                                                            )
-                                                        } else {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.account),
-                                                                contentDescription = stringResource(R.string.account),
-                                                                modifier = Modifier.size(32.dp)
-                                                            )
+                                                        BadgedBox(
+                                                            badge = {
+                                                                if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                                                    Badge(
+                                                                        containerColor = MaterialTheme.colorScheme.error
+                                                                    )
+                                                                }
+                                                            }
+                                                        ) {
+                                                            if (accountImageUrl != null) {
+                                                                AsyncImage(
+                                                                    model = accountImageUrl,
+                                                                    contentDescription = stringResource(R.string.account),
+                                                                    modifier = Modifier
+                                                                        .size(24.dp)
+                                                                        .clip(CircleShape)
+                                                                )
+                                                            } else {
+                                                                Icon(
+                                                                    painter = painterResource(R.drawable.account),
+                                                                    contentDescription = stringResource(R.string.account),
+                                                                    modifier = Modifier.size(24.dp)
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 },
@@ -1100,7 +1063,12 @@ class MainActivity : ComponentActivity() {
                                             IconButton(
                                                 onClick = {
                                                     when {
-                                                        active -> onActiveChange(false)
+                                                        active -> {
+                                                            onActiveChange(false)
+                                                            navController.navigate(Screens.Home.route) {
+                                                                popUpTo(navController.graph.id)
+                                                            }
+                                                        }
                                                         !navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } -> {
                                                             navController.navigateUp()
                                                         }
@@ -1252,7 +1220,9 @@ class MainActivity : ComponentActivity() {
                                                         onSearch = { searchQuery ->
                                                             navController.navigate(
                                                                 "search/${URLEncoder.encode(searchQuery, "UTF-8")}"
-                                                            )
+                                                            ) {
+                                                                popUpTo(Screens.Home.route)
+                                                            }
                                                             if (dataStore[PauseSearchHistoryKey] != true) {
                                                                 lifecycleScope.launch(Dispatchers.IO) {
                                                                     database.query {
@@ -1275,146 +1245,122 @@ class MainActivity : ComponentActivity() {
                                         BottomSheetPlayer(
                                             state = playerBottomSheetState,
                                             navController = navController,
-                                            pureBlack = pureBlack,
-                                            backdrop = backdrop,
-                                            layer = layer,
-                                            luminance = luminanceAnimation.value
+                                            pureBlack = pureBlack
                                         )
                                     } else if (!showRail) {
                                         Box {
                                             BottomSheetPlayer(
                                                 state = playerBottomSheetState,
                                                 navController = navController,
-                                                pureBlack = pureBlack,
-                                                backdrop = backdrop,
-                                                layer = layer,
-                                                luminance = luminanceAnimation.value
+                                                pureBlack = pureBlack
                                             )
-                                            // Pill-shaped Navigation Bar
                                             Box(
                                                 modifier = Modifier
                                                     .align(Alignment.BottomCenter)
-                                                    .padding(bottom = bottomInset + 16.dp)
-                                                    .padding(horizontal = 24.dp) // Adjusted padding to match MiniPlayer width
-                                                    .fillMaxWidth() // Ensure row has width to distribute items
+                                                    .height(bottomInset + getNavPadding())
+                                                    .fillMaxWidth()
                                                     .offset {
                                                         if (navigationBarHeight == 0.dp) {
                                                             IntOffset(
                                                                 x = 0,
-                                                                y = (bottomInset + targetNavBarHeight + 16.dp).roundToPx(),
+                                                                y = (bottomInset + targetNavBarHeight).roundToPx(),
                                                             )
                                                         } else {
                                                             val slideOffset =
-                                                                (bottomInset + targetNavBarHeight + 16.dp) *
+                                                                (bottomInset + targetNavBarHeight) *
                                                                         playerBottomSheetState.progress.coerceIn(
                                                                             0f,
                                                                             1f,
                                                                         )
                                                             val hideOffset =
-                                                                (bottomInset + targetNavBarHeight + 16.dp) * (1 - navigationBarHeight / targetNavBarHeight)
+                                                                (bottomInset + targetNavBarHeight) * (1 - navigationBarHeight / targetNavBarHeight)
                                                             IntOffset(
                                                                 x = 0,
                                                                 y = (slideOffset + hideOffset).roundToPx(),
                                                             )
                                                         }
                                                     }
+                                                    .background(if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer)
                                             ) {
-
-                                                Box(
+                                                NavigationBar(
                                                     modifier = Modifier
-                                                        .height(NavigationBarHeight)
-                                                        // Shadow needs to be applied before clipping or drawing if we want it outside, 
-                                                        // but usually shadow requires a surface or manual drawing. 
-                                                        // drawBackdropCustomShape effectively draws a surface.
-                                                        // Let's try adding shadow via modifier.
-                                                        .shadow(16.dp, RoundedCornerShape(percent = 50))
-                                                        .drawBackdropCustomShape(
-                                                            backdrop = backdrop,
-                                                            layer = layer,
-                                                            luminanceAnimation = luminanceAnimation.value,
-                                                            shape = RoundedCornerShape(percent = 50)
-                                                        )
-                                                        .border(
-                                                            width = 1.dp,
-                                                            brush = Brush.verticalGradient(
-                                                                colors = listOf(
-                                                                    Color.White.copy(alpha = 0.5f),
-                                                                    Color.White.copy(alpha = 0.1f)
-                                                                )
-                                                            ),
-                                                            shape = RoundedCornerShape(percent = 50)
-                                                        )
+                                                        .align(Alignment.BottomCenter)
+                                                        .height(bottomInset + getNavPadding()),
+                                                    containerColor = Color.Transparent,
+                                                    contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                                                 ) {
-                                                    Row(
-                                                        modifier = Modifier
-                                                            .padding(horizontal = 24.dp), // Increased padding
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp) // Proper spacing
-                                                    ) {
-                                                        navigationItems.fastForEach { screen ->
-                                                            val isSelected =
-                                                                navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                                    navigationItems.fastForEach { screen ->
+                                                        val isSelected =
+                                                            navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
 
-                                                            NavigationBarItem(
-                                                                selected = isSelected,
-                                                                icon = {
+                                                        NavigationBarItem(
+                                                            selected = isSelected,
+                                                            icon = {
+                                                                if (screen.route == Screens.Settings.route) {
+                                                                    BadgedBox(badge = {
+                                                                        if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                                                            Badge()
+                                                                        }
+                                                                    }) {
+                                                                        Icon(
+                                                                            painter = painterResource(
+                                                                                id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
+                                                                            ),
+                                                                            contentDescription = null,
+                                                                        )
+                                                                    }
+                                                                } else {
                                                                     Icon(
                                                                         painter = painterResource(
                                                                             id = if (isSelected) screen.iconIdActive else screen.iconIdInactive
                                                                         ),
                                                                         contentDescription = null,
-                                                                        modifier = Modifier.size(26.dp) // Slightly larger icons
                                                                     )
-                                                                },
-                                                                label = {
-                                                                    if (isSelected) {
-                                                                        Text(
-                                                                            text = stringResource(screen.titleId),
-                                                                            maxLines = 1,
-                                                                            overflow = TextOverflow.Ellipsis,
-                                                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                                                 fontWeight = FontWeight.Bold
-                                                                            )
-                                                                        )
+                                                                }
+                                                            },
+                                                            label = {
+                                                                if (!slimNav) {
+                                                                    Text(
+                                                                        text = stringResource(screen.titleId),
+                                                                        maxLines = 1,
+                                                                        overflow = TextOverflow.Ellipsis
+                                                                    )
+                                                                }
+                                                            },
+                                                            onClick = {
+                                                                if (isSelected) {
+                                                                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                                                                        "scrollToTop",
+                                                                        true
+                                                                    )
+                                                                    coroutineScope.launch {
+                                                                        searchBarScrollBehavior.state.resetHeightOffset()
                                                                     }
-                                                                },
-                                                                alwaysShowLabel = false,
-                                                                colors = androidx.compose.material3.NavigationBarItemDefaults.colors(
-                                                                    indicatorColor = Color.Transparent, // Remove pill indicator
-                                                                    selectedIconColor = MaterialTheme.colorScheme.primary, // Use primary color for active
-                                                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                                                    unselectedIconColor = Color.White.copy(alpha = 0.6f),
-                                                                    unselectedTextColor = Color.White.copy(alpha = 0.6f)
-                                                                ),
-                                                                onClick = {
-                                                                    if (screen.route == Screens.Search.route) {
-                                                                        onActiveChange(true)
-                                                                    } else if (isSelected) {
-                                                                        navController.currentBackStackEntry?.savedStateHandle?.set(
-                                                                            "scrollToTop",
-                                                                            true
-                                                                        )
-                                                                        coroutineScope.launch {
-                                                                            searchBarScrollBehavior.state.resetHeightOffset()
+                                                                } else {
+                                                                    // Close search bar when navigating away from search
+                                                                    if (navBackStackEntry?.destination?.route == Screens.Search.route && screen.route != Screens.Search.route) {
+                                                                        onActiveChange(false)
+                                                                    }
+                                                                    if (screen.route == Screens.Home.route) {
+                                                                        navController.navigate(screen.route) {
+                                                                            popUpTo(navController.graph.id)
                                                                         }
                                                                     } else {
-                                                                        if (screen.route == Screens.Home.route) {
-                                                                            navController.navigate(screen.route) {
-                                                                                popUpTo(navController.graph.id)
+                                                                        navController.navigate(screen.route) {
+                                                                            popUpTo(navController.graph.startDestinationId) {
+                                                                                saveState = true
                                                                             }
-                                                                        } else {
-                                                                            navController.navigate(screen.route) {
-                                                                                popUpTo(navController.graph.startDestinationId) {
-                                                                                    saveState = true
-                                                                                }
-                                                                                launchSingleTop = true
-                                                                                restoreState = true
-                                                                            }
+                                                                            launchSingleTop = true
+                                                                            restoreState = true
                                                                         }
                                                                     }
+                                                                    // Open search bar when navigating to search
+                                                                    if (screen.route == Screens.Search.route) {
+                                                                        onActiveChange(true)
+                                                                    }
                                                                 }
-                                                            )
-                                                        }
+                                                            },
+                                                        )
                                                     }
                                                 }
                                             }
@@ -1431,10 +1377,7 @@ class MainActivity : ComponentActivity() {
                                         BottomSheetPlayer(
                                             state = playerBottomSheetState,
                                             navController = navController,
-                                            pureBlack = pureBlack,
-                                            backdrop = backdrop,
-                                            layer = layer,
-                                            luminance = luminanceAnimation.value
+                                            pureBlack = pureBlack
                                         )
 
                                         Box(
@@ -1449,11 +1392,10 @@ class MainActivity : ComponentActivity() {
                             },
 
                             modifier = Modifier
-                                .layerBackdrop(menuBackdrop)
                                 .fillMaxSize()
                                 .nestedScroll(searchBarScrollBehavior.nestedScrollConnection)
                         ) {
-                            Row(Modifier.layerBackdrop(backdrop).fillMaxSize()) {
+                            Row(Modifier.fillMaxSize()) {
                                 if (showRail) {
                                     NavigationRail(
                                         containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
@@ -1466,14 +1408,16 @@ class MainActivity : ComponentActivity() {
                                             NavigationRailItem(
                                                 selected = isSelected,
                                                 onClick = {
-                                                    if (screen.route == Screens.Search.route) {
-                                                        onActiveChange(true)
-                                                    } else if (isSelected) {
+                                                    if (isSelected) {
                                                         navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
                                                         coroutineScope.launch {
                                                             searchBarScrollBehavior.state.resetHeightOffset()
                                                         }
                                                     } else {
+                                                        // Close search bar when navigating away from search
+                                                        if (navBackStackEntry?.destination?.route == Screens.Search.route && screen.route != Screens.Search.route) {
+                                                            onActiveChange(false)
+                                                        }
                                                         if (screen.route == Screens.Home.route) {
                                                             navController.navigate(screen.route) {
                                                                 popUpTo(navController.graph.id)
@@ -1486,6 +1430,10 @@ class MainActivity : ComponentActivity() {
                                                                 launchSingleTop = true
                                                                 restoreState = false
                                                             }
+                                                        }
+                                                        // Open search bar when navigating to search
+                                                        if (screen.route == Screens.Search.route) {
+                                                            onActiveChange(true)
                                                         }
                                                     }
                                                 },
@@ -1643,22 +1591,14 @@ class MainActivity : ComponentActivity() {
                         }
 
                         if (!isAmbientMode) {
-                            CompositionLocalProvider(
-                                LocalBackdrop provides menuBackdrop
-                            ) {
-                                BottomSheetMenu(
-                                    state = LocalMenuState.current,
-                                    modifier = Modifier.align(Alignment.BottomCenter),
-                                    background = Color.Black
-                                )
-                            }
+                            BottomSheetMenu(
+                                state = LocalMenuState.current,
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            )
 
                             BottomSheetPage(
                                 state = LocalBottomSheetPageState.current,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .glassGrain(pureBlack),
-                                background = Color.Transparent
+                                modifier = Modifier.align(Alignment.BottomCenter)
                             )
                         }
 
@@ -1731,7 +1671,6 @@ class MainActivity : ComponentActivity() {
                             openSearchImmediately = false
                         }
                     }
-                }
                 }
             }
         }
@@ -1812,6 +1751,51 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun showUpdateNotification(context: Context, version: String) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        // Create notification channel for Android O and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "updates",
+                "App Updates",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifications for app updates"
+                enableLights(true)
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+        
+        // Create intent to open MainActivity with settings
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("openSettings", true)
+        }
+        
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        
+        // Build notification
+        val notification = NotificationCompat.Builder(context, "updates")
+            .setSmallIcon(R.drawable.update)
+            .setContentTitle("Echo Music Update Available")
+            .setContentText("Version $version is now available")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("A new version ($version) of Echo Music is available. Tap to download and install."))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+        
+        notificationManager.notify(1001, notification)
+    }
+
     @SuppressLint("ObsoleteSdkInt")
     private fun setSystemBarAppearance(isDark: Boolean) {
         WindowCompat.getInsetsController(window, window.decorView.rootView).apply {
@@ -1842,50 +1826,3 @@ val LocalPlayerAwareWindowInsets =
     compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }
 val LocalDownloadUtil = staticCompositionLocalOf<DownloadUtil> { error("No DownloadUtil provided") }
 val LocalSyncUtils = staticCompositionLocalOf<SyncUtils> { error("No SyncUtils provided") }
-
-/**
- * Applies a translucent background with a grainy noise texture to simulate a "glassy" effect.
- */
-fun Modifier.glassGrain(pureBlack: Boolean): Modifier = this.drawWithCache {
-    val noiseSize = 64
-    val noiseBitmap = android.graphics.Bitmap.createBitmap(noiseSize, noiseSize, android.graphics.Bitmap.Config.ARGB_8888)
-    val pixels = IntArray(noiseSize * noiseSize)
-    val random = java.util.Random()
-    
-    // Generate white noise pixels
-    for (i in pixels.indices) {
-        val alpha = random.nextInt(50) // Random alpha 0-50
-        // Use white granules
-        pixels[i] = android.graphics.Color.argb(alpha, 255, 255, 255)
-    }
-    noiseBitmap.setPixels(pixels, 0, noiseSize, 0, 0, noiseSize, noiseSize)
-    val noiseImage = noiseBitmap.asImageBitmap()
-    
-    val paint = androidx.compose.ui.graphics.Paint().apply {
-        shader = androidx.compose.ui.graphics.ImageShader(
-            noiseImage,
-            androidx.compose.ui.graphics.TileMode.Repeated,
-            androidx.compose.ui.graphics.TileMode.Repeated
-        )
-        // Very subtle grain visibility - decreased from 0.15f
-        alpha = 0.05f 
-    }
-
-    onDrawBehind {
-        // Base translucent layer - increased darkness from 0.85f
-        // Use Color.Black for both to ensure "blackish" look as requested, avoiding the grey 1E1E1E
-        val baseColor = Color.Black
-        drawRect(baseColor.copy(alpha = 0.99f))
-        
-        val w = size.width
-        val h = size.height
-        
-        drawIntoCanvas { canvas ->
-            val nativeCanvas = canvas.nativeCanvas
-            nativeCanvas.drawRect(
-                0f, 0f, w, h, 
-                paint.asFrameworkPaint()
-            )
-        }
-    }
-}

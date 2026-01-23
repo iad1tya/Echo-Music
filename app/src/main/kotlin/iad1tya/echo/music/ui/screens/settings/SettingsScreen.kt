@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ import androidx.navigation.NavController
 import iad1tya.echo.music.BuildConfig
 import iad1tya.echo.music.LocalPlayerAwareWindowInsets
 import iad1tya.echo.music.R
+import iad1tya.echo.music.constants.MaterialYouKey
 import iad1tya.echo.music.ui.component.IconButton
 import iad1tya.echo.music.ui.component.Material3SettingsGroup
 import iad1tya.echo.music.ui.component.Material3SettingsItem
@@ -72,6 +74,7 @@ fun SettingsScreen(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val isAndroid12OrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val (enableMaterialYou) = iad1tya.echo.music.utils.rememberPreference(MaterialYouKey, defaultValue = false)
 
     Column(
         Modifier
@@ -105,8 +108,9 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -117,7 +121,7 @@ fun SettingsScreen(
                         Icon(
                             painter = painterResource(R.drawable.update),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -125,13 +129,13 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(R.string.new_version_available),
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Version $latestVersionName",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     
@@ -321,18 +325,6 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Material3SettingsGroup(
-            items = listOf(
-                Material3SettingsItem(
-                    icon = painterResource(R.drawable.storage),
-                    title = { Text(stringResource(R.string.local_media)) },
-                    onClick = { navController.navigate("settings/local_media") }
-                )
-            )
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-
         // AI - Separate
         Material3SettingsGroup(
             items = listOf(
@@ -502,6 +494,8 @@ fun SettingsScreen(
                 Text(
                     text = stringResource(R.string.settings),
                     style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                        fontWeight = FontWeight.Bold
                     )
                 )
             },

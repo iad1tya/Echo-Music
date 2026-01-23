@@ -1,6 +1,7 @@
 package iad1tya.echo.music.lyrics
 
 import iad1tya.echo.music.api.OpenRouterService
+import iad1tya.echo.music.constants.LanguageCodeToName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 object LyricsTranslationHelper {
     private val _status = MutableStateFlow<TranslationStatus>(TranslationStatus.Idle)
@@ -24,6 +26,34 @@ object LyricsTranslationHelper {
     val manualTrigger: SharedFlow<Unit> = _manualTrigger.asSharedFlow()
     
     private var translationJob: Job? = null
+    
+    // Cache for translations: key = hash of (lyrics content + mode + language), value = list of translations
+    private val translationCache = mutableMapOf<String, List<String>>()
+    
+    private fun getCacheKey(lyricsText: String, mode: String, language: String): String {
+        return "${lyricsText.hashCode()}_${mode}_$language"
+    }
+    
+    fun getCachedTranslations(lyrics: List<LyricsEntry>, mode: String, language: String): List<String>? {
+        val lyricsText = lyrics.filter { it.text.isNotBlank() }.joinToString("\n") { it.text }
+        val key = getCacheKey(lyricsText, mode, language)
+        return translationCache[key]
+    }
+    
+    fun applyCachedTranslations(lyrics: List<LyricsEntry>, mode: String, language: String): Boolean {
+        val cached = getCachedTranslations(lyrics, mode, language) ?: return false
+        val nonEmptyEntries = lyrics.mapIndexedNotNull { index, entry ->
+            if (entry.text.isNotBlank()) index to entry else null
+        }
+        
+        if (cached.size >= nonEmptyEntries.size) {
+            nonEmptyEntries.forEachIndexed { idx, (originalIndex, _) ->
+                lyrics[originalIndex].translatedTextFlow.value = cached[idx]
+            }
+            return true
+        }
+        return false
+    }
 
     fun triggerManualTranslation() {
         _manualTrigger.tryEmit(Unit)
@@ -31,6 +61,10 @@ object LyricsTranslationHelper {
     
     fun resetStatus() {
         _status.value = TranslationStatus.Idle
+    }
+    
+    fun clearCache() {
+        translationCache.clear()
     }
 
     fun translateLyrics(
@@ -61,23 +95,35 @@ object LyricsTranslationHelper {
                     return@launch
                 }
                 
-                // Create full text while preserving structure (including empty lines)
-                val fullText = lyrics.joinToString("\n") { it.text }
+                // Filter out empty lines and keep track of their indices
+                val nonEmptyEntries = lyrics.mapIndexedNotNull { index, entry ->
+                    if (entry.text.isNotBlank()) index to entry else null
+                }
                 
-                if (fullText.isBlank()) {
+                if (nonEmptyEntries.isEmpty()) {
                     _status.value = TranslationStatus.Error("Lyrics are empty")
                     return@launch
                 }
+                
+                // Create text from non-empty lines only
+                val fullText = nonEmptyEntries.joinToString("\n") { it.second.text }
 
-                // Validate language for translation mode
-                if (mode != "Romanized" && targetLanguage.isBlank()) {
-                    _status.value = TranslationStatus.Error("Target language is required for translation")
+                // Validate language for all modes
+                if (targetLanguage.isBlank()) {
+                    _status.value = TranslationStatus.Error("Target language is required")
                     return@launch
                 }
 
+                // Convert language code to full language name for better AI understanding
+                val fullLanguageName = LanguageCodeToName[targetLanguage] 
+                    ?: try {
+                        Locale(targetLanguage).displayLanguage.takeIf { it.isNotBlank() && it != targetLanguage }
+                    } catch (e: Exception) { null }
+                    ?: targetLanguage
+
                 val result = OpenRouterService.translate(
                     text = fullText,
-                    targetLanguage = if (mode == "Romanized") "Latin" else targetLanguage,
+                    targetLanguage = fullLanguageName,
                     apiKey = apiKey,
                     baseUrl = baseUrl,
                     model = model,
@@ -85,32 +131,28 @@ object LyricsTranslationHelper {
                 )
                 
                 result.onSuccess { translatedLines ->
-                    // Robust mapping with validation
+                    // Cache the translations
+                    val cacheKey = getCacheKey(fullText, mode, targetLanguage)
+                    translationCache[cacheKey] = translatedLines
+                    
+                    // Map translations back to original non-empty entries only
+                    val expectedCount = nonEmptyEntries.size
+                    
                     when {
-                        translatedLines.size == lyrics.size -> {
-                            // Perfect match - direct mapping
-                            lyrics.forEachIndexed { index, entry ->
-                                entry.translatedTextFlow.value = translatedLines[index]
+                        translatedLines.size >= expectedCount -> {
+                            // Perfect match or more - map to non-empty entries
+                            nonEmptyEntries.forEachIndexed { idx, (originalIndex, _) ->
+                                lyrics[originalIndex].translatedTextFlow.value = translatedLines[idx]
                             }
                             _status.value = TranslationStatus.Success
                         }
-                        translatedLines.size > lyrics.size -> {
-                            // More translations than expected - use first N
-                            lyrics.forEachIndexed { index, entry ->
-                                entry.translatedTextFlow.value = translatedLines[index]
-                            }
-                            _status.value = TranslationStatus.Success
-                        }
-                        translatedLines.size < lyrics.size -> {
-                            // Fewer translations - map what we have, leave rest as original
-                            translatedLines.forEachIndexed { index, translation ->
-                                if (index < lyrics.size) {
-                                    lyrics[index].translatedTextFlow.value = translation
+                        translatedLines.size < expectedCount -> {
+                            // Fewer translations than expected - map what we have
+                            translatedLines.forEachIndexed { idx, translation ->
+                                if (idx < nonEmptyEntries.size) {
+                                    val originalIndex = nonEmptyEntries[idx].first
+                                    lyrics[originalIndex].translatedTextFlow.value = translation
                                 }
-                            }
-                            // Fill remaining with original text for romanization, empty for translation
-                            for (i in translatedLines.size until lyrics.size) {
-                                lyrics[i].translatedTextFlow.value = if (mode == "Romanized") lyrics[i].text else ""
                             }
                             _status.value = TranslationStatus.Success
                         }

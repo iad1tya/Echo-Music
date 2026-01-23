@@ -446,7 +446,10 @@ fun AboutScreen(
             title = { 
                 Text(
                     text = stringResource(R.string.about),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                        fontWeight = FontWeight.Bold
+                    )
                 )
             },
             navigationIcon = {
@@ -495,7 +498,7 @@ private fun BuyMeCoffeeItem(
                     painter = painterResource(R.drawable.buymeacoffee),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    colorFilter = ColorFilter.tint(Color.White)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
                 )
             }
         }

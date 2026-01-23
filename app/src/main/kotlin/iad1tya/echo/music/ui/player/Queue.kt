@@ -146,7 +146,6 @@ fun Queue(
     textButtonColor: Color,
     iconButtonColor: Color,
     onShowLyrics: () -> Unit = {},
-    onShowQueue: () -> Unit = {},
     pureBlack: Boolean,
 ) {
     val context = LocalContext.current
@@ -185,7 +184,7 @@ fun Queue(
     var dismissJob: Job? by remember { mutableStateOf(null) }
 
     var showSleepTimerDialog by remember { mutableStateOf(false) }
-
+    var sleepTimerValue by remember { mutableFloatStateOf(30f) }
     val sleepTimerEnabled = remember(
         playerConnection.service.sleepTimer.triggerTime,
         playerConnection.service.sleepTimer.pauseWhenSongEnd
@@ -253,7 +252,7 @@ fun Queue(
                                     bottomEnd = 5.dp
                                 )
                             )
-                            .clickable { onShowQueue() },
+                            .clickable { state.expandSoft() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -413,7 +412,7 @@ fun Queue(
                         ),
                 ) {
                     TextButton(
-                        onClick = { onShowQueue() },
+                        onClick = { state.expandSoft() },
                         modifier = Modifier.weight(1f)
                     ) {
                         Row(
@@ -518,8 +517,64 @@ fun Queue(
             }
 
             if (showSleepTimerDialog) {
-                iad1tya.echo.music.ui.component.SleepTimerDialog(
-                    onDismiss = { showSleepTimerDialog = false }
+                ActionPromptDialog(
+                    titleBar = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.sleep_timer),
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+                        }
+                    },
+                    onDismiss = { showSleepTimerDialog = false },
+                    onConfirm = {
+                        showSleepTimerDialog = false
+                        playerConnection.service.sleepTimer.start(sleepTimerValue.roundToInt())
+                    },
+                    onCancel = {
+                        showSleepTimerDialog = false
+                    },
+                    onReset = {
+                        sleepTimerValue = 30f // Default value
+                    },
+                    content = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = pluralStringResource(
+                                    R.plurals.minute,
+                                    sleepTimerValue.roundToInt(),
+                                    sleepTimerValue.roundToInt()
+                                ),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+
+                            Spacer(Modifier.height(16.dp))
+
+                            Slider(
+                                value = sleepTimerValue,
+                                onValueChange = { sleepTimerValue = it },
+                                valueRange = 5f..120f,
+                                steps = (120 - 5) / 5 - 1,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(Modifier.height(8.dp))
+
+                            OutlinedButton(
+                                onClick = {
+                                    showSleepTimerDialog = false
+                                    playerConnection.service.sleepTimer.start(-1)
+                                }
+                            ) {
+                                Text(stringResource(R.string.end_of_song))
+                            }
+                        }
+                    }
                 )
             }
         },

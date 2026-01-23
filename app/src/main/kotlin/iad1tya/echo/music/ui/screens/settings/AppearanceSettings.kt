@@ -401,6 +401,8 @@ fun AppearanceSettings(
             title = stringResource(R.string.player),
         )
 
+        // Player background style option hidden per user request
+        /*
         EnumListPreference(
             title = { Text(stringResource(R.string.player_background_style)) },
             icon = { Icon(painterResource(R.drawable.gradient), null) },
@@ -413,6 +415,7 @@ fun AppearanceSettings(
                 }
             },
         )
+        */
 
         // Player button colors option hidden per user request
         /*
@@ -675,6 +678,8 @@ fun AppearanceSettings(
                 Text(
                     text = stringResource(R.string.appearance),
                     style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily(Font(R.font.zalando_sans_expanded)),
+                        fontWeight = FontWeight.Bold
                     )
                 )
             },

@@ -65,39 +65,4 @@ object SimpMusicLyricsProvider : LyricsProvider {
             Result.failure(e)
         }
     }
-
-    override suspend fun getAllLyrics(
-        id: String,
-        title: String,
-        artist: String,
-        duration: Int,
-        callback: (String) -> Unit
-    ) {
-        try {
-            Timber.d("SimpMusic: Searching all lyrics for $title by $artist")
-            val query = "$title $artist"
-            val searchResponse = service.search(query, limit = 5) // Fetch up to 5 results
-            
-            searchResponse.data?.forEach { match ->
-                try {
-                    Timber.d("SimpMusic: Fetching lyrics for ${match.videoId}")
-                    val lyricsResponse = service.getLyrics(match.videoId)
-                    val lyricItem = lyricsResponse.data?.firstOrNull()
-                    
-                    val lyrics = lyricItem?.syncedLyrics?.takeIf { it.isNotEmpty() }
-                        ?: lyricItem?.plainLyric
-                    
-                    if (lyrics != null && lyrics.isNotEmpty()) {
-                        Timber.d("SimpMusic: Successfully fetched lyrics for ${match.videoId}")
-                        callback(lyrics)
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "SimpMusic: Error fetching lyrics for ${match.videoId}")
-                    // Continue to next result
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "SimpMusic: Error in getAllLyrics")
-        }
-    }
 }

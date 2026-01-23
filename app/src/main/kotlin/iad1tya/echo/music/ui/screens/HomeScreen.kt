@@ -106,7 +106,6 @@ import iad1tya.echo.music.ui.component.LocalBottomSheetPageState
 import iad1tya.echo.music.ui.component.LocalMenuState
 import iad1tya.echo.music.ui.component.NavigationTitle
 import iad1tya.echo.music.ui.component.SongGridItem
-import iad1tya.echo.music.ui.component.QuickPickGridItem
 import iad1tya.echo.music.ui.component.SongListItem
 import iad1tya.echo.music.ui.component.YouTubeGridItem
 import iad1tya.echo.music.ui.component.YouTubeListItem
@@ -390,9 +389,7 @@ fun HomeScreen(
         ) {
             item {
                 ChipsRow(
-                    chips = homePage?.chips
-                        ?.filter { !it.title.contains("Podcast", ignoreCase = true) }
-                        ?.map { it to it.title } ?: emptyList(),
+                    chips = homePage?.chips?.map { it to it.title } ?: emptyList(),
                     currentValue = selectedChip,
                     onValueUpdate = {
                         viewModel.toggleChip(it)
@@ -410,18 +407,17 @@ fun HomeScreen(
                                     onClick = {
                                         playerConnection.playQueue(
                                             ListQueue(
-                                                title = "Quick picks",
+                                                title = "Quick Picks",
                                                 items = quickPicks.map { it.toMediaItem() },
-                                                startIndex = 0
                                             )
                                         )
                                     },
                                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                        containerColor = Color.Black,
-                                        contentColor = Color.White
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
                                     ),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                                     modifier = Modifier.height(32.dp)
                                 ) {
                                     Icon(
@@ -443,16 +439,13 @@ fun HomeScreen(
                     item(key = "quick_picks_list") {
                         LazyHorizontalGrid(
                             state = quickPicksLazyGridState,
-                            rows = GridCells.Fixed(1),
+                            rows = GridCells.Fixed(4),
                             flingBehavior = rememberSnapFlingBehavior(quickPicksSnapLayoutInfoProvider),
                             contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
                                 .asPaddingValues(),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(GridThumbnailHeight + with(LocalDensity.current) {
-                                    MaterialTheme.typography.bodyLarge.lineHeight.toDp() * 2 +
-                                            MaterialTheme.typography.bodyMedium.lineHeight.toDp() * 2
-                                })
+                                .height(ListItemHeight * 4)
                                 .animateItem()
                         ) {
                             items(
@@ -463,7 +456,56 @@ fun HomeScreen(
                                 val song by database.song(originalSong.id)
                                     .collectAsState(initial = originalSong)
 
-                                localGridItem(song!!)
+                                SongListItem(
+                                    song = song!!,
+                                    showInLibraryIcon = true,
+                                    isActive = song!!.id == mediaMetadata?.id,
+                                    isPlaying = isPlaying,
+                                    isSwipeable = false,
+                                    trailingContent = {
+                                        IconButton(
+                                            onClick = {
+                                                menuState.show {
+                                                    SongMenu(
+                                                        originalSong = song!!,
+                                                        navController = navController,
+                                                        onDismiss = menuState::dismiss
+                                                    )
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(R.drawable.more_vert),
+                                                contentDescription = null
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .width(horizontalLazyGridItemWidth)
+                                        .combinedClickable(
+                                            onClick = {
+                                                if (song!!.id == mediaMetadata?.id) {
+                                                    playerConnection.player.togglePlayPause()
+                                                } else {
+                                                    playerConnection.playQueue(
+                                                        YouTubeQueue.radio(
+                                                            song!!.toMediaMetadata()
+                                                        )
+                                                    )
+                                                }
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                menuState.show {
+                                                    SongMenu(
+                                                        originalSong = song!!,
+                                                        navController = navController,
+                                                        onDismiss = menuState::dismiss
+                                                    )
+                                                }
+                                            }
+                                        )
+                                )
                             }
                         }
                     }
@@ -519,7 +561,7 @@ fun HomeScreen(
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .size(ListThumbnailSize)
-                                            .clip(CircleShape)
+                                            .clip(RoundedCornerShape(ThumbnailCornerRadius))
                                     )
                                 } else {
                                     Icon(
@@ -647,12 +689,15 @@ fun HomeScreen(
                             title = recommendation.title.title,
                             thumbnail = recommendation.title.thumbnailUrl?.let { thumbnailUrl ->
                                 {
+                                    val shape = RoundedCornerShape(
+                                        ThumbnailCornerRadius
+                                    )
                                     AsyncImage(
                                         model = thumbnailUrl,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .size(ListThumbnailSize)
-                                            .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                                            .clip(shape)
                                     )
                                 }
                             },
@@ -690,12 +735,15 @@ fun HomeScreen(
                         label = section.label,
                         thumbnail = section.thumbnail?.let { thumbnailUrl ->
                             {
+                                val shape = RoundedCornerShape(
+                                    ThumbnailCornerRadius
+                                )
                                 AsyncImage(
                                     model = thumbnailUrl,
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(ListThumbnailSize)
-                                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                                        .clip(shape)
                                 )
                             }
                         },

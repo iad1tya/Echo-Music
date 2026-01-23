@@ -55,7 +55,7 @@ fun CryptoSelectionDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp)
-                .border(1.dp, Color.White, RoundedCornerShape(24.dp)),
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(24.dp)),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
@@ -94,14 +94,14 @@ fun CryptoSelectionDialog(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Icon - all white
+                            // Icon - theme color
                             if (crypto == CryptoType.BITCOIN) {
                                 Image(
                                     painter = painterResource(crypto.icon),
                                     contentDescription = crypto.displayName,
                                     modifier = Modifier.size(24.dp),
                                     colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
-                                        Color.White
+                                        MaterialTheme.colorScheme.onSurface
                                     )
                                 )
                             } else {
@@ -109,7 +109,7 @@ fun CryptoSelectionDialog(
                                     painter = painterResource(crypto.icon),
                                     contentDescription = crypto.displayName,
                                     modifier = Modifier.size(24.dp),
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
 

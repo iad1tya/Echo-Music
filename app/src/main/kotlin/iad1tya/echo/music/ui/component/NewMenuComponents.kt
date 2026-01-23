@@ -42,8 +42,8 @@ fun NewActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    backgroundColor: Color = Color.Transparent,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     val animatedBackground by animateColorAsState(
         targetValue = if (enabled) backgroundColor else backgroundColor.copy(alpha = 0.5f),
@@ -69,9 +69,8 @@ fun NewActionButton(
                 containerColor = animatedBackground
             ),
             shape = RoundedCornerShape(50),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = 0.dp
+                defaultElevation = 2.dp
             )
         ) {
             Box(
@@ -161,8 +160,8 @@ fun NewActionGrid(
                         onClick = action.onClick,
                         modifier = Modifier.weight(1f),
                         enabled = action.enabled,
-                        backgroundColor = if (action.backgroundColor != Color.Unspecified) action.backgroundColor else Color.Transparent,
-                        contentColor = if (action.contentColor != Color.Unspecified) action.contentColor else MaterialTheme.colorScheme.onSurface
+                        backgroundColor = if (action.backgroundColor != Color.Unspecified) action.backgroundColor else MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (action.contentColor != Color.Unspecified) action.contentColor else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 

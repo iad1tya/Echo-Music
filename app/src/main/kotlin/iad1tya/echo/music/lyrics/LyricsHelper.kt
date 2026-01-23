@@ -75,12 +75,12 @@ constructor(
     private val cache = LruCache<String, List<LyricsResult>>(MAX_CACHE_SIZE)
     private var currentLyricsJob: Job? = null
 
-    suspend fun getLyrics(mediaMetadata: MediaMetadata): LyricsResult {
+    suspend fun getLyrics(mediaMetadata: MediaMetadata): String {
         currentLyricsJob?.cancel()
 
         val cached = cache.get(mediaMetadata.id)?.firstOrNull()
         if (cached != null) {
-            return cached
+            return cached.lyrics
         }
 
         // Check network connectivity before making network requests
@@ -94,7 +94,7 @@ constructor(
         
         if (!isNetworkAvailable) {
             // Still proceed but return not found to avoid hanging
-            return LyricsResult("Unknown", LYRICS_NOT_FOUND)
+            return LYRICS_NOT_FOUND
         }
 
         val scope = CoroutineScope(SupervisorJob())
@@ -109,7 +109,7 @@ constructor(
                             mediaMetadata.duration,
                         )
                         result.onSuccess { lyrics ->
-                            return@async LyricsResult(provider.name, lyrics)
+                            return@async lyrics
                         }.onFailure {
                             reportException(it)
                         }
@@ -119,12 +119,12 @@ constructor(
                     }
                 }
             }
-            return@async LyricsResult("Unknown", LYRICS_NOT_FOUND)
+            return@async LYRICS_NOT_FOUND
         }
 
-        val result = deferred.await()
+        val lyrics = deferred.await()
         scope.cancel()
-        return result
+        return lyrics
     }
 
     suspend fun getAllLyrics(

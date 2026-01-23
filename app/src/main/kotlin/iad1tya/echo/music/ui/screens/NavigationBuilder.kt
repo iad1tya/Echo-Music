@@ -90,6 +90,9 @@ fun NavGraphBuilder.navigationBuilder(
     composable(Screens.Home.route) {
         HomeScreen(navController)
     }
+    composable(Screens.Search.route) {
+        SearchScreen(navController, onSearchBarClick = { /* Search bar opens automatically via active state */ })
+    }
     composable(Screens.Find.route) {
         FindSongScreen(navController, onOpenPlayer = onOpenPlayer)
     }
@@ -336,9 +339,6 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/ai") {
         AiSettings(navController, scrollBehavior)
-    }
-    composable("settings/local_media") {
-        iad1tya.echo.music.ui.screens.settings.LocalMediaSettings(navController, scrollBehavior, androidx.hilt.navigation.compose.hiltViewModel())
     }
     composable("login") {
         LoginScreen(navController)
