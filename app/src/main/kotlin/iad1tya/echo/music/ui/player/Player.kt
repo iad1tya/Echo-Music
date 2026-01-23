@@ -1573,7 +1573,7 @@ fun BottomSheetPlayer(
                         "Audio Output",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = TextBackgroundColor
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     FilledTonalIconButton(
                         onClick = { audioRoutingSheetState.collapseSoft() },
@@ -1600,7 +1600,7 @@ fun BottomSheetPlayer(
                             Text(
                                 "CONNECTED DEVICES",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = TextBackgroundColor.copy(alpha = 0.6f),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(bottom = 12.dp)
                             )
