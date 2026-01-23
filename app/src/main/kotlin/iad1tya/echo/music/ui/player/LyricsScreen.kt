@@ -216,12 +216,12 @@ fun LyricsScreen(
     }
 
     val textBackgroundColor = when (playerBackground) {
-        PlayerBackgroundStyle.DEFAULT -> Color.White
+        PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
         PlayerBackgroundStyle.GRADIENT -> Color.White
     }
 
     val iconButtonColor = when (playerBackground) {
-        PlayerBackgroundStyle.DEFAULT -> Color(0xFF1C1B1F)
+        PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.surface
         PlayerBackgroundStyle.GRADIENT -> Color.Black
     }
 
@@ -396,7 +396,7 @@ fun LyricsScreen(
                                             }
                                             sliderPosition = null
                                         },
-                                        colors = PlayerSliderColors.defaultSliderColors(textBackgroundColor, playerBackground, true),
+                                        colors = PlayerSliderColors.defaultSliderColors(textBackgroundColor, playerBackground, useDarkTheme),
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
@@ -412,7 +412,7 @@ fun LyricsScreen(
                                             }
                                             sliderPosition = null
                                         },
-                                        colors = PlayerSliderColors.squigglySliderColors(textBackgroundColor, playerBackground, true),
+                                        colors = PlayerSliderColors.squigglySliderColors(textBackgroundColor, playerBackground, useDarkTheme),
                                         modifier = Modifier.fillMaxWidth(),
                                         squigglesSpec = SquigglySlider.SquigglesSpec(
                                             amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
@@ -436,7 +436,7 @@ fun LyricsScreen(
                                         track = { sliderState ->
                                             PlayerSliderTrack(
                                                 sliderState = sliderState,
-                                                colors = PlayerSliderColors.slimSliderColors(textBackgroundColor, playerBackground, true)
+                                                colors = PlayerSliderColors.slimSliderColors(textBackgroundColor, playerBackground, useDarkTheme)
                                             )
                                         },
                                         modifier = Modifier.fillMaxWidth()
@@ -649,7 +649,7 @@ fun LyricsScreen(
                                         }
                                         sliderPosition = null
                                     },
-                                    colors = PlayerSliderColors.defaultSliderColors(textBackgroundColor, playerBackground, true),
+                                    colors = PlayerSliderColors.defaultSliderColors(textBackgroundColor, playerBackground, useDarkTheme),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -665,7 +665,7 @@ fun LyricsScreen(
                                         }
                                         sliderPosition = null
                                     },
-                                    colors = PlayerSliderColors.squigglySliderColors(textBackgroundColor, playerBackground, true),
+                                    colors = PlayerSliderColors.squigglySliderColors(textBackgroundColor, playerBackground, useDarkTheme),
                                     modifier = Modifier.fillMaxWidth(),
                                     squigglesSpec = SquigglySlider.SquigglesSpec(
                                         amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
@@ -689,7 +689,7 @@ fun LyricsScreen(
                                     track = { sliderState ->
                                         PlayerSliderTrack(
                                             sliderState = sliderState,
-                                            colors = PlayerSliderColors.slimSliderColors(textBackgroundColor, playerBackground, true)
+                                            colors = PlayerSliderColors.slimSliderColors(textBackgroundColor, playerBackground, useDarkTheme)
                                         )
                                     },
                                     modifier = Modifier.fillMaxWidth()
