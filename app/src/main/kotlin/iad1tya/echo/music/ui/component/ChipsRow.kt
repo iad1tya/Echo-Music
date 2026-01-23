@@ -88,7 +88,7 @@ fun <E> ChipsRow(
                 ),
                 onClick = { onValueUpdate(value) },
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color.White)
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             )
 
             Spacer(Modifier.width(8.dp))
