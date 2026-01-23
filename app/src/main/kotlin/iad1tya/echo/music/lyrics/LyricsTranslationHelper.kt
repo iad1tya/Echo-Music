@@ -26,6 +26,34 @@ object LyricsTranslationHelper {
     val manualTrigger: SharedFlow<Unit> = _manualTrigger.asSharedFlow()
     
     private var translationJob: Job? = null
+    
+    // Cache for translations: key = hash of (lyrics content + mode + language), value = list of translations
+    private val translationCache = mutableMapOf<String, List<String>>()
+    
+    private fun getCacheKey(lyricsText: String, mode: String, language: String): String {
+        return "${lyricsText.hashCode()}_${mode}_$language"
+    }
+    
+    fun getCachedTranslations(lyrics: List<LyricsEntry>, mode: String, language: String): List<String>? {
+        val lyricsText = lyrics.filter { it.text.isNotBlank() }.joinToString("\n") { it.text }
+        val key = getCacheKey(lyricsText, mode, language)
+        return translationCache[key]
+    }
+    
+    fun applyCachedTranslations(lyrics: List<LyricsEntry>, mode: String, language: String): Boolean {
+        val cached = getCachedTranslations(lyrics, mode, language) ?: return false
+        val nonEmptyEntries = lyrics.mapIndexedNotNull { index, entry ->
+            if (entry.text.isNotBlank()) index to entry else null
+        }
+        
+        if (cached.size >= nonEmptyEntries.size) {
+            nonEmptyEntries.forEachIndexed { idx, (originalIndex, _) ->
+                lyrics[originalIndex].translatedTextFlow.value = cached[idx]
+            }
+            return true
+        }
+        return false
+    }
 
     fun triggerManualTranslation() {
         _manualTrigger.tryEmit(Unit)
@@ -33,6 +61,10 @@ object LyricsTranslationHelper {
     
     fun resetStatus() {
         _status.value = TranslationStatus.Idle
+    }
+    
+    fun clearCache() {
+        translationCache.clear()
     }
 
     fun translateLyrics(
@@ -99,6 +131,10 @@ object LyricsTranslationHelper {
                 )
                 
                 result.onSuccess { translatedLines ->
+                    // Cache the translations
+                    val cacheKey = getCacheKey(fullText, mode, targetLanguage)
+                    translationCache[cacheKey] = translatedLines
+                    
                     // Map translations back to original non-empty entries only
                     val expectedCount = nonEmptyEntries.size
                     

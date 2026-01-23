@@ -391,31 +391,38 @@ fun Lyrics(
         }
     }
 
-    LaunchedEffect(lines, autoTranslateLyrics, autoTranslateLyricsMismatch, openRouterApiKey, isVisible) {
-        if (isVisible && autoTranslateLyrics && openRouterApiKey.isNotBlank() && lines.isNotEmpty()) {
-            val needsTranslation = lines.any { it.translatedTextFlow.value == null }
-            if (needsTranslation) {
-                var shouldTranslate = true
-                if (autoTranslateLyricsMismatch) {
-                    val combinedText = lines.take(5).joinToString(" ") { it.text }
-                    val detectedLang = LanguageDetectionHelper.identifyLanguage(combinedText)
-                    val systemLang = Locale.getDefault().language
-                    
-                    if (detectedLang != null && detectedLang == systemLang) {
-                        shouldTranslate = false
+    LaunchedEffect(lines, autoTranslateLyrics, autoTranslateLyricsMismatch, openRouterApiKey, isVisible, translateMode, translateLanguage) {
+        if (isVisible && lines.isNotEmpty()) {
+            // First, try to apply cached translations
+            val targetLang = if (autoTranslateLyricsMismatch) Locale.getDefault().language else translateLanguage
+            val hasCached = LyricsTranslationHelper.applyCachedTranslations(lines, translateMode, targetLang)
+            
+            // If no cache and auto-translate is enabled, translate
+            if (!hasCached && autoTranslateLyrics && openRouterApiKey.isNotBlank()) {
+                val needsTranslation = lines.any { it.translatedTextFlow.value == null && it.text.isNotBlank() }
+                if (needsTranslation) {
+                    var shouldTranslate = true
+                    if (autoTranslateLyricsMismatch) {
+                        val combinedText = lines.take(5).joinToString(" ") { it.text }
+                        val detectedLang = LanguageDetectionHelper.identifyLanguage(combinedText)
+                        val systemLang = Locale.getDefault().language
+                        
+                        if (detectedLang != null && detectedLang == systemLang) {
+                            shouldTranslate = false
+                        }
                     }
-                }
 
-                if (shouldTranslate) {
-                    LyricsTranslationHelper.translateLyrics(
-                        lyrics = lines,
-                        targetLanguage = if (autoTranslateLyricsMismatch) Locale.getDefault().language else translateLanguage,
-                        apiKey = openRouterApiKey,
-                        baseUrl = openRouterBaseUrl,
-                        model = openRouterModel,
-                        mode = translateMode,
-                        scope = scope
-                    )
+                    if (shouldTranslate) {
+                        LyricsTranslationHelper.translateLyrics(
+                            lyrics = lines,
+                            targetLanguage = targetLang,
+                            apiKey = openRouterApiKey,
+                            baseUrl = openRouterBaseUrl,
+                            model = openRouterModel,
+                            mode = translateMode,
+                            scope = scope
+                        )
+                    }
                 }
             }
         }
