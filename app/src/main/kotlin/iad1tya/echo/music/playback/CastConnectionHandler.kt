@@ -408,8 +408,8 @@ class CastConnectionHandler(
     /**
      * Initialize Cast Context and add listeners
      */
-    fun initialize() {
-        try {
+    fun initialize(): Boolean {
+        return try {
             castContext = CastContext.getSharedInstance(context)
             sessionManager = castContext?.sessionManager
             mediaRouter = MediaRouter.getInstance(context)
@@ -419,15 +419,19 @@ class CastConnectionHandler(
             
             sessionManager?.addSessionManagerListener(sessionManagerListener, CastSession::class.java)
             
-            // Check current session
-            val currentSession = sessionManager?.currentCastSession
-            if (currentSession != null && currentSession.isConnected) {
-                // Manually trigger session started to sync state
-                val sessionId = currentSession.sessionId ?: ""
-                sessionManagerListener.onSessionStarted(currentSession, sessionId)
+            // Check if already connected
+            sessionManager?.currentCastSession?.let { session ->
+                _isCasting.value = true
+                _castDeviceName.value = session.castDevice?.friendlyName
+                remoteMediaClient = session.remoteMediaClient
+                remoteMediaClient?.registerCallback(remoteMediaClientCallback)
+                startPositionUpdates()
             }
+            
+            true
         } catch (e: Exception) {
-            Timber.e(e, "Failed to initialize Cast context")
+            Timber.e(e, "Failed to initialize Cast")
+            false
         }
     }
     
