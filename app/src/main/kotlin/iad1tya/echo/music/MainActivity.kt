@@ -2,6 +2,8 @@ package iad1tya.echo.music
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -440,8 +442,13 @@ class MainActivity : ComponentActivity() {
                             val json = org.json.JSONObject(responseText)
                             val tagName = json.getString("tag_name")
                             if (tagName.isNotEmpty()) {
+                                val version = tagName.removePrefix("v")
                                 withContext(Dispatchers.Main) {
-                                    latestVersionName = tagName.removePrefix("v")
+                                    latestVersionName = version
+                                    // Show notification if new version is available
+                                    if (version != BuildConfig.VERSION_NAME) {
+                                        showUpdateNotification(this@MainActivity, version)
+                                    }
                                 }
                             }
                         }
@@ -1028,7 +1035,12 @@ class MainActivity : ComponentActivity() {
                                             IconButton(
                                                 onClick = {
                                                     when {
-                                                        active -> onActiveChange(false)
+                                                        active -> {
+                                                            onActiveChange(false)
+                                                            navController.navigate(Screens.Home.route) {
+                                                                popUpTo(navController.graph.id)
+                                                            }
+                                                        }
                                                         !navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } -> {
                                                             navController.navigateUp()
                                                         }
@@ -1707,6 +1719,51 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun showUpdateNotification(context: Context, version: String) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        // Create notification channel for Android O and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "updates",
+                "App Updates",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifications for app updates"
+                enableLights(true)
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+        
+        // Create intent to open MainActivity with settings
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("openSettings", true)
+        }
+        
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        
+        // Build notification
+        val notification = NotificationCompat.Builder(context, "updates")
+            .setSmallIcon(R.drawable.update)
+            .setContentTitle("Echo Music Update Available")
+            .setContentText("Version $version is now available")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("A new version ($version) of Echo Music is available. Tap to download and install."))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+        
+        notificationManager.notify(1001, notification)
     }
 
     @SuppressLint("ObsoleteSdkInt")
