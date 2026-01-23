@@ -110,7 +110,7 @@ abstract class InternalDatabase : RoomDatabase() {
                 Room
                     .databaseBuilder(context, InternalDatabase::class.java, DB_NAME)
                     .addMigrations(MIGRATION_1_2)
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
                     .build(),
             )
     }
