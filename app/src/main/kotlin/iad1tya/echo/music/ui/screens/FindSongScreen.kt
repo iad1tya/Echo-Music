@@ -148,7 +148,7 @@ fun FindSongScreen(
                             fontWeight = FontWeight.Bold,
                             fontSize = 28.sp
                         ),
-                        color = MaterialTheme.colorScheme.primary
+                        color = if (state is RecognitionState.Success) Color.White else MaterialTheme.colorScheme.primary
                     )
                 },
                 navigationIcon = {
@@ -160,7 +160,7 @@ fun FindSongScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = if (state is RecognitionState.Success) Color.White else MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -187,7 +187,7 @@ fun FindSongScreen(
                             Icon(
                                 painter = painterResource(R.drawable.share),
                                 contentDescription = "Share",
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = Color.White
                             )
                         }
                     }
