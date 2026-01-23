@@ -561,7 +561,7 @@ fun HomeScreen(
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .size(ListThumbnailSize)
-                                            .clip(CircleShape)
+                                            .clip(RoundedCornerShape(ThumbnailCornerRadius))
                                     )
                                 } else {
                                     Icon(
@@ -689,10 +689,9 @@ fun HomeScreen(
                             title = recommendation.title.title,
                             thumbnail = recommendation.title.thumbnailUrl?.let { thumbnailUrl ->
                                 {
-                                    val shape =
-                                        if (recommendation.title is Artist) CircleShape else RoundedCornerShape(
-                                            ThumbnailCornerRadius
-                                        )
+                                    val shape = RoundedCornerShape(
+                                        ThumbnailCornerRadius
+                                    )
                                     AsyncImage(
                                         model = thumbnailUrl,
                                         contentDescription = null,
@@ -736,10 +735,9 @@ fun HomeScreen(
                         label = section.label,
                         thumbnail = section.thumbnail?.let { thumbnailUrl ->
                             {
-                                val shape =
-                                    if (section.endpoint?.isArtistEndpoint == true) CircleShape else RoundedCornerShape(
-                                        ThumbnailCornerRadius
-                                    )
+                                val shape = RoundedCornerShape(
+                                    ThumbnailCornerRadius
+                                )
                                 AsyncImage(
                                     model = thumbnailUrl,
                                     contentDescription = null,
