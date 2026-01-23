@@ -291,13 +291,13 @@ fun BottomSheetPlayer(
 
     val TextBackgroundColor =
         when (playerBackground) {
-            PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
+            PlayerBackgroundStyle.DEFAULT -> Color.White
             PlayerBackgroundStyle.GRADIENT -> Color.White
         }
 
     val icBackgroundColor =
         when (playerBackground) {
-            PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.surface
+            PlayerBackgroundStyle.DEFAULT -> Color(0xFF1C1B1F)
             PlayerBackgroundStyle.GRADIENT -> Color.Black
         }
 
@@ -893,7 +893,7 @@ fun BottomSheetPlayer(
                             }
                             sliderPosition = null
                         },
-                        colors = PlayerSliderColors.defaultSliderColors(textButtonColor, playerBackground, useDarkTheme),
+                        colors = PlayerSliderColors.defaultSliderColors(textButtonColor, playerBackground, true),
                         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
                     )
                 }
@@ -912,7 +912,7 @@ fun BottomSheetPlayer(
                             }
                             sliderPosition = null
                         },
-                        colors = PlayerSliderColors.squigglySliderColors(textButtonColor, playerBackground, useDarkTheme),
+                        colors = PlayerSliderColors.squigglySliderColors(textButtonColor, playerBackground, true),
                         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding),
                         squigglesSpec =
                         SquigglySlider.SquigglesSpec(
@@ -940,7 +940,7 @@ fun BottomSheetPlayer(
                         track = { sliderState ->
                             PlayerSliderTrack(
                                 sliderState = sliderState,
-                                colors = PlayerSliderColors.slimSliderColors(textButtonColor, playerBackground, useDarkTheme)
+                                colors = PlayerSliderColors.slimSliderColors(textButtonColor, playerBackground, true)
                             )
                         },
                         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding)
