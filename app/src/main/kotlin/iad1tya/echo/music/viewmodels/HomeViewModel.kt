@@ -139,6 +139,7 @@ class HomeViewModel @Inject constructor(
 
         YouTube.home().onSuccess { page ->
             homePage.value = page.copy(
+                chips = page.chips?.filterNot { it.title.contains("Podcasts", ignoreCase = true) },
                 sections = page.sections.map { section ->
                     section.copy(items = section.items.filterExplicit(hideExplicit))
                 }
