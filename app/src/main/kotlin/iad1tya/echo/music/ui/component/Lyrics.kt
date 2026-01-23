@@ -934,20 +934,44 @@ fun Lyrics(
                         val romanizedText by item.romanizedTextFlow.collectAsState()
                         
                         // Determine what text to display based on mode and availability
-                        val displayText: String?
                         val isTranslationError: Boolean
                         
                         // Check for translation errors
                         isTranslationError = translatedText?.startsWith("⚠️") == true || translatedText?.startsWith("Error:") == true
                         
-                        // Always show original text as the main display
-                        displayText = item.text
+                        // Skip rendering if original text is empty
+                        if (item.text.isBlank()) {
+                            return@itemsIndexed
+                        }
                         
                         // Display the selected text
                         val currentTextColor = if (isActive && palette.isNotEmpty()) palette.first() else textColor
                         
+                        // Calculate secondary text first to determine if we need to show it
+                        val secondaryText: String?
+                        val showSecondaryText: Boolean
+                        
+                        when (translateMode) {
+                            "Literal" -> {
+                                // Show translation below original
+                                secondaryText = translatedText
+                                showSecondaryText = translatedText != null && !isTranslationError && item.text.isNotBlank()
+                            }
+                            "Transcribed" -> {
+                                // Show AI transcription if available, otherwise local romanization
+                                val aiTranscription = if (translatedText != null && !isTranslationError) translatedText else null
+                                secondaryText = aiTranscription ?: romanizedText
+                                showSecondaryText = secondaryText != null && item.text.isNotBlank()
+                            }
+                            else -> {
+                                secondaryText = translatedText
+                                showSecondaryText = translatedText != null && !isTranslationError && item.text.isNotBlank()
+                            }
+                        }
+                        
+                        // ORIGINAL TEXT (always on top, larger)
                         Text(
-                            text = displayText ?: item.text,
+                            text = item.text,
                             fontSize = 24.sp,
                             color = if (isActive) {
                                 currentTextColor
@@ -968,41 +992,20 @@ fun Lyrics(
                             fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold
                         )
                         
-                        // Show secondary text based on mode
-                        val secondaryText: String?
-                        val showSecondaryText: Boolean
-                        
-                        when (translateMode) {
-                            "Literal" -> {
-                                // Show translation below original
-                                secondaryText = translatedText
-                                showSecondaryText = translatedText != null && !isTranslationError
-                            }
-                            "Transcribed" -> {
-                                // Show AI transcription if available, otherwise local romanization
-                                val aiTranscription = if (translatedText != null && !isTranslationError) translatedText else null
-                                secondaryText = aiTranscription ?: romanizedText
-                                showSecondaryText = secondaryText != null
-                            }
-                            else -> {
-                                secondaryText = translatedText
-                                showSecondaryText = translatedText != null && !isTranslationError
-                            }
-                        }
-                        
+                        // SECONDARY TEXT (translation/transcription - below original, smaller)
                         if (showSecondaryText && secondaryText != null) {
                             Text(
                                 text = secondaryText,
-                                fontSize = 18.sp,
+                                fontSize = 16.sp,
                                 color = if (isActive) {
-                                    currentTextColor.copy(alpha = 0.85f)
+                                    currentTextColor.copy(alpha = 0.7f)
                                 } else {
-                                    textColor.copy(alpha = 0.6f)
+                                    textColor.copy(alpha = 0.5f)
                                 },
                                 style = TextStyle(
                                     shadow = if (isActive) Shadow(
-                                        color = currentTextColor.copy(alpha = 0.3f),
-                                        blurRadius = 20f
+                                        color = currentTextColor.copy(alpha = 0.2f),
+                                        blurRadius = 15f
                                     ) else Shadow.None
                                 ),
                                 textAlign = when (lyricsTextPosition) {
@@ -1010,8 +1013,8 @@ fun Lyrics(
                                     LyricsPosition.CENTER -> TextAlign.Center
                                     LyricsPosition.RIGHT -> TextAlign.Right
                                 },
-                                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                                modifier = Modifier.padding(top = 4.dp)
+                                fontWeight = FontWeight.Normal,
+                                modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
                             )
                         }
                     }

@@ -63,13 +63,18 @@ object LyricsTranslationHelper {
                     return@launch
                 }
                 
-                // Create full text while preserving structure (including empty lines)
-                val fullText = lyrics.joinToString("\n") { it.text }
+                // Filter out empty lines and keep track of their indices
+                val nonEmptyEntries = lyrics.mapIndexedNotNull { index, entry ->
+                    if (entry.text.isNotBlank()) index to entry else null
+                }
                 
-                if (fullText.isBlank()) {
+                if (nonEmptyEntries.isEmpty()) {
                     _status.value = TranslationStatus.Error("Lyrics are empty")
                     return@launch
                 }
+                
+                // Create text from non-empty lines only
+                val fullText = nonEmptyEntries.joinToString("\n") { it.second.text }
 
                 // Validate language for all modes
                 if (targetLanguage.isBlank()) {
@@ -94,32 +99,24 @@ object LyricsTranslationHelper {
                 )
                 
                 result.onSuccess { translatedLines ->
-                    // Robust mapping with validation
+                    // Map translations back to original non-empty entries only
+                    val expectedCount = nonEmptyEntries.size
+                    
                     when {
-                        translatedLines.size == lyrics.size -> {
-                            // Perfect match - direct mapping
-                            lyrics.forEachIndexed { index, entry ->
-                                entry.translatedTextFlow.value = translatedLines[index]
+                        translatedLines.size >= expectedCount -> {
+                            // Perfect match or more - map to non-empty entries
+                            nonEmptyEntries.forEachIndexed { idx, (originalIndex, _) ->
+                                lyrics[originalIndex].translatedTextFlow.value = translatedLines[idx]
                             }
                             _status.value = TranslationStatus.Success
                         }
-                        translatedLines.size > lyrics.size -> {
-                            // More translations than expected - use first N
-                            lyrics.forEachIndexed { index, entry ->
-                                entry.translatedTextFlow.value = translatedLines[index]
-                            }
-                            _status.value = TranslationStatus.Success
-                        }
-                        translatedLines.size < lyrics.size -> {
-                            // Fewer translations - map what we have, leave rest as original
-                            translatedLines.forEachIndexed { index, translation ->
-                                if (index < lyrics.size) {
-                                    lyrics[index].translatedTextFlow.value = translation
+                        translatedLines.size < expectedCount -> {
+                            // Fewer translations than expected - map what we have
+                            translatedLines.forEachIndexed { idx, translation ->
+                                if (idx < nonEmptyEntries.size) {
+                                    val originalIndex = nonEmptyEntries[idx].first
+                                    lyrics[originalIndex].translatedTextFlow.value = translation
                                 }
-                            }
-                            // Fill remaining with original text for romanization, empty for translation
-                            for (i in translatedLines.size until lyrics.size) {
-                                lyrics[i].translatedTextFlow.value = if (mode == "Romanized") lyrics[i].text else ""
                             }
                             _status.value = TranslationStatus.Success
                         }
