@@ -199,7 +199,6 @@ import iad1tya.echo.music.ui.component.shimmer.ShimmerTheme
 import iad1tya.echo.music.ui.menu.YouTubeSongMenu
 import iad1tya.echo.music.ui.player.BottomSheetPlayer
 import iad1tya.echo.music.ui.screens.Screens
-import iad1tya.echo.music.ui.screens.SplashScreen
 import iad1tya.echo.music.ui.screens.navigationBuilder
 import iad1tya.echo.music.ui.screens.search.LocalSearchScreen
 import iad1tya.echo.music.ui.screens.search.OnlineSearchScreen
@@ -452,8 +451,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            var showSplash by remember { mutableStateOf(true) }
-
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
             val enableMaterialYou by rememberPreference(MaterialYouKey, defaultValue = false)
             
@@ -518,20 +515,7 @@ class MainActivity : ComponentActivity() {
                 themeColor = themeColor,
                 isDynamicColor = enableMaterialYou,
             ) {
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = showSplash,
-                    exit = fadeOut(animationSpec = tween(300))
-                ) {
-                    SplashScreen(
-                        onTimeout = { showSplash = false }
-                    )
-                }
-                
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = !showSplash,
-                    enter = fadeIn(animationSpec = tween(500))
-                ) {
-                    BoxWithConstraints(
+                BoxWithConstraints(
                         modifier =
                         Modifier
                             .fillMaxSize()
@@ -1633,7 +1617,6 @@ class MainActivity : ComponentActivity() {
                             openSearchImmediately = false
                         }
                     }
-                }
                 }
             }
         }
