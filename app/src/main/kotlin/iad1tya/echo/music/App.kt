@@ -26,6 +26,7 @@ import iad1tya.echo.music.constants.*
 import iad1tya.echo.music.di.ApplicationScope
 import iad1tya.echo.music.extensions.toEnum
 import iad1tya.echo.music.extensions.toInetSocketAddress
+import iad1tya.echo.music.utils.CrashHandler
 import iad1tya.echo.music.utils.dataStore
 import iad1tya.echo.music.utils.get
 import iad1tya.echo.music.utils.reportException
@@ -54,6 +55,7 @@ class App : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler(applicationContext))
         Timber.plant(Timber.DebugTree())
 
         // Initialize Firebase with error handling

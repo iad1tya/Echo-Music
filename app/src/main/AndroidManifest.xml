@@ -155,6 +155,12 @@
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Theme.Echo" />
+            
+        <activity
+            android:name=".ui.activities.CrashActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Echo"
+            android:process=":crash" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
