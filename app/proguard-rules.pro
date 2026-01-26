@@ -272,3 +272,12 @@
 -keep class com.echo.innertube.** { *; }
 -keep interface com.echo.innertube.** { *; }
 -dontwarn com.echo.innertube.**
+
+## Shazam Signature Rules
+-keep class com.alexmercerind.audire.native.** { *; }
+-keep interface com.alexmercerind.audire.native.** { *; }
+
+## KuGou Rules
+-keep class com.echo.kugou.** { *; }
+-keep interface com.echo.kugou.** { *; }
+-dontwarn com.echo.kugou.**

@@ -31,14 +31,10 @@ class ShazamRepository @Inject constructor() {
         val timestamp = Calendar.getInstance().time.time.toInt()
         val name = Random(timestamp).nextInt(1 shl 48).toString()
         val signature = try {
-            val sig = ShazamSignature().create(data.toShortArray())
+            val sig = ShazamSignature().safeCreate(data.toShortArray())
             android.util.Log.d("EchoMusic", "Signature generated successfully: ${sig.take(20)}...")
             sig
-        } catch (e: UnsatisfiedLinkError) {
-            android.util.Log.e("EchoMusic", "Native library not found: ${e.message}")
-            e.printStackTrace()
-            return null
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             android.util.Log.e("EchoMusic", "Error creating signature: ${e.message}")
             e.printStackTrace()
             return null
