@@ -574,6 +574,36 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    // Define hierarchy for tabs to keep selection active
+                    val libraryHierarchy = remember {
+                        listOf(
+                            Screens.Library.route,
+                            "local_playlist/{playlistId}",
+                            "online_playlist/{playlistId}",
+                            "top_playlist/{top}",
+                            "cache_playlist/{playlist}",
+                            "auto_playlist/{playlist}",
+                            "artist/{artistId}",
+                            "artist/{artistId}/songs",
+                            "artist/{artistId}/albums",
+                            "artist/{artistId}/items",
+                            "album/{albumId}",
+                            "browse/{browseId}",
+                            "youtube_browse/{browseId}?params={params}"
+                        )
+                    }
+
+                    val homeHierarchy = remember {
+                        listOf(
+                            Screens.Home.route,
+                            "new_release",
+                            "charts_screen",
+                            "mood_and_genres",
+                            "history",
+                            "stats"
+                        )
+                    }
+
                     val (query, onQueryChange) =
                         rememberSaveable(stateSaver = TextFieldValue.Saver) {
                             mutableStateOf(TextFieldValue())
@@ -1301,8 +1331,25 @@ class MainActivity : ComponentActivity() {
                                                     contentColor = if (pureBlack) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                                                 ) {
                                                     navigationItems.fastForEach { screen ->
-                                                        val isSelected =
-                                                            navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                                        val isSelected = when (screen) {
+                                                            Screens.Library -> navBackStackEntry?.destination?.route?.let { route ->
+                                                                libraryHierarchy.any { 
+                                                                    if (it.contains("/{")) 
+                                                                        route.startsWith(it.substringBefore("/{")) 
+                                                                    else 
+                                                                        route == it 
+                                                                }
+                                                            } == true
+                                                            Screens.Home -> navBackStackEntry?.destination?.route?.let { route ->
+                                                                homeHierarchy.any { 
+                                                                    if (it.contains("/{")) 
+                                                                        route.startsWith(it.substringBefore("/{")) 
+                                                                    else 
+                                                                        route == it 
+                                                                }
+                                                            } == true
+                                                            else -> navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                                        }
 
                                                         NavigationBarItem(
                                                             selected = isSelected,
@@ -1340,12 +1387,19 @@ class MainActivity : ComponentActivity() {
                                                             },
                                                             onClick = {
                                                                 if (isSelected) {
-                                                                    navController.currentBackStackEntry?.savedStateHandle?.set(
-                                                                        "scrollToTop",
-                                                                        true
-                                                                    )
-                                                                    coroutineScope.launch {
-                                                                        searchBarScrollBehavior.state.resetHeightOffset()
+                                                                    // If already on the start destination of the tab, scroll to top
+                                                                    // Otherwise, pop back to the start destination
+                                                                    val currentRoute = navBackStackEntry?.destination?.route
+                                                                    if (currentRoute != screen.route) {
+                                                                        navController.popBackStack(screen.route, false)
+                                                                    } else {
+                                                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                                                            "scrollToTop",
+                                                                            true
+                                                                        )
+                                                                        coroutineScope.launch {
+                                                                            searchBarScrollBehavior.state.resetHeightOffset()
+                                                                        }
                                                                     }
                                                                 } else {
                                                                     // Close search bar when navigating away from search
@@ -1417,16 +1471,43 @@ class MainActivity : ComponentActivity() {
                                         Spacer(modifier = Modifier.weight(1f))
 
                                         navigationItems.fastForEach { screen ->
-                                            val isSelected =
-                                                navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                            val isSelected = when (screen) {
+                                                Screens.Library -> navBackStackEntry?.destination?.route?.let { route ->
+                                                    libraryHierarchy.any { 
+                                                        if (it.contains("/{")) 
+                                                            route.startsWith(it.substringBefore("/{")) 
+                                                        else 
+                                                            route == it 
+                                                    }
+                                                } == true
+                                                Screens.Home -> navBackStackEntry?.destination?.route?.let { route ->
+                                                    homeHierarchy.any { 
+                                                        if (it.contains("/{")) 
+                                                            route.startsWith(it.substringBefore("/{")) 
+                                                        else 
+                                                            route == it 
+                                                    }
+                                                } == true
+                                                else -> navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                            }
                                             NavigationRailItem(
                                                 selected = isSelected,
                                                 onClick = {
                                                     if (isSelected) {
-                                                        navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
-                                                        coroutineScope.launch {
-                                                            searchBarScrollBehavior.state.resetHeightOffset()
-                                                        }
+                                                                    // If already on the start destination of the tab, scroll to top
+                                                                    // Otherwise, pop back to the start destination
+                                                                    val currentRoute = navBackStackEntry?.destination?.route
+                                                                    if (currentRoute != screen.route) {
+                                                                        navController.popBackStack(screen.route, false)
+                                                                    } else {
+                                                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                                                            "scrollToTop",
+                                                                            true
+                                                                        )
+                                                                        coroutineScope.launch {
+                                                                            searchBarScrollBehavior.state.resetHeightOffset()
+                                                                        }
+                                                                    }
                                                     } else {
                                                         // Close search bar when navigating away from search
                                                         if (navBackStackEntry?.destination?.route == Screens.Search.route && screen.route != Screens.Search.route) {
