@@ -987,7 +987,7 @@ fun Lyrics(
                             },
                             style = TextStyle(
                                 shadow = if (isActive) Shadow(
-                                    color = currentTextColor.copy(alpha = 0.5f),
+                                    color = currentTextColor.copy(alpha = 0.9f),
                                     blurRadius = 30f
                                 ) else Shadow.None
                             ),
@@ -1011,7 +1011,7 @@ fun Lyrics(
                                 },
                                 style = TextStyle(
                                     shadow = if (isActive) Shadow(
-                                        color = currentTextColor.copy(alpha = 0.2f),
+                                        color = currentTextColor.copy(alpha = 0.6f),
                                         blurRadius = 15f
                                     ) else Shadow.None
                                 ),
