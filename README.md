@@ -15,17 +15,33 @@
 
 Echo Music is designed to provide a seamless and premium music listening experience. It leverages the vast library of YouTube Music while eliminating advertisements and adding powerful features such as offline downloads, real-time lyrics, and environment-aware music recognition.
 
+> [!IMPORTANT]
+> **Echo Music is now available for Desktop (Windows, macOS, and Linux)!**
+
+
 ## Screenshots
 
+### Mobile
 <div align="center">
-  <img src="assets/Screenshots/sc_1.png" alt="Home Screen" width="200"/>
-  <img src="assets/Screenshots/sc_2.png" alt="Music Player" width="200"/>
-  <img src="assets/Screenshots/sc_3.png" alt="Playlist Management" width="200"/>
+  <img src="Screenshots/sc_1.png" alt="Home Screen" width="200"/>
+  <img src="Screenshots/sc_2.png" alt="Music Player" width="200"/>
+  <img src="Screenshots/sc_3.png" alt="Playlist Management" width="200"/>
 </div>
 <div align="center">
-  <img src="assets/Screenshots/sc_4.png" alt="Settings" width="200"/>
-  <img src="assets/Screenshots/sc_5.png" alt="Settings" width="200"/>
+  <img src="Screenshots/sc_4.png" alt="Settings" width="200"/>
+  <img src="Screenshots/sc_5.png" alt="Settings" width="200"/>
 </div>
+
+### Desktop
+<div align="center">
+  <img src="Screenshots/Desktop-1.png" alt="Desktop Home" width="400"/>
+  <img src="Screenshots/Desktop-2.png" alt="Desktop Player" width="400"/>
+</div>
+<div align="center">
+  <img src="Screenshots/Desktop-3.png" alt="Desktop Library" width="400"/>
+  <img src="Screenshots/Desktop-4.png" alt="Desktop Settings" width="400"/>
+</div>
+
 
 ## Features
 
