@@ -16,6 +16,14 @@
     <string name="top_music_videos">Top music videos</string>
     <string name="trending">Trending</string>
 
+    <string name="top_result">Top result</string>
+    <string name="other_results">Other</string>
+    <string name="random">Random</string>
+    <string name="play_all">Play all</string>
+    <string name="typing_to_search">Start typing to search...</string>
+    <string name="at_listening">Listening...</string>
+    <string name="enable_simpmusic">Enable SimpMusic lyrics provider</string>
+
     <string name="days">Days</string>
     <string name="weeks">Weeks</string>
     <string name="months">Months</string>
@@ -113,6 +121,7 @@
     <string name="show_uploaded_playlist">Show \"Uploaded\" playlist</string>
 
     <string name="google">Google</string>
+    <string name="google_login">Google Login</string>
     <string name="discord">Discord</string>
     <string name="advanced_login">Login with token</string>
     <string name="token_hidden">Tap to show token</string>
@@ -244,6 +253,8 @@
     <!-- Updater -->
     <string name="updater">Updater</string>
     <string name="check_for_updates">Automatically check for updates</string>
+    <string name="check_for_updates_now">Check for updates now</string>
+    <string name="up_to_date">You\'re on the latest version</string>
     <string name="update_notifications">Enable update notifications</string>
     <string name="update_available_title">Update available</string>
     <string name="update_channel_name">App updates</string>
