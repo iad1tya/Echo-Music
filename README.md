@@ -69,10 +69,23 @@ Echo Music is designed to provide a seamless and premium music listening experie
 
 ## Installation
 
-### Option 1: Direct Download (APK)
-Download the latest Android Package Kit (APK) from the [Releases Page](https://github.com/iad1tya/Echo-Music/releases/latest).
+### Mobile
+**Android**: Download the latest APK from the [Releases Page](https://github.com/iad1tya/Echo-Music/releases/latest).
 
-### Option 2: Build from Source
+### Desktop
+**Windows**:
+1. Download `EchoMusic.exe` from the [Releases Page](https://github.com/iad1tya/Echo-Music/releases/latest).
+2. Run the installer and follow the prompts.
+
+**macOS**:
+1. Download `EchoMusic.dmg` from the [Releases Page](https://github.com/iad1tya/Echo-Music/releases/latest).
+2. Open the file and drag "Echo Music" to your Applications folder.
+3. *Note: If you see a security warning, Go to System Settings > Privacy & Security and click "Open Anyway".*
+
+**Linux**:
+Download the appropriate package (AppImage, Deb, etc.) from the [Releases Page](https://github.com/iad1tya/Echo-Music/releases/latest).
+
+### Build from Source
 To build the application locally, follow these steps:
 
 1.  **Clone the Repository**
