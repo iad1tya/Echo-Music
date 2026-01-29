@@ -3,13 +3,10 @@
   <h1>Echo Music</h1>
   <p><strong>A robust, open-source music streaming client offering an ad-free experience, offline capabilities, and advanced music discovery.</strong></p>
 
-  <a href="https://echomusic.fun/download"><img src="assets/download.png" alt="Download" width="200"/></a>
+  <a href="https://echomusic.fun/download"><img src="assets/download.png" alt="Download" width="200"/></a>  <a href="https://echomusic.fun/obtainium"><img src="assets/obtainium.png" alt="Get it on Obtainium" width="200"/></a>
   <br>
   <a href="https://github.com/iad1tya/Echo-Music/releases/download/v3.3.6/EchoMusic.exe"><img src="assets/Windows-button.png" alt="Download for Windows" width="170"/></a>
   <a href="https://github.com/iad1tya/Echo-Music/releases/download/v3.3.6/EchoMusic.dmg"><img src="assets/mac-button.png" alt="Download for Mac" width="170"/></a>
-  <br>
-  <a href="https://echomusic.fun/obtainium"><img src="assets/obtainium.png" alt="Get it on Obtainium" width="200"/></a>
-  <a href="https://github.com/iad1tya/Echo-Music/releases"><img src="assets/github.png" alt="Releases" width="160"/></a>
 </div>
 
 ---
